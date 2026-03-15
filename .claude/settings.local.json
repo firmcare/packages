@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"^import.*from\" /c/Users/dsimg/Documents/firmcare/packages/src/app/actions.ts /c/Users/dsimg/Documents/firmcare/packages/src/lib/*.ts)",
+      "Bash(xargs grep -l \"paystack\\\\|Paystack\")",
+      "Bash(npx prisma db push --accept-data-loss)",
+      "Bash(npx prisma generate)",
+      "Bash(\"c:/Users/dsimg/Documents/firmcare/packages/.env\")",
+      "Bash(npx prisma:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx tsx -e \":*)",
+      "Bash(npx tsx:*)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''''dependencies'''',{}\\), indent=2\\)\\)\")",
+      "Read(//c/Users/dsimg/.claude/projects/c--Users-dsimg-Documents-firmcare-packages/memory/**)",
+      "Bash(yarn build:*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\dsimg\\Documents\\firmcare\\packages\\src\\app\\api\\bookings\\[id]",
+      "c:\\Users\\dsimg\\.claude\\projects\\c--Users-dsimg-Documents-firmcare-packages\\memory",
+      "c:\\Users\\dsimg\\Documents\\firmcare\\packages\\src\\app\\api\\notifications"
+    ]
+  }
+}

@@ -1,0 +1,206 @@
+/* Google Fonts – must precede all other imports */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..800;1,14..32,300..800&display=swap');
+
+@import "tailwindcss";
+
+/* ── Design Tokens ───────────────────────────────────────────── */
+@theme {
+  /* Brand palette */
+  --color-primary:       #A44692;
+  --color-primary-dark:  #8a3a7a;
+  --color-primary-light: #d68bb1;
+  --color-primary-50:    #fdf4fb;
+  --color-primary-100:   #fae8f7;
+  --color-footer-bg:     #2e1a2e;
+
+  /* Semantic aliases (referenced by body / bg utilities) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  /* Typography */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Named animation shorthands used by Tailwind `animate-*` utilities */
+  --animate-fadeIn:        fadeIn        0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slideInLeft:   slideInLeft   0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slideInRight:  slideInRight  0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-slideInUp:     slideInUp     0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-scaleIn:       scaleIn       0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-pulse:         pulse         2s   cubic-bezier(0.4, 0, 0.6, 1)  infinite;
+  --animate-heroSlide:     heroSlide     1s   cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-heroImageZoom: heroImageZoom 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-shimmer:       shimmer       1.5s linear infinite;
+  --animate-float:         float         6s   ease-in-out       infinite;
+  --animate-floatSlow:     float         9s   ease-in-out       infinite;
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-60px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(60px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideInUp {
+    from { opacity: 0; transform: translateY(50px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.7; }
+  }
+  @keyframes heroSlide {
+    from { opacity: 0; transform: translateX(-40px) scale(0.96); }
+    to   { opacity: 1; transform: translateX(0) scale(1); }
+  }
+  @keyframes heroImageZoom {
+    from { opacity: 0; transform: scale(1.15) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to   { background-position:  200% 0; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-18px); }
+  }
+}
+
+/* ── CSS Custom Properties ───────────────────────────────────── */
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+/* ── Base / HTML ─────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px; /* compensate for sticky header */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Text selection ──────────────────────────────────────────── */
+::selection {
+  background-color: #A44692;
+  color: #ffffff;
+}
+
+/* ── Focus (keyboard nav) ────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid #A44692;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Interactive element defaults ────────────────────────────── */
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* Scope transitions to interactive elements only (better perf) */
+a,
+button,
+input,
+select,
+textarea,
+[role="button"] {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Custom scrollbar (WebKit) ───────────────────────────────── */
+::-webkit-scrollbar       { width: 8px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #A44692; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #8a3a7a; }
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #A44692 #f1f1f1;
+}
+
+/* ── Utilities ───────────────────────────────────────────────── */
+
+/* Hide scrollbar (used on horizontal carousels) */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Skeleton / shimmer loading placeholder */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+  border-radius: 0.5rem;
+}
+
+/* ── PWA standalone safe-area insets ─────────────────────────── */
+@media (display-mode: standalone) {
+  body {
+    padding-top:    env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left:   env(safe-area-inset-left);
+    padding-right:  env(safe-area-inset-right);
+  }
+}
+
+/* ── Print ───────────────────────────────────────────────────── */
+@media print {
+  header,
+  footer,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 12pt;
+  }
+  a {
+    color: inherit;
+    text-decoration: underline;
+  }
+}

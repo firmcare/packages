@@ -1,0 +1,291 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  SAMPLE_COLLECTED
+  IN_PROGRESS
+  RESULTS_READY
+  COMPLETED
+  CANCELLED
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CARD
+  BANK_TRANSFER
+  CASH
+  WALLET
+}
+
+enum ReferralRewardStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum ReferralType {
+  USER
+  ADMIN
+  AGENT
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String?
+  phone         String?
+  address       String?
+  roleId        String
+  role          CustomRole @relation(fields: [roleId], references: [id])
+  referralCode          String    @unique
+  referredByCode        String?
+  emailVerified         Boolean   @default(false)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  bookings              Booking[]
+  transactions          Transaction[]
+  referralRewardsGiven  ReferralReward[] @relation("ReferralRewardReferrer")
+  referralRewardsEarned ReferralReward[] @relation("ReferralRewardReferee")
+  emailVerifications    EmailVerification[]
+  notifications         Notification[]
+  passwordResets        PasswordReset[]
+}
+
+model CustomRole {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  resource    String
+  action      String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roles       RolePermission[]
+
+  @@unique([resource, action])
+}
+
+model RolePermission {
+  id           String       @id @default(cuid())
+  roleId       String
+  role         CustomRole   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission   @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  createdAt    DateTime     @default(now())
+
+  @@unique([roleId, permissionId])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  packages    Package[]
+}
+
+model Test {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  price       Decimal  @default(0.0) @db.Decimal(10, 2)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  packages    Package[]  @relation("PackageTests")
+}
+
+model Package {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  price       Decimal  @default(0.0) @db.Decimal(10, 2)
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+
+  // Relations
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  tests       Test[]   @relation("PackageTests")
+  bookings    Booking[]
+  promos      PromoPackage[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+
+  packageId       String
+  package         Package       @relation(fields: [packageId], references: [id])
+
+  date            DateTime
+  status          BookingStatus @default(PENDING)
+  homeCollection  Boolean       @default(false)
+  totalAmount     Decimal       @default(0.0) @db.Decimal(10, 2)
+  paymentRef      String?       // Paystack reference — set on initialize, kept for audit
+  resultPdfUrl    String?
+  notes           String?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  transactions    Transaction[]
+  referralRewards ReferralReward[]
+}
+
+model Promo {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  description     String?
+  discountType    String    // "PERCENTAGE" or "FIXED"
+  discountValue   Decimal   @db.Decimal(10, 2)
+  minAmount       Decimal?  @db.Decimal(10, 2)
+  maxDiscount     Decimal?  @db.Decimal(10, 2)
+  validFrom       DateTime
+  validUntil      DateTime
+  usageLimit      Int?
+  usageCount      Int       @default(0)
+  isActive        Boolean   @default(true)
+  applyToAll      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  packages        PromoPackage[]
+  transactions    Transaction[]
+}
+
+model PromoPackage {
+  id        String   @id @default(cuid())
+  promoId   String
+  promo     Promo    @relation(fields: [promoId], references: [id], onDelete: Cascade)
+  packageId String
+  package   Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([promoId, packageId])
+}
+
+model Transaction {
+  id              String            @id @default(cuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id])
+
+  bookingId       String
+  booking         Booking           @relation(fields: [bookingId], references: [id])
+
+  promoId         String?
+  promo           Promo?            @relation(fields: [promoId], references: [id])
+
+  amount          Decimal           @db.Decimal(10, 2)
+  discount        Decimal           @default(0.0) @db.Decimal(10, 2)
+  finalAmount     Decimal           @db.Decimal(10, 2)
+  paymentMethod   PaymentMethod
+  status          TransactionStatus @default(PENDING)
+  reference       String?           @unique
+  metadata        String?           // JSON string for additional data
+
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model ReferralReward {
+  id         String               @id @default(cuid())
+  referrerId String
+  referrer   User                 @relation("ReferralRewardReferrer", fields: [referrerId], references: [id])
+  refereeId  String
+  referee    User                 @relation("ReferralRewardReferee", fields: [refereeId], references: [id])
+  bookingId  String
+  booking    Booking              @relation(fields: [bookingId], references: [id])
+  amount        Decimal              @db.Decimal(10, 2)
+  status        ReferralRewardStatus @default(PENDING)
+  referralType  ReferralType         @default(USER)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // booking_confirmed | status_update | results_ready | new_booking
+  title     String
+  message   String
+  bookingId String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model EmailLog {
+  id        String   @id @default(cuid())
+  to        String
+  subject   String
+  type      String
+  status    String
+  error     String?
+  createdAt DateTime @default(now())
+}
