@@ -18,7 +18,9 @@
     "additionalDirectories": [
       "c:\\Users\\dsimg\\Documents\\firmcare\\packages\\src\\app\\api\\bookings\\[id]",
       "c:\\Users\\dsimg\\.claude\\projects\\c--Users-dsimg-Documents-firmcare-packages\\memory",
-      "c:\\Users\\dsimg\\Documents\\firmcare\\packages\\src\\app\\api\\notifications"
+      "c:\\Users\\dsimg\\Documents\\firmcare\\packages\\src\\app\\api\\notifications",
+      "c:\\Users\\dsimg\\Documents\\firmcare\\packages\\src\\app\\api\\admin\\withdrawals",
+      "C:\\Users\\dsimg\\Documents\\firmcare\\packages\\src\\app\\api\\admin\\agent-applications"
     ]
   }
 }

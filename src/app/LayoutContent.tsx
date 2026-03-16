@@ -9,8 +9,9 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const isAdminRoute = pathname.startsWith('/admin');
   const isAuthRoute = pathname.startsWith('/auth');
   const isDashboardRoute = pathname.startsWith('/dashboard');
+  const isAgentRoute = pathname.startsWith('/agent');
 
-  const showPublicShell = !isAdminRoute && !isAuthRoute && !isDashboardRoute;
+  const showPublicShell = !isAdminRoute && !isAuthRoute && !isDashboardRoute && !isAgentRoute;
 
   return (
     <>

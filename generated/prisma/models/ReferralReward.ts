@@ -42,6 +42,7 @@ export type ReferralRewardMinAggregateOutputType = {
   amount: runtime.Decimal | null
   status: $Enums.ReferralRewardStatus | null
   referralType: $Enums.ReferralType | null
+  withdrawalId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,6 +55,7 @@ export type ReferralRewardMaxAggregateOutputType = {
   amount: runtime.Decimal | null
   status: $Enums.ReferralRewardStatus | null
   referralType: $Enums.ReferralType | null
+  withdrawalId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -66,6 +68,7 @@ export type ReferralRewardCountAggregateOutputType = {
   amount: number
   status: number
   referralType: number
+  withdrawalId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -88,6 +91,7 @@ export type ReferralRewardMinAggregateInputType = {
   amount?: true
   status?: true
   referralType?: true
+  withdrawalId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +104,7 @@ export type ReferralRewardMaxAggregateInputType = {
   amount?: true
   status?: true
   referralType?: true
+  withdrawalId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -112,6 +117,7 @@ export type ReferralRewardCountAggregateInputType = {
   amount?: true
   status?: true
   referralType?: true
+  withdrawalId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -211,6 +217,7 @@ export type ReferralRewardGroupByOutputType = {
   amount: runtime.Decimal
   status: $Enums.ReferralRewardStatus
   referralType: $Enums.ReferralType
+  withdrawalId: string | null
   createdAt: Date
   updatedAt: Date
   _count: ReferralRewardCountAggregateOutputType | null
@@ -246,11 +253,13 @@ export type ReferralRewardWhereInput = {
   amount?: Prisma.DecimalFilter<"ReferralReward"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumReferralRewardStatusFilter<"ReferralReward"> | $Enums.ReferralRewardStatus
   referralType?: Prisma.EnumReferralTypeFilter<"ReferralReward"> | $Enums.ReferralType
+  withdrawalId?: Prisma.StringNullableFilter<"ReferralReward"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ReferralReward"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReferralReward"> | Date | string
   referrer?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   referee?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   booking?: Prisma.XOR<Prisma.BookingScalarRelationFilter, Prisma.BookingWhereInput>
+  withdrawal?: Prisma.XOR<Prisma.WithdrawalRequestNullableScalarRelationFilter, Prisma.WithdrawalRequestWhereInput> | null
 }
 
 export type ReferralRewardOrderByWithRelationInput = {
@@ -261,11 +270,13 @@ export type ReferralRewardOrderByWithRelationInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   referralType?: Prisma.SortOrder
+  withdrawalId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   referrer?: Prisma.UserOrderByWithRelationInput
   referee?: Prisma.UserOrderByWithRelationInput
   booking?: Prisma.BookingOrderByWithRelationInput
+  withdrawal?: Prisma.WithdrawalRequestOrderByWithRelationInput
 }
 
 export type ReferralRewardWhereUniqueInput = Prisma.AtLeast<{
@@ -279,11 +290,13 @@ export type ReferralRewardWhereUniqueInput = Prisma.AtLeast<{
   amount?: Prisma.DecimalFilter<"ReferralReward"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumReferralRewardStatusFilter<"ReferralReward"> | $Enums.ReferralRewardStatus
   referralType?: Prisma.EnumReferralTypeFilter<"ReferralReward"> | $Enums.ReferralType
+  withdrawalId?: Prisma.StringNullableFilter<"ReferralReward"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ReferralReward"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReferralReward"> | Date | string
   referrer?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   referee?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   booking?: Prisma.XOR<Prisma.BookingScalarRelationFilter, Prisma.BookingWhereInput>
+  withdrawal?: Prisma.XOR<Prisma.WithdrawalRequestNullableScalarRelationFilter, Prisma.WithdrawalRequestWhereInput> | null
 }, "id">
 
 export type ReferralRewardOrderByWithAggregationInput = {
@@ -294,6 +307,7 @@ export type ReferralRewardOrderByWithAggregationInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   referralType?: Prisma.SortOrder
+  withdrawalId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ReferralRewardCountOrderByAggregateInput
@@ -314,6 +328,7 @@ export type ReferralRewardScalarWhereWithAggregatesInput = {
   amount?: Prisma.DecimalWithAggregatesFilter<"ReferralReward"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumReferralRewardStatusWithAggregatesFilter<"ReferralReward"> | $Enums.ReferralRewardStatus
   referralType?: Prisma.EnumReferralTypeWithAggregatesFilter<"ReferralReward"> | $Enums.ReferralType
+  withdrawalId?: Prisma.StringNullableWithAggregatesFilter<"ReferralReward"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ReferralReward"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ReferralReward"> | Date | string
 }
@@ -328,6 +343,7 @@ export type ReferralRewardCreateInput = {
   referrer: Prisma.UserCreateNestedOneWithoutReferralRewardsGivenInput
   referee: Prisma.UserCreateNestedOneWithoutReferralRewardsEarnedInput
   booking: Prisma.BookingCreateNestedOneWithoutReferralRewardsInput
+  withdrawal?: Prisma.WithdrawalRequestCreateNestedOneWithoutRewardsInput
 }
 
 export type ReferralRewardUncheckedCreateInput = {
@@ -338,6 +354,7 @@ export type ReferralRewardUncheckedCreateInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: $Enums.ReferralRewardStatus
   referralType?: $Enums.ReferralType
+  withdrawalId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -352,6 +369,7 @@ export type ReferralRewardUpdateInput = {
   referrer?: Prisma.UserUpdateOneRequiredWithoutReferralRewardsGivenNestedInput
   referee?: Prisma.UserUpdateOneRequiredWithoutReferralRewardsEarnedNestedInput
   booking?: Prisma.BookingUpdateOneRequiredWithoutReferralRewardsNestedInput
+  withdrawal?: Prisma.WithdrawalRequestUpdateOneWithoutRewardsNestedInput
 }
 
 export type ReferralRewardUncheckedUpdateInput = {
@@ -362,6 +380,7 @@ export type ReferralRewardUncheckedUpdateInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumReferralRewardStatusFieldUpdateOperationsInput | $Enums.ReferralRewardStatus
   referralType?: Prisma.EnumReferralTypeFieldUpdateOperationsInput | $Enums.ReferralType
+  withdrawalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -374,6 +393,7 @@ export type ReferralRewardCreateManyInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: $Enums.ReferralRewardStatus
   referralType?: $Enums.ReferralType
+  withdrawalId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -395,6 +415,7 @@ export type ReferralRewardUncheckedUpdateManyInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumReferralRewardStatusFieldUpdateOperationsInput | $Enums.ReferralRewardStatus
   referralType?: Prisma.EnumReferralTypeFieldUpdateOperationsInput | $Enums.ReferralType
+  withdrawalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -417,6 +438,7 @@ export type ReferralRewardCountOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   referralType?: Prisma.SortOrder
+  withdrawalId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -433,6 +455,7 @@ export type ReferralRewardMaxOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   referralType?: Prisma.SortOrder
+  withdrawalId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -445,6 +468,7 @@ export type ReferralRewardMinOrderByAggregateInput = {
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   referralType?: Prisma.SortOrder
+  withdrawalId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -587,6 +611,48 @@ export type EnumReferralTypeFieldUpdateOperationsInput = {
   set?: $Enums.ReferralType
 }
 
+export type ReferralRewardCreateNestedManyWithoutWithdrawalInput = {
+  create?: Prisma.XOR<Prisma.ReferralRewardCreateWithoutWithdrawalInput, Prisma.ReferralRewardUncheckedCreateWithoutWithdrawalInput> | Prisma.ReferralRewardCreateWithoutWithdrawalInput[] | Prisma.ReferralRewardUncheckedCreateWithoutWithdrawalInput[]
+  connectOrCreate?: Prisma.ReferralRewardCreateOrConnectWithoutWithdrawalInput | Prisma.ReferralRewardCreateOrConnectWithoutWithdrawalInput[]
+  createMany?: Prisma.ReferralRewardCreateManyWithdrawalInputEnvelope
+  connect?: Prisma.ReferralRewardWhereUniqueInput | Prisma.ReferralRewardWhereUniqueInput[]
+}
+
+export type ReferralRewardUncheckedCreateNestedManyWithoutWithdrawalInput = {
+  create?: Prisma.XOR<Prisma.ReferralRewardCreateWithoutWithdrawalInput, Prisma.ReferralRewardUncheckedCreateWithoutWithdrawalInput> | Prisma.ReferralRewardCreateWithoutWithdrawalInput[] | Prisma.ReferralRewardUncheckedCreateWithoutWithdrawalInput[]
+  connectOrCreate?: Prisma.ReferralRewardCreateOrConnectWithoutWithdrawalInput | Prisma.ReferralRewardCreateOrConnectWithoutWithdrawalInput[]
+  createMany?: Prisma.ReferralRewardCreateManyWithdrawalInputEnvelope
+  connect?: Prisma.ReferralRewardWhereUniqueInput | Prisma.ReferralRewardWhereUniqueInput[]
+}
+
+export type ReferralRewardUpdateManyWithoutWithdrawalNestedInput = {
+  create?: Prisma.XOR<Prisma.ReferralRewardCreateWithoutWithdrawalInput, Prisma.ReferralRewardUncheckedCreateWithoutWithdrawalInput> | Prisma.ReferralRewardCreateWithoutWithdrawalInput[] | Prisma.ReferralRewardUncheckedCreateWithoutWithdrawalInput[]
+  connectOrCreate?: Prisma.ReferralRewardCreateOrConnectWithoutWithdrawalInput | Prisma.ReferralRewardCreateOrConnectWithoutWithdrawalInput[]
+  upsert?: Prisma.ReferralRewardUpsertWithWhereUniqueWithoutWithdrawalInput | Prisma.ReferralRewardUpsertWithWhereUniqueWithoutWithdrawalInput[]
+  createMany?: Prisma.ReferralRewardCreateManyWithdrawalInputEnvelope
+  set?: Prisma.ReferralRewardWhereUniqueInput | Prisma.ReferralRewardWhereUniqueInput[]
+  disconnect?: Prisma.ReferralRewardWhereUniqueInput | Prisma.ReferralRewardWhereUniqueInput[]
+  delete?: Prisma.ReferralRewardWhereUniqueInput | Prisma.ReferralRewardWhereUniqueInput[]
+  connect?: Prisma.ReferralRewardWhereUniqueInput | Prisma.ReferralRewardWhereUniqueInput[]
+  update?: Prisma.ReferralRewardUpdateWithWhereUniqueWithoutWithdrawalInput | Prisma.ReferralRewardUpdateWithWhereUniqueWithoutWithdrawalInput[]
+  updateMany?: Prisma.ReferralRewardUpdateManyWithWhereWithoutWithdrawalInput | Prisma.ReferralRewardUpdateManyWithWhereWithoutWithdrawalInput[]
+  deleteMany?: Prisma.ReferralRewardScalarWhereInput | Prisma.ReferralRewardScalarWhereInput[]
+}
+
+export type ReferralRewardUncheckedUpdateManyWithoutWithdrawalNestedInput = {
+  create?: Prisma.XOR<Prisma.ReferralRewardCreateWithoutWithdrawalInput, Prisma.ReferralRewardUncheckedCreateWithoutWithdrawalInput> | Prisma.ReferralRewardCreateWithoutWithdrawalInput[] | Prisma.ReferralRewardUncheckedCreateWithoutWithdrawalInput[]
+  connectOrCreate?: Prisma.ReferralRewardCreateOrConnectWithoutWithdrawalInput | Prisma.ReferralRewardCreateOrConnectWithoutWithdrawalInput[]
+  upsert?: Prisma.ReferralRewardUpsertWithWhereUniqueWithoutWithdrawalInput | Prisma.ReferralRewardUpsertWithWhereUniqueWithoutWithdrawalInput[]
+  createMany?: Prisma.ReferralRewardCreateManyWithdrawalInputEnvelope
+  set?: Prisma.ReferralRewardWhereUniqueInput | Prisma.ReferralRewardWhereUniqueInput[]
+  disconnect?: Prisma.ReferralRewardWhereUniqueInput | Prisma.ReferralRewardWhereUniqueInput[]
+  delete?: Prisma.ReferralRewardWhereUniqueInput | Prisma.ReferralRewardWhereUniqueInput[]
+  connect?: Prisma.ReferralRewardWhereUniqueInput | Prisma.ReferralRewardWhereUniqueInput[]
+  update?: Prisma.ReferralRewardUpdateWithWhereUniqueWithoutWithdrawalInput | Prisma.ReferralRewardUpdateWithWhereUniqueWithoutWithdrawalInput[]
+  updateMany?: Prisma.ReferralRewardUpdateManyWithWhereWithoutWithdrawalInput | Prisma.ReferralRewardUpdateManyWithWhereWithoutWithdrawalInput[]
+  deleteMany?: Prisma.ReferralRewardScalarWhereInput | Prisma.ReferralRewardScalarWhereInput[]
+}
+
 export type ReferralRewardCreateWithoutReferrerInput = {
   id?: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -596,6 +662,7 @@ export type ReferralRewardCreateWithoutReferrerInput = {
   updatedAt?: Date | string
   referee: Prisma.UserCreateNestedOneWithoutReferralRewardsEarnedInput
   booking: Prisma.BookingCreateNestedOneWithoutReferralRewardsInput
+  withdrawal?: Prisma.WithdrawalRequestCreateNestedOneWithoutRewardsInput
 }
 
 export type ReferralRewardUncheckedCreateWithoutReferrerInput = {
@@ -605,6 +672,7 @@ export type ReferralRewardUncheckedCreateWithoutReferrerInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: $Enums.ReferralRewardStatus
   referralType?: $Enums.ReferralType
+  withdrawalId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -628,6 +696,7 @@ export type ReferralRewardCreateWithoutRefereeInput = {
   updatedAt?: Date | string
   referrer: Prisma.UserCreateNestedOneWithoutReferralRewardsGivenInput
   booking: Prisma.BookingCreateNestedOneWithoutReferralRewardsInput
+  withdrawal?: Prisma.WithdrawalRequestCreateNestedOneWithoutRewardsInput
 }
 
 export type ReferralRewardUncheckedCreateWithoutRefereeInput = {
@@ -637,6 +706,7 @@ export type ReferralRewardUncheckedCreateWithoutRefereeInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: $Enums.ReferralRewardStatus
   referralType?: $Enums.ReferralType
+  withdrawalId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -678,6 +748,7 @@ export type ReferralRewardScalarWhereInput = {
   amount?: Prisma.DecimalFilter<"ReferralReward"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumReferralRewardStatusFilter<"ReferralReward"> | $Enums.ReferralRewardStatus
   referralType?: Prisma.EnumReferralTypeFilter<"ReferralReward"> | $Enums.ReferralType
+  withdrawalId?: Prisma.StringNullableFilter<"ReferralReward"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ReferralReward"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReferralReward"> | Date | string
 }
@@ -707,6 +778,7 @@ export type ReferralRewardCreateWithoutBookingInput = {
   updatedAt?: Date | string
   referrer: Prisma.UserCreateNestedOneWithoutReferralRewardsGivenInput
   referee: Prisma.UserCreateNestedOneWithoutReferralRewardsEarnedInput
+  withdrawal?: Prisma.WithdrawalRequestCreateNestedOneWithoutRewardsInput
 }
 
 export type ReferralRewardUncheckedCreateWithoutBookingInput = {
@@ -716,6 +788,7 @@ export type ReferralRewardUncheckedCreateWithoutBookingInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: $Enums.ReferralRewardStatus
   referralType?: $Enums.ReferralType
+  withdrawalId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -746,6 +819,56 @@ export type ReferralRewardUpdateManyWithWhereWithoutBookingInput = {
   data: Prisma.XOR<Prisma.ReferralRewardUpdateManyMutationInput, Prisma.ReferralRewardUncheckedUpdateManyWithoutBookingInput>
 }
 
+export type ReferralRewardCreateWithoutWithdrawalInput = {
+  id?: string
+  amount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: $Enums.ReferralRewardStatus
+  referralType?: $Enums.ReferralType
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  referrer: Prisma.UserCreateNestedOneWithoutReferralRewardsGivenInput
+  referee: Prisma.UserCreateNestedOneWithoutReferralRewardsEarnedInput
+  booking: Prisma.BookingCreateNestedOneWithoutReferralRewardsInput
+}
+
+export type ReferralRewardUncheckedCreateWithoutWithdrawalInput = {
+  id?: string
+  referrerId: string
+  refereeId: string
+  bookingId: string
+  amount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: $Enums.ReferralRewardStatus
+  referralType?: $Enums.ReferralType
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ReferralRewardCreateOrConnectWithoutWithdrawalInput = {
+  where: Prisma.ReferralRewardWhereUniqueInput
+  create: Prisma.XOR<Prisma.ReferralRewardCreateWithoutWithdrawalInput, Prisma.ReferralRewardUncheckedCreateWithoutWithdrawalInput>
+}
+
+export type ReferralRewardCreateManyWithdrawalInputEnvelope = {
+  data: Prisma.ReferralRewardCreateManyWithdrawalInput | Prisma.ReferralRewardCreateManyWithdrawalInput[]
+  skipDuplicates?: boolean
+}
+
+export type ReferralRewardUpsertWithWhereUniqueWithoutWithdrawalInput = {
+  where: Prisma.ReferralRewardWhereUniqueInput
+  update: Prisma.XOR<Prisma.ReferralRewardUpdateWithoutWithdrawalInput, Prisma.ReferralRewardUncheckedUpdateWithoutWithdrawalInput>
+  create: Prisma.XOR<Prisma.ReferralRewardCreateWithoutWithdrawalInput, Prisma.ReferralRewardUncheckedCreateWithoutWithdrawalInput>
+}
+
+export type ReferralRewardUpdateWithWhereUniqueWithoutWithdrawalInput = {
+  where: Prisma.ReferralRewardWhereUniqueInput
+  data: Prisma.XOR<Prisma.ReferralRewardUpdateWithoutWithdrawalInput, Prisma.ReferralRewardUncheckedUpdateWithoutWithdrawalInput>
+}
+
+export type ReferralRewardUpdateManyWithWhereWithoutWithdrawalInput = {
+  where: Prisma.ReferralRewardScalarWhereInput
+  data: Prisma.XOR<Prisma.ReferralRewardUpdateManyMutationInput, Prisma.ReferralRewardUncheckedUpdateManyWithoutWithdrawalInput>
+}
+
 export type ReferralRewardCreateManyReferrerInput = {
   id?: string
   refereeId: string
@@ -753,6 +876,7 @@ export type ReferralRewardCreateManyReferrerInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: $Enums.ReferralRewardStatus
   referralType?: $Enums.ReferralType
+  withdrawalId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -764,6 +888,7 @@ export type ReferralRewardCreateManyRefereeInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: $Enums.ReferralRewardStatus
   referralType?: $Enums.ReferralType
+  withdrawalId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -777,6 +902,7 @@ export type ReferralRewardUpdateWithoutReferrerInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   referee?: Prisma.UserUpdateOneRequiredWithoutReferralRewardsEarnedNestedInput
   booking?: Prisma.BookingUpdateOneRequiredWithoutReferralRewardsNestedInput
+  withdrawal?: Prisma.WithdrawalRequestUpdateOneWithoutRewardsNestedInput
 }
 
 export type ReferralRewardUncheckedUpdateWithoutReferrerInput = {
@@ -786,6 +912,7 @@ export type ReferralRewardUncheckedUpdateWithoutReferrerInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumReferralRewardStatusFieldUpdateOperationsInput | $Enums.ReferralRewardStatus
   referralType?: Prisma.EnumReferralTypeFieldUpdateOperationsInput | $Enums.ReferralType
+  withdrawalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -797,6 +924,7 @@ export type ReferralRewardUncheckedUpdateManyWithoutReferrerInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumReferralRewardStatusFieldUpdateOperationsInput | $Enums.ReferralRewardStatus
   referralType?: Prisma.EnumReferralTypeFieldUpdateOperationsInput | $Enums.ReferralType
+  withdrawalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -810,6 +938,7 @@ export type ReferralRewardUpdateWithoutRefereeInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   referrer?: Prisma.UserUpdateOneRequiredWithoutReferralRewardsGivenNestedInput
   booking?: Prisma.BookingUpdateOneRequiredWithoutReferralRewardsNestedInput
+  withdrawal?: Prisma.WithdrawalRequestUpdateOneWithoutRewardsNestedInput
 }
 
 export type ReferralRewardUncheckedUpdateWithoutRefereeInput = {
@@ -819,6 +948,7 @@ export type ReferralRewardUncheckedUpdateWithoutRefereeInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumReferralRewardStatusFieldUpdateOperationsInput | $Enums.ReferralRewardStatus
   referralType?: Prisma.EnumReferralTypeFieldUpdateOperationsInput | $Enums.ReferralType
+  withdrawalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -830,6 +960,7 @@ export type ReferralRewardUncheckedUpdateManyWithoutRefereeInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumReferralRewardStatusFieldUpdateOperationsInput | $Enums.ReferralRewardStatus
   referralType?: Prisma.EnumReferralTypeFieldUpdateOperationsInput | $Enums.ReferralType
+  withdrawalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -841,6 +972,7 @@ export type ReferralRewardCreateManyBookingInput = {
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: $Enums.ReferralRewardStatus
   referralType?: $Enums.ReferralType
+  withdrawalId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -854,6 +986,7 @@ export type ReferralRewardUpdateWithoutBookingInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   referrer?: Prisma.UserUpdateOneRequiredWithoutReferralRewardsGivenNestedInput
   referee?: Prisma.UserUpdateOneRequiredWithoutReferralRewardsEarnedNestedInput
+  withdrawal?: Prisma.WithdrawalRequestUpdateOneWithoutRewardsNestedInput
 }
 
 export type ReferralRewardUncheckedUpdateWithoutBookingInput = {
@@ -863,6 +996,7 @@ export type ReferralRewardUncheckedUpdateWithoutBookingInput = {
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumReferralRewardStatusFieldUpdateOperationsInput | $Enums.ReferralRewardStatus
   referralType?: Prisma.EnumReferralTypeFieldUpdateOperationsInput | $Enums.ReferralType
+  withdrawalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -871,6 +1005,55 @@ export type ReferralRewardUncheckedUpdateManyWithoutBookingInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   referrerId?: Prisma.StringFieldUpdateOperationsInput | string
   refereeId?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: Prisma.EnumReferralRewardStatusFieldUpdateOperationsInput | $Enums.ReferralRewardStatus
+  referralType?: Prisma.EnumReferralTypeFieldUpdateOperationsInput | $Enums.ReferralType
+  withdrawalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ReferralRewardCreateManyWithdrawalInput = {
+  id?: string
+  referrerId: string
+  refereeId: string
+  bookingId: string
+  amount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: $Enums.ReferralRewardStatus
+  referralType?: $Enums.ReferralType
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ReferralRewardUpdateWithoutWithdrawalInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: Prisma.EnumReferralRewardStatusFieldUpdateOperationsInput | $Enums.ReferralRewardStatus
+  referralType?: Prisma.EnumReferralTypeFieldUpdateOperationsInput | $Enums.ReferralType
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  referrer?: Prisma.UserUpdateOneRequiredWithoutReferralRewardsGivenNestedInput
+  referee?: Prisma.UserUpdateOneRequiredWithoutReferralRewardsEarnedNestedInput
+  booking?: Prisma.BookingUpdateOneRequiredWithoutReferralRewardsNestedInput
+}
+
+export type ReferralRewardUncheckedUpdateWithoutWithdrawalInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  referrerId?: Prisma.StringFieldUpdateOperationsInput | string
+  refereeId?: Prisma.StringFieldUpdateOperationsInput | string
+  bookingId?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  status?: Prisma.EnumReferralRewardStatusFieldUpdateOperationsInput | $Enums.ReferralRewardStatus
+  referralType?: Prisma.EnumReferralTypeFieldUpdateOperationsInput | $Enums.ReferralType
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ReferralRewardUncheckedUpdateManyWithoutWithdrawalInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  referrerId?: Prisma.StringFieldUpdateOperationsInput | string
+  refereeId?: Prisma.StringFieldUpdateOperationsInput | string
+  bookingId?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: Prisma.EnumReferralRewardStatusFieldUpdateOperationsInput | $Enums.ReferralRewardStatus
   referralType?: Prisma.EnumReferralTypeFieldUpdateOperationsInput | $Enums.ReferralType
@@ -888,11 +1071,13 @@ export type ReferralRewardSelect<ExtArgs extends runtime.Types.Extensions.Intern
   amount?: boolean
   status?: boolean
   referralType?: boolean
+  withdrawalId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   referrer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   referee?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   booking?: boolean | Prisma.BookingDefaultArgs<ExtArgs>
+  withdrawal?: boolean | Prisma.ReferralReward$withdrawalArgs<ExtArgs>
 }, ExtArgs["result"]["referralReward"]>
 
 export type ReferralRewardSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -903,11 +1088,13 @@ export type ReferralRewardSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   amount?: boolean
   status?: boolean
   referralType?: boolean
+  withdrawalId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   referrer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   referee?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   booking?: boolean | Prisma.BookingDefaultArgs<ExtArgs>
+  withdrawal?: boolean | Prisma.ReferralReward$withdrawalArgs<ExtArgs>
 }, ExtArgs["result"]["referralReward"]>
 
 export type ReferralRewardSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -918,11 +1105,13 @@ export type ReferralRewardSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   amount?: boolean
   status?: boolean
   referralType?: boolean
+  withdrawalId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   referrer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   referee?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   booking?: boolean | Prisma.BookingDefaultArgs<ExtArgs>
+  withdrawal?: boolean | Prisma.ReferralReward$withdrawalArgs<ExtArgs>
 }, ExtArgs["result"]["referralReward"]>
 
 export type ReferralRewardSelectScalar = {
@@ -933,25 +1122,29 @@ export type ReferralRewardSelectScalar = {
   amount?: boolean
   status?: boolean
   referralType?: boolean
+  withdrawalId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ReferralRewardOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "referrerId" | "refereeId" | "bookingId" | "amount" | "status" | "referralType" | "createdAt" | "updatedAt", ExtArgs["result"]["referralReward"]>
+export type ReferralRewardOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "referrerId" | "refereeId" | "bookingId" | "amount" | "status" | "referralType" | "withdrawalId" | "createdAt" | "updatedAt", ExtArgs["result"]["referralReward"]>
 export type ReferralRewardInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   referrer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   referee?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   booking?: boolean | Prisma.BookingDefaultArgs<ExtArgs>
+  withdrawal?: boolean | Prisma.ReferralReward$withdrawalArgs<ExtArgs>
 }
 export type ReferralRewardIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   referrer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   referee?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   booking?: boolean | Prisma.BookingDefaultArgs<ExtArgs>
+  withdrawal?: boolean | Prisma.ReferralReward$withdrawalArgs<ExtArgs>
 }
 export type ReferralRewardIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   referrer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   referee?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   booking?: boolean | Prisma.BookingDefaultArgs<ExtArgs>
+  withdrawal?: boolean | Prisma.ReferralReward$withdrawalArgs<ExtArgs>
 }
 
 export type $ReferralRewardPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -960,6 +1153,7 @@ export type $ReferralRewardPayload<ExtArgs extends runtime.Types.Extensions.Inte
     referrer: Prisma.$UserPayload<ExtArgs>
     referee: Prisma.$UserPayload<ExtArgs>
     booking: Prisma.$BookingPayload<ExtArgs>
+    withdrawal: Prisma.$WithdrawalRequestPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -969,6 +1163,7 @@ export type $ReferralRewardPayload<ExtArgs extends runtime.Types.Extensions.Inte
     amount: runtime.Decimal
     status: $Enums.ReferralRewardStatus
     referralType: $Enums.ReferralType
+    withdrawalId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["referralReward"]>
@@ -1368,6 +1563,7 @@ export interface Prisma__ReferralRewardClient<T, Null = never, ExtArgs extends r
   referrer<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   referee<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   booking<T extends Prisma.BookingDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BookingDefaultArgs<ExtArgs>>): Prisma.Prisma__BookingClient<runtime.Types.Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  withdrawal<T extends Prisma.ReferralReward$withdrawalArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReferralReward$withdrawalArgs<ExtArgs>>): Prisma.Prisma__WithdrawalRequestClient<runtime.Types.Result.GetResult<Prisma.$WithdrawalRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1404,6 +1600,7 @@ export interface ReferralRewardFieldRefs {
   readonly amount: Prisma.FieldRef<"ReferralReward", 'Decimal'>
   readonly status: Prisma.FieldRef<"ReferralReward", 'ReferralRewardStatus'>
   readonly referralType: Prisma.FieldRef<"ReferralReward", 'ReferralType'>
+  readonly withdrawalId: Prisma.FieldRef<"ReferralReward", 'String'>
   readonly createdAt: Prisma.FieldRef<"ReferralReward", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ReferralReward", 'DateTime'>
 }
@@ -1799,6 +1996,25 @@ export type ReferralRewardDeleteManyArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many ReferralRewards to delete.
    */
   limit?: number
+}
+
+/**
+ * ReferralReward.withdrawal
+ */
+export type ReferralReward$withdrawalArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WithdrawalRequest
+   */
+  select?: Prisma.WithdrawalRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WithdrawalRequest
+   */
+  omit?: Prisma.WithdrawalRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WithdrawalRequestInclude<ExtArgs> | null
+  where?: Prisma.WithdrawalRequestWhereInput
 }
 
 /**

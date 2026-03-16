@@ -16,6 +16,7 @@ import {
   Mail,
   X,
   UserSquare2,
+  Wallet,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -34,6 +35,7 @@ const menuItems = [
   { name: "Reports",      href: "/admin/reports",      icon: FileText,        roles: ["ADMIN", "SUPERADMIN"] },
   { name: "Referrals",    href: "/admin/referrals",    icon: Gift,            roles: ["ADMIN", "SUPERADMIN"] },
   { name: "Agents",       href: "/admin/agents",       icon: UserSquare2,     roles: ["ADMIN", "SUPERADMIN"] },
+  { name: "Withdrawals",  href: "/admin/withdrawals",  icon: Wallet,          roles: ["ADMIN", "SUPERADMIN"] },
   { name: "Email",        href: "/admin/email",        icon: Mail,            roles: ["ADMIN", "SUPERADMIN"] },
   { name: "Users",        href: "/admin/users",        icon: Users,           roles: ["SUPERADMIN"] },
   { name: "Settings",     href: "/admin/settings",     icon: Settings,        roles: ["SUPERADMIN"] },

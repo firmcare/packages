@@ -400,7 +400,10 @@ export const ModelName = {
   Notification: 'Notification',
   EmailVerification: 'EmailVerification',
   PasswordReset: 'PasswordReset',
-  EmailLog: 'EmailLog'
+  EmailLog: 'EmailLog',
+  AgentApplication: 'AgentApplication',
+  AgentBankAccount: 'AgentBankAccount',
+  WithdrawalRequest: 'WithdrawalRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -416,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "customRole" | "permission" | "rolePermission" | "category" | "test" | "package" | "booking" | "promo" | "promoPackage" | "transaction" | "siteSetting" | "referralReward" | "notification" | "emailVerification" | "passwordReset" | "emailLog"
+    modelProps: "user" | "customRole" | "permission" | "rolePermission" | "category" | "test" | "package" | "booking" | "promo" | "promoPackage" | "transaction" | "siteSetting" | "referralReward" | "notification" | "emailVerification" | "passwordReset" | "emailLog" | "agentApplication" | "agentBankAccount" | "withdrawalRequest"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1678,6 +1681,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AgentApplication: {
+      payload: Prisma.$AgentApplicationPayload<ExtArgs>
+      fields: Prisma.AgentApplicationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AgentApplicationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApplicationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AgentApplicationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApplicationPayload>
+        }
+        findFirst: {
+          args: Prisma.AgentApplicationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApplicationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AgentApplicationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApplicationPayload>
+        }
+        findMany: {
+          args: Prisma.AgentApplicationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApplicationPayload>[]
+        }
+        create: {
+          args: Prisma.AgentApplicationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApplicationPayload>
+        }
+        createMany: {
+          args: Prisma.AgentApplicationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AgentApplicationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApplicationPayload>[]
+        }
+        delete: {
+          args: Prisma.AgentApplicationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApplicationPayload>
+        }
+        update: {
+          args: Prisma.AgentApplicationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApplicationPayload>
+        }
+        deleteMany: {
+          args: Prisma.AgentApplicationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AgentApplicationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AgentApplicationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApplicationPayload>[]
+        }
+        upsert: {
+          args: Prisma.AgentApplicationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentApplicationPayload>
+        }
+        aggregate: {
+          args: Prisma.AgentApplicationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAgentApplication>
+        }
+        groupBy: {
+          args: Prisma.AgentApplicationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentApplicationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AgentApplicationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentApplicationCountAggregateOutputType> | number
+        }
+      }
+    }
+    AgentBankAccount: {
+      payload: Prisma.$AgentBankAccountPayload<ExtArgs>
+      fields: Prisma.AgentBankAccountFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AgentBankAccountFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentBankAccountPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AgentBankAccountFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentBankAccountPayload>
+        }
+        findFirst: {
+          args: Prisma.AgentBankAccountFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentBankAccountPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AgentBankAccountFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentBankAccountPayload>
+        }
+        findMany: {
+          args: Prisma.AgentBankAccountFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentBankAccountPayload>[]
+        }
+        create: {
+          args: Prisma.AgentBankAccountCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentBankAccountPayload>
+        }
+        createMany: {
+          args: Prisma.AgentBankAccountCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AgentBankAccountCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentBankAccountPayload>[]
+        }
+        delete: {
+          args: Prisma.AgentBankAccountDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentBankAccountPayload>
+        }
+        update: {
+          args: Prisma.AgentBankAccountUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentBankAccountPayload>
+        }
+        deleteMany: {
+          args: Prisma.AgentBankAccountDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AgentBankAccountUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AgentBankAccountUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentBankAccountPayload>[]
+        }
+        upsert: {
+          args: Prisma.AgentBankAccountUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AgentBankAccountPayload>
+        }
+        aggregate: {
+          args: Prisma.AgentBankAccountAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAgentBankAccount>
+        }
+        groupBy: {
+          args: Prisma.AgentBankAccountGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentBankAccountGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AgentBankAccountCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AgentBankAccountCountAggregateOutputType> | number
+        }
+      }
+    }
+    WithdrawalRequest: {
+      payload: Prisma.$WithdrawalRequestPayload<ExtArgs>
+      fields: Prisma.WithdrawalRequestFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.WithdrawalRequestFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WithdrawalRequestPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.WithdrawalRequestFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WithdrawalRequestPayload>
+        }
+        findFirst: {
+          args: Prisma.WithdrawalRequestFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WithdrawalRequestPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.WithdrawalRequestFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WithdrawalRequestPayload>
+        }
+        findMany: {
+          args: Prisma.WithdrawalRequestFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WithdrawalRequestPayload>[]
+        }
+        create: {
+          args: Prisma.WithdrawalRequestCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WithdrawalRequestPayload>
+        }
+        createMany: {
+          args: Prisma.WithdrawalRequestCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.WithdrawalRequestCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WithdrawalRequestPayload>[]
+        }
+        delete: {
+          args: Prisma.WithdrawalRequestDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WithdrawalRequestPayload>
+        }
+        update: {
+          args: Prisma.WithdrawalRequestUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WithdrawalRequestPayload>
+        }
+        deleteMany: {
+          args: Prisma.WithdrawalRequestDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.WithdrawalRequestUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.WithdrawalRequestUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WithdrawalRequestPayload>[]
+        }
+        upsert: {
+          args: Prisma.WithdrawalRequestUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WithdrawalRequestPayload>
+        }
+        aggregate: {
+          args: Prisma.WithdrawalRequestAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWithdrawalRequest>
+        }
+        groupBy: {
+          args: Prisma.WithdrawalRequestGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WithdrawalRequestGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.WithdrawalRequestCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WithdrawalRequestCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1896,6 +2121,7 @@ export const ReferralRewardScalarFieldEnum = {
   amount: 'amount',
   status: 'status',
   referralType: 'referralType',
+  withdrawalId: 'withdrawalId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1952,6 +2178,54 @@ export const EmailLogScalarFieldEnum = {
 } as const
 
 export type EmailLogScalarFieldEnum = (typeof EmailLogScalarFieldEnum)[keyof typeof EmailLogScalarFieldEnum]
+
+
+export const AgentApplicationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  city: 'city',
+  motivation: 'motivation',
+  status: 'status',
+  adminNotes: 'adminNotes',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  processedAt: 'processedAt'
+} as const
+
+export type AgentApplicationScalarFieldEnum = (typeof AgentApplicationScalarFieldEnum)[keyof typeof AgentApplicationScalarFieldEnum]
+
+
+export const AgentBankAccountScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  bankCode: 'bankCode',
+  bankName: 'bankName',
+  accountNumber: 'accountNumber',
+  accountName: 'accountName',
+  paystackRecipientCode: 'paystackRecipientCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AgentBankAccountScalarFieldEnum = (typeof AgentBankAccountScalarFieldEnum)[keyof typeof AgentBankAccountScalarFieldEnum]
+
+
+export const WithdrawalRequestScalarFieldEnum = {
+  id: 'id',
+  agentId: 'agentId',
+  amount: 'amount',
+  status: 'status',
+  paystackTransferCode: 'paystackTransferCode',
+  paystackReference: 'paystackReference',
+  failureReason: 'failureReason',
+  processedAt: 'processedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WithdrawalRequestScalarFieldEnum = (typeof WithdrawalRequestScalarFieldEnum)[keyof typeof WithdrawalRequestScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2118,6 +2392,34 @@ export type ListEnumReferralTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
 
 
 /**
+ * Reference to a field of type 'AgentApplicationStatus'
+ */
+export type EnumAgentApplicationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AgentApplicationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'AgentApplicationStatus[]'
+ */
+export type ListEnumAgentApplicationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AgentApplicationStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'WithdrawalStatus'
+ */
+export type EnumWithdrawalStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WithdrawalStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'WithdrawalStatus[]'
+ */
+export type ListEnumWithdrawalStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WithdrawalStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -2242,6 +2544,9 @@ export type GlobalOmitConfig = {
   emailVerification?: Prisma.EmailVerificationOmit
   passwordReset?: Prisma.PasswordResetOmit
   emailLog?: Prisma.EmailLogOmit
+  agentApplication?: Prisma.AgentApplicationOmit
+  agentBankAccount?: Prisma.AgentBankAccountOmit
+  withdrawalRequest?: Prisma.WithdrawalRequestOmit
 }
 
 /* Types for Logging */

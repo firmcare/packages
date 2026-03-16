@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CheckCircle, XCircle, Clock, Users, UserSquare2, Shield } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 
-type RewardStatus = "PENDING" | "PAID" | "CANCELLED";
+type RewardStatus = "PENDING" | "CONFIRMED" | "PAID" | "CANCELLED";
 type ReferralType = "USER" | "ADMIN" | "AGENT";
 
 interface Reward {
@@ -20,6 +20,7 @@ interface Reward {
 
 const STATUS_CONFIG: Record<RewardStatus, { label: string; icon: typeof Clock; classes: string }> = {
   PENDING:   { label: "Pending",   icon: Clock,        classes: "bg-yellow-100 text-yellow-800" },
+  CONFIRMED: { label: "Confirmed", icon: CheckCircle,  classes: "bg-blue-100 text-blue-800"     },
   PAID:      { label: "Paid",      icon: CheckCircle,  classes: "bg-green-100 text-green-800"   },
   CANCELLED: { label: "Cancelled", icon: XCircle,      classes: "bg-red-100 text-red-800"       },
 };

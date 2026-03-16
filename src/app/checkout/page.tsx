@@ -6,6 +6,7 @@ import { useCart } from '@/context/CartContext';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { getStoredReferralCode } from '@/components/ui/ReferralTracker';
 
 interface PromoResult {
   id: string;
@@ -77,6 +78,15 @@ export default function CheckoutPage() {
     script.async = true;
     document.body.appendChild(script);
     paystackScriptLoaded.current = true;
+  }, []);
+
+  // Auto-fill referral code from stored ?ref= param (set by ReferralTracker)
+  useEffect(() => {
+    const stored = getStoredReferralCode();
+    if (stored && !referralCode) {
+      setReferralCode(stored);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Reset promo/referral when cart changes

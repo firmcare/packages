@@ -16,8 +16,6 @@ export default async function AgentSharePage() {
     orderBy: { createdAt: "asc" },
   });
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://firmcare.com.ng";
-
   return (
     <div className="space-y-6">
       <div>
@@ -36,7 +34,6 @@ export default async function AgentSharePage() {
           price: Number(p.price),
           category: p.category.name,
         }))}
-        siteUrl={siteUrl}
       />
     </div>
   );

@@ -4,7 +4,9 @@ import InfoSection from "@/components/home/InfoSection";
 import PackageList from "@/components/home/PackageList";
 import SearchAndCategories from "@/components/home/SearchAndCategories";
 import Testimonials from "@/components/home/Testimonials";
+import BecomeAgent from "@/components/home/BecomeAgent";
 import AnimatedSection from "@/components/ui/AnimatedSection";
+import { prisma } from "@/lib/prisma";
 import { Metadata } from "next";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://firmcare.com.ng";
@@ -30,7 +32,19 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+async function getAgentPercent(): Promise<number> {
+  try {
+    const row = await prisma.siteSetting.findUnique({
+      where: { key: "referral_reward_percent_agent" },
+    });
+    return row ? parseFloat(row.value) : 10;
+  } catch {
+    return 10;
+  }
+}
+
+export default async function Home() {
+  const agentPercent = await getAgentPercent();
   return (
     <>
       <Hero />
@@ -45,6 +59,9 @@ export default function Home() {
       </AnimatedSection>
       <AnimatedSection animation="slideInUp" delay={200}>
         <InfoSection />
+      </AnimatedSection>
+      <AnimatedSection animation="fadeIn" delay={250}>
+        <BecomeAgent agentPercent={agentPercent} />
       </AnimatedSection>
     </>
   );

@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import AgentsManager from "@/components/admin/AgentsManager";
+import AgentApplicationsManager from "@/components/admin/AgentApplicationsManager";
 
 async function getAgents() {
   const agentRole = await prisma.customRole.findUnique({ where: { name: "AGENT" } });
@@ -42,9 +43,13 @@ async function getAgents() {
   );
 }
 
+async function getPendingApplicationsCount() {
+  return prisma.agentApplication.count({ where: { status: "PENDING" } });
+}
+
 export default async function AdminAgentsPage() {
   await requireAdmin();
-  const agents = await getAgents();
+  const [agents, pendingCount] = await Promise.all([getAgents(), getPendingApplicationsCount()]);
 
   return (
     <div className="space-y-6">
@@ -77,6 +82,22 @@ export default async function AdminAgentsPage() {
       </div>
 
       <AgentsManager initialAgents={agents} />
+
+      {/* Applications section */}
+      <div className="mt-10">
+        <div className="flex items-center gap-3 mb-4">
+          <h2 className="text-xl font-bold text-gray-900">Agent Applications</h2>
+          {pendingCount > 0 && (
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">
+              {pendingCount} pending
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-gray-500 mb-4">
+          Self-registered applications from the "Become an Agent" form. Review and approve or reject after offline due diligence.
+        </p>
+        <AgentApplicationsManager />
+      </div>
     </div>
   );
 }

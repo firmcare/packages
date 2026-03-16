@@ -8,6 +8,7 @@ import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import PWARegister from "@/components/PWARegister";
 import LayoutContent from "./LayoutContent";
 import { SessionProvider } from "next-auth/react";
+import ReferralTracker from "@/components/ui/ReferralTracker";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://firmcare.com.ng";
 
@@ -146,6 +147,7 @@ export default function RootLayout({
           <ToastProvider>
             <CartProvider>
               <ProgressBar />
+              <ReferralTracker />
               <LayoutContent>{children}</LayoutContent>
               <PWAInstallPrompt />
             </CartProvider>

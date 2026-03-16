@@ -33,15 +33,31 @@ enum PaymentMethod {
 }
 
 enum ReferralRewardStatus {
-  PENDING
-  PAID
+  PENDING    // booking paid, reward not yet available
+  CONFIRMED  // booking completed, available for withdrawal
+  PAID       // included in a completed withdrawal
   CANCELLED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  COMPLETED
+  FAILED
+  REJECTED
 }
 
 enum ReferralType {
   USER
   ADMIN
   AGENT
+}
+
+enum AgentApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model User {
@@ -66,6 +82,8 @@ model User {
   emailVerifications    EmailVerification[]
   notifications         Notification[]
   passwordResets        PasswordReset[]
+  bankAccount           AgentBankAccount?
+  withdrawalRequests    WithdrawalRequest[]
 }
 
 model CustomRole {
@@ -244,6 +262,8 @@ model ReferralReward {
   amount        Decimal              @db.Decimal(10, 2)
   status        ReferralRewardStatus @default(PENDING)
   referralType  ReferralType         @default(USER)
+  withdrawalId  String?
+  withdrawal    WithdrawalRequest?   @relation(fields: [withdrawalId], references: [id])
   createdAt     DateTime             @default(now())
   updatedAt     DateTime             @updatedAt
 }
@@ -288,4 +308,46 @@ model EmailLog {
   status    String
   error     String?
   createdAt DateTime @default(now())
+}
+
+model AgentApplication {
+  id          String                 @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  city        String?
+  motivation  String                 @db.Text
+  status      AgentApplicationStatus @default(PENDING)
+  adminNotes  String?
+  userId      String?                // set when approved and account created
+  createdAt   DateTime               @default(now())
+  processedAt DateTime?
+}
+
+model AgentBankAccount {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bankCode              String
+  bankName              String
+  accountNumber         String
+  accountName           String
+  paystackRecipientCode String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model WithdrawalRequest {
+  id                   String           @id @default(cuid())
+  agentId              String
+  agent                User             @relation(fields: [agentId], references: [id])
+  amount               Decimal          @db.Decimal(10, 2)
+  status               WithdrawalStatus @default(PENDING)
+  paystackTransferCode String?
+  paystackReference    String?
+  failureReason        String?
+  processedAt          DateTime?
+  rewards              ReferralReward[]
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
 }

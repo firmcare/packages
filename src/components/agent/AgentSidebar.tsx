@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Gift, Share2, User, X } from "lucide-react";
+import { LayoutDashboard, Gift, Share2, User, Wallet, X } from "lucide-react";
 
 interface AgentSidebarProps {
   isOpen: boolean;
@@ -12,6 +12,7 @@ interface AgentSidebarProps {
 const menuItems = [
   { name: "Dashboard",   href: "/agent/dashboard",  icon: LayoutDashboard },
   { name: "My Referrals", href: "/agent/referrals", icon: Gift            },
+  { name: "Wallet",      href: "/agent/wallet",     icon: Wallet          },
   { name: "Share Links", href: "/agent/share",      icon: Share2          },
   { name: "Profile",     href: "/agent/profile",    icon: User            },
 ];

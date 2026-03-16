@@ -9,6 +9,8 @@ export type EmailType =
   | "booking_status_update"
   | "results_ready"
   | "password_reset"
+  | "agent_approved"
+  | "agent_rejected"
   | "general";
 
 interface SmtpConfig {
@@ -509,6 +511,103 @@ export async function sendGeneralEmail(
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     await logEmail(to, subject, "general", "failed", msg);
+    return { success: false, error: msg };
+  }
+}
+
+export async function sendAgentApprovedEmail(
+  to: string,
+  name: string,
+  tempPassword: string,
+  referralCode: string,
+  baseUrl: string
+): Promise<SendResult> {
+  const cfg = await getSmtpConfig();
+  if (!cfg.host || !cfg.user || !cfg.pass) {
+    return { success: false, error: "SMTP not configured" };
+  }
+
+  const loginLink = `${baseUrl}/auth/login`;
+  const subject = "Congratulations! Your FirmCare Agent Account is Approved";
+  const body = `
+    <h2>Welcome to the team, ${name}!</h2>
+    <p>We're excited to let you know that your application to become a <strong>FirmCare Marketing Agent</strong> has been approved. You can now log in to your agent dashboard and start sharing packages to earn commissions.</p>
+
+    <div class="info-box">
+      <p class="label">Your Login Credentials</p>
+      <p><strong>Email:</strong> ${to}</p>
+      <p><strong>Temporary Password:</strong> <span style="font-family:monospace;font-size:16px;font-weight:700;color:#A44692;letter-spacing:1px;">${tempPassword}</span></p>
+      <p style="font-size:13px;color:#e05c00;margin-top:8px;">⚠️ Please change your password immediately after first login.</p>
+    </div>
+
+    <div class="info-box" style="background:#f0f9f0;border-left-color:#22c55e;">
+      <p class="label" style="color:#16a34a;">Your Referral Code</p>
+      <p style="font-size:24px;font-weight:800;color:#16a34a;letter-spacing:3px;">${referralCode}</p>
+      <p>Share this code or your personal referral link with potential customers. You earn a commission on every booking made through your link.</p>
+    </div>
+
+    <p style="text-align:center;"><a href="${loginLink}" class="btn">Log In to My Dashboard</a></p>
+    <div class="divider"></div>
+    <p style="font-size:13px;color:#777;">From your agent dashboard you can:</p>
+    <ul style="font-size:14px;color:#555;line-height:2;">
+      <li>View your referral statistics and earnings</li>
+      <li>Share personalized links for all available packages</li>
+      <li>Request withdrawals once your earnings are confirmed</li>
+      <li>Manage your bank account details for payouts</li>
+    </ul>
+    <p style="font-size:13px;color:#999;">Have questions? Reply to this email or contact us at <a href="mailto:info@firmcare.com.ng" style="color:#A44692;">info@firmcare.com.ng</a>.</p>
+  `;
+
+  try {
+    const transporter = createTransporter(cfg);
+    await transporter.sendMail({
+      from: `"${cfg.fromName}" <${cfg.fromEmail}>`,
+      to,
+      subject,
+      html: baseHtml(subject, "Your agent account is now active!", body),
+    });
+    await logEmail(to, subject, "agent_approved", "sent");
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    await logEmail(to, subject, "agent_approved", "failed", msg);
+    return { success: false, error: msg };
+  }
+}
+
+export async function sendAgentRejectedEmail(
+  to: string,
+  name: string,
+  reason?: string
+): Promise<SendResult> {
+  const cfg = await getSmtpConfig();
+  if (!cfg.host || !cfg.user || !cfg.pass) {
+    return { success: false, error: "SMTP not configured" };
+  }
+
+  const subject = "Update on Your FirmCare Agent Application";
+  const body = `
+    <h2>Application Update, ${name}</h2>
+    <p>Thank you for your interest in becoming a FirmCare Marketing Agent. After reviewing your application, we are unable to approve it at this time.</p>
+    ${reason ? `<div class="info-box"><p class="label">Feedback</p><p>${reason}</p></div>` : ""}
+    <p>You are welcome to re-apply in the future. If you have any questions or would like further clarification, please don't hesitate to reach out.</p>
+    <div class="divider"></div>
+    <p style="font-size:13px;color:#999;">Contact us at <a href="mailto:info@firmcare.com.ng" style="color:#A44692;">info@firmcare.com.ng</a> — we're happy to help.</p>
+  `;
+
+  try {
+    const transporter = createTransporter(cfg);
+    await transporter.sendMail({
+      from: `"${cfg.fromName}" <${cfg.fromEmail}>`,
+      to,
+      subject,
+      html: baseHtml(subject, "Update on your agent application", body),
+    });
+    await logEmail(to, subject, "agent_rejected", "sent");
+    return { success: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    await logEmail(to, subject, "agent_rejected", "failed", msg);
     return { success: false, error: msg };
   }
 }

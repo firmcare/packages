@@ -1,3 +1,4 @@
+import "dotenv/config"; // must be first — loads .env before any other module runs
 import { createServer } from "http";
 import { parse } from "url";
 import next from "next";

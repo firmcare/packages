@@ -67,7 +67,10 @@ export const ModelName = {
   Notification: 'Notification',
   EmailVerification: 'EmailVerification',
   PasswordReset: 'PasswordReset',
-  EmailLog: 'EmailLog'
+  EmailLog: 'EmailLog',
+  AgentApplication: 'AgentApplication',
+  AgentBankAccount: 'AgentBankAccount',
+  WithdrawalRequest: 'WithdrawalRequest'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -265,6 +268,7 @@ export const ReferralRewardScalarFieldEnum = {
   amount: 'amount',
   status: 'status',
   referralType: 'referralType',
+  withdrawalId: 'withdrawalId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -321,6 +325,54 @@ export const EmailLogScalarFieldEnum = {
 } as const
 
 export type EmailLogScalarFieldEnum = (typeof EmailLogScalarFieldEnum)[keyof typeof EmailLogScalarFieldEnum]
+
+
+export const AgentApplicationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  phone: 'phone',
+  city: 'city',
+  motivation: 'motivation',
+  status: 'status',
+  adminNotes: 'adminNotes',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  processedAt: 'processedAt'
+} as const
+
+export type AgentApplicationScalarFieldEnum = (typeof AgentApplicationScalarFieldEnum)[keyof typeof AgentApplicationScalarFieldEnum]
+
+
+export const AgentBankAccountScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  bankCode: 'bankCode',
+  bankName: 'bankName',
+  accountNumber: 'accountNumber',
+  accountName: 'accountName',
+  paystackRecipientCode: 'paystackRecipientCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AgentBankAccountScalarFieldEnum = (typeof AgentBankAccountScalarFieldEnum)[keyof typeof AgentBankAccountScalarFieldEnum]
+
+
+export const WithdrawalRequestScalarFieldEnum = {
+  id: 'id',
+  agentId: 'agentId',
+  amount: 'amount',
+  status: 'status',
+  paystackTransferCode: 'paystackTransferCode',
+  paystackReference: 'paystackReference',
+  failureReason: 'failureReason',
+  processedAt: 'processedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type WithdrawalRequestScalarFieldEnum = (typeof WithdrawalRequestScalarFieldEnum)[keyof typeof WithdrawalRequestScalarFieldEnum]
 
 
 export const SortOrder = {

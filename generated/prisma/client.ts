@@ -124,3 +124,18 @@ export type PasswordReset = Prisma.PasswordResetModel
  * 
  */
 export type EmailLog = Prisma.EmailLogModel
+/**
+ * Model AgentApplication
+ * 
+ */
+export type AgentApplication = Prisma.AgentApplicationModel
+/**
+ * Model AgentBankAccount
+ * 
+ */
+export type AgentBankAccount = Prisma.AgentBankAccountModel
+/**
+ * Model WithdrawalRequest
+ * 
+ */
+export type WithdrawalRequest = Prisma.WithdrawalRequestModel

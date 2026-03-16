@@ -43,10 +43,12 @@ function ProgressBarInner() {
   useEffect(() => {
     const originalPushState = history.pushState.bind(history)
     history.pushState = (...args) => {
-      start()
-      return originalPushState(...args)
+      const result = originalPushState(...args)
+      // Defer to avoid calling setState during React's internal commit phase
+      setTimeout(start, 0)
+      return result
     }
-    const onPopState = () => start()
+    const onPopState = () => setTimeout(start, 0)
     window.addEventListener('popstate', onPopState)
     return () => {
       history.pushState = originalPushState

@@ -63,6 +63,22 @@ export async function PUT(
           bookingId: id,
         });
       }
+
+      // Auto-confirm referral rewards when booking is COMPLETED
+      if (newStatus === "COMPLETED") {
+        await prisma.referralReward.updateMany({
+          where: { bookingId: id, status: "PENDING" },
+          data: { status: "CONFIRMED" },
+        });
+      }
+
+      // Cancel pending rewards if booking is CANCELLED
+      if (newStatus === "CANCELLED") {
+        await prisma.referralReward.updateMany({
+          where: { bookingId: id, status: "PENDING" },
+          data: { status: "CANCELLED" },
+        });
+      }
     }
 
     return NextResponse.json(booking);

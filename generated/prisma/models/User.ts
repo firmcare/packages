@@ -246,6 +246,8 @@ export type UserWhereInput = {
   emailVerifications?: Prisma.EmailVerificationListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   passwordResets?: Prisma.PasswordResetListRelationFilter
+  bankAccount?: Prisma.XOR<Prisma.AgentBankAccountNullableScalarRelationFilter, Prisma.AgentBankAccountWhereInput> | null
+  withdrawalRequests?: Prisma.WithdrawalRequestListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -269,6 +271,8 @@ export type UserOrderByWithRelationInput = {
   emailVerifications?: Prisma.EmailVerificationOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   passwordResets?: Prisma.PasswordResetOrderByRelationAggregateInput
+  bankAccount?: Prisma.AgentBankAccountOrderByWithRelationInput
+  withdrawalRequests?: Prisma.WithdrawalRequestOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -295,6 +299,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   emailVerifications?: Prisma.EmailVerificationListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   passwordResets?: Prisma.PasswordResetListRelationFilter
+  bankAccount?: Prisma.XOR<Prisma.AgentBankAccountNullableScalarRelationFilter, Prisma.AgentBankAccountWhereInput> | null
+  withdrawalRequests?: Prisma.WithdrawalRequestListRelationFilter
 }, "id" | "email" | "referralCode">
 
 export type UserOrderByWithAggregationInput = {
@@ -353,6 +359,8 @@ export type UserCreateInput = {
   emailVerifications?: Prisma.EmailVerificationCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestCreateNestedManyWithoutAgentInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -375,6 +383,8 @@ export type UserUncheckedCreateInput = {
   emailVerifications?: Prisma.EmailVerificationUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type UserUpdateInput = {
@@ -397,6 +407,8 @@ export type UserUpdateInput = {
   emailVerifications?: Prisma.EmailVerificationUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUpdateManyWithoutAgentNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -419,6 +431,8 @@ export type UserUncheckedUpdateInput = {
   emailVerifications?: Prisma.EmailVerificationUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedUpdateManyWithoutAgentNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -681,6 +695,34 @@ export type UserUpdateOneRequiredWithoutPasswordResetsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPasswordResetsInput, Prisma.UserUpdateWithoutPasswordResetsInput>, Prisma.UserUncheckedUpdateWithoutPasswordResetsInput>
 }
 
+export type UserCreateNestedOneWithoutBankAccountInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBankAccountInput, Prisma.UserUncheckedCreateWithoutBankAccountInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBankAccountInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutBankAccountNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBankAccountInput, Prisma.UserUncheckedCreateWithoutBankAccountInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBankAccountInput
+  upsert?: Prisma.UserUpsertWithoutBankAccountInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBankAccountInput, Prisma.UserUpdateWithoutBankAccountInput>, Prisma.UserUncheckedUpdateWithoutBankAccountInput>
+}
+
+export type UserCreateNestedOneWithoutWithdrawalRequestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWithdrawalRequestsInput, Prisma.UserUncheckedCreateWithoutWithdrawalRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWithdrawalRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutWithdrawalRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWithdrawalRequestsInput, Prisma.UserUncheckedCreateWithoutWithdrawalRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWithdrawalRequestsInput
+  upsert?: Prisma.UserUpsertWithoutWithdrawalRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutWithdrawalRequestsInput, Prisma.UserUpdateWithoutWithdrawalRequestsInput>, Prisma.UserUncheckedUpdateWithoutWithdrawalRequestsInput>
+}
+
 export type UserCreateWithoutRoleInput = {
   id?: string
   email: string
@@ -700,6 +742,8 @@ export type UserCreateWithoutRoleInput = {
   emailVerifications?: Prisma.EmailVerificationCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestCreateNestedManyWithoutAgentInput
 }
 
 export type UserUncheckedCreateWithoutRoleInput = {
@@ -721,6 +765,8 @@ export type UserUncheckedCreateWithoutRoleInput = {
   emailVerifications?: Prisma.EmailVerificationUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type UserCreateOrConnectWithoutRoleInput = {
@@ -786,6 +832,8 @@ export type UserCreateWithoutBookingsInput = {
   emailVerifications?: Prisma.EmailVerificationCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestCreateNestedManyWithoutAgentInput
 }
 
 export type UserUncheckedCreateWithoutBookingsInput = {
@@ -807,6 +855,8 @@ export type UserUncheckedCreateWithoutBookingsInput = {
   emailVerifications?: Prisma.EmailVerificationUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type UserCreateOrConnectWithoutBookingsInput = {
@@ -844,6 +894,8 @@ export type UserUpdateWithoutBookingsInput = {
   emailVerifications?: Prisma.EmailVerificationUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUpdateManyWithoutAgentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBookingsInput = {
@@ -865,6 +917,8 @@ export type UserUncheckedUpdateWithoutBookingsInput = {
   emailVerifications?: Prisma.EmailVerificationUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedUpdateManyWithoutAgentNestedInput
 }
 
 export type UserCreateWithoutTransactionsInput = {
@@ -886,6 +940,8 @@ export type UserCreateWithoutTransactionsInput = {
   emailVerifications?: Prisma.EmailVerificationCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestCreateNestedManyWithoutAgentInput
 }
 
 export type UserUncheckedCreateWithoutTransactionsInput = {
@@ -907,6 +963,8 @@ export type UserUncheckedCreateWithoutTransactionsInput = {
   emailVerifications?: Prisma.EmailVerificationUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type UserCreateOrConnectWithoutTransactionsInput = {
@@ -944,6 +1002,8 @@ export type UserUpdateWithoutTransactionsInput = {
   emailVerifications?: Prisma.EmailVerificationUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUpdateManyWithoutAgentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTransactionsInput = {
@@ -965,6 +1025,8 @@ export type UserUncheckedUpdateWithoutTransactionsInput = {
   emailVerifications?: Prisma.EmailVerificationUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedUpdateManyWithoutAgentNestedInput
 }
 
 export type UserCreateWithoutReferralRewardsGivenInput = {
@@ -986,6 +1048,8 @@ export type UserCreateWithoutReferralRewardsGivenInput = {
   emailVerifications?: Prisma.EmailVerificationCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestCreateNestedManyWithoutAgentInput
 }
 
 export type UserUncheckedCreateWithoutReferralRewardsGivenInput = {
@@ -1007,6 +1071,8 @@ export type UserUncheckedCreateWithoutReferralRewardsGivenInput = {
   emailVerifications?: Prisma.EmailVerificationUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type UserCreateOrConnectWithoutReferralRewardsGivenInput = {
@@ -1033,6 +1099,8 @@ export type UserCreateWithoutReferralRewardsEarnedInput = {
   emailVerifications?: Prisma.EmailVerificationCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestCreateNestedManyWithoutAgentInput
 }
 
 export type UserUncheckedCreateWithoutReferralRewardsEarnedInput = {
@@ -1054,6 +1122,8 @@ export type UserUncheckedCreateWithoutReferralRewardsEarnedInput = {
   emailVerifications?: Prisma.EmailVerificationUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type UserCreateOrConnectWithoutReferralRewardsEarnedInput = {
@@ -1091,6 +1161,8 @@ export type UserUpdateWithoutReferralRewardsGivenInput = {
   emailVerifications?: Prisma.EmailVerificationUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUpdateManyWithoutAgentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReferralRewardsGivenInput = {
@@ -1112,6 +1184,8 @@ export type UserUncheckedUpdateWithoutReferralRewardsGivenInput = {
   emailVerifications?: Prisma.EmailVerificationUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedUpdateManyWithoutAgentNestedInput
 }
 
 export type UserUpsertWithoutReferralRewardsEarnedInput = {
@@ -1144,6 +1218,8 @@ export type UserUpdateWithoutReferralRewardsEarnedInput = {
   emailVerifications?: Prisma.EmailVerificationUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUpdateManyWithoutAgentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReferralRewardsEarnedInput = {
@@ -1165,6 +1241,8 @@ export type UserUncheckedUpdateWithoutReferralRewardsEarnedInput = {
   emailVerifications?: Prisma.EmailVerificationUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedUpdateManyWithoutAgentNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -1186,6 +1264,8 @@ export type UserCreateWithoutNotificationsInput = {
   referralRewardsEarned?: Prisma.ReferralRewardCreateNestedManyWithoutRefereeInput
   emailVerifications?: Prisma.EmailVerificationCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestCreateNestedManyWithoutAgentInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -1207,6 +1287,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   referralRewardsEarned?: Prisma.ReferralRewardUncheckedCreateNestedManyWithoutRefereeInput
   emailVerifications?: Prisma.EmailVerificationUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -1244,6 +1326,8 @@ export type UserUpdateWithoutNotificationsInput = {
   referralRewardsEarned?: Prisma.ReferralRewardUpdateManyWithoutRefereeNestedInput
   emailVerifications?: Prisma.EmailVerificationUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUpdateManyWithoutAgentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -1265,6 +1349,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   referralRewardsEarned?: Prisma.ReferralRewardUncheckedUpdateManyWithoutRefereeNestedInput
   emailVerifications?: Prisma.EmailVerificationUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedUpdateManyWithoutAgentNestedInput
 }
 
 export type UserCreateWithoutEmailVerificationsInput = {
@@ -1286,6 +1372,8 @@ export type UserCreateWithoutEmailVerificationsInput = {
   referralRewardsEarned?: Prisma.ReferralRewardCreateNestedManyWithoutRefereeInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestCreateNestedManyWithoutAgentInput
 }
 
 export type UserUncheckedCreateWithoutEmailVerificationsInput = {
@@ -1307,6 +1395,8 @@ export type UserUncheckedCreateWithoutEmailVerificationsInput = {
   referralRewardsEarned?: Prisma.ReferralRewardUncheckedCreateNestedManyWithoutRefereeInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type UserCreateOrConnectWithoutEmailVerificationsInput = {
@@ -1344,6 +1434,8 @@ export type UserUpdateWithoutEmailVerificationsInput = {
   referralRewardsEarned?: Prisma.ReferralRewardUpdateManyWithoutRefereeNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUpdateManyWithoutAgentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmailVerificationsInput = {
@@ -1365,6 +1457,8 @@ export type UserUncheckedUpdateWithoutEmailVerificationsInput = {
   referralRewardsEarned?: Prisma.ReferralRewardUncheckedUpdateManyWithoutRefereeNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedUpdateManyWithoutAgentNestedInput
 }
 
 export type UserCreateWithoutPasswordResetsInput = {
@@ -1386,6 +1480,8 @@ export type UserCreateWithoutPasswordResetsInput = {
   referralRewardsEarned?: Prisma.ReferralRewardCreateNestedManyWithoutRefereeInput
   emailVerifications?: Prisma.EmailVerificationCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestCreateNestedManyWithoutAgentInput
 }
 
 export type UserUncheckedCreateWithoutPasswordResetsInput = {
@@ -1407,6 +1503,8 @@ export type UserUncheckedCreateWithoutPasswordResetsInput = {
   referralRewardsEarned?: Prisma.ReferralRewardUncheckedCreateNestedManyWithoutRefereeInput
   emailVerifications?: Prisma.EmailVerificationUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedCreateNestedOneWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedCreateNestedManyWithoutAgentInput
 }
 
 export type UserCreateOrConnectWithoutPasswordResetsInput = {
@@ -1444,6 +1542,8 @@ export type UserUpdateWithoutPasswordResetsInput = {
   referralRewardsEarned?: Prisma.ReferralRewardUpdateManyWithoutRefereeNestedInput
   emailVerifications?: Prisma.EmailVerificationUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUpdateManyWithoutAgentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPasswordResetsInput = {
@@ -1465,6 +1565,224 @@ export type UserUncheckedUpdateWithoutPasswordResetsInput = {
   referralRewardsEarned?: Prisma.ReferralRewardUncheckedUpdateManyWithoutRefereeNestedInput
   emailVerifications?: Prisma.EmailVerificationUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedUpdateManyWithoutAgentNestedInput
+}
+
+export type UserCreateWithoutBankAccountInput = {
+  id?: string
+  email: string
+  password: string
+  name?: string | null
+  phone?: string | null
+  address?: string | null
+  referralCode: string
+  referredByCode?: string | null
+  emailVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role: Prisma.CustomRoleCreateNestedOneWithoutUsersInput
+  bookings?: Prisma.BookingCreateNestedManyWithoutUserInput
+  transactions?: Prisma.TransactionCreateNestedManyWithoutUserInput
+  referralRewardsGiven?: Prisma.ReferralRewardCreateNestedManyWithoutReferrerInput
+  referralRewardsEarned?: Prisma.ReferralRewardCreateNestedManyWithoutRefereeInput
+  emailVerifications?: Prisma.EmailVerificationCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestCreateNestedManyWithoutAgentInput
+}
+
+export type UserUncheckedCreateWithoutBankAccountInput = {
+  id?: string
+  email: string
+  password: string
+  name?: string | null
+  phone?: string | null
+  address?: string | null
+  roleId: string
+  referralCode: string
+  referredByCode?: string | null
+  emailVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutUserInput
+  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutUserInput
+  referralRewardsGiven?: Prisma.ReferralRewardUncheckedCreateNestedManyWithoutReferrerInput
+  referralRewardsEarned?: Prisma.ReferralRewardUncheckedCreateNestedManyWithoutRefereeInput
+  emailVerifications?: Prisma.EmailVerificationUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedCreateNestedManyWithoutAgentInput
+}
+
+export type UserCreateOrConnectWithoutBankAccountInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBankAccountInput, Prisma.UserUncheckedCreateWithoutBankAccountInput>
+}
+
+export type UserUpsertWithoutBankAccountInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBankAccountInput, Prisma.UserUncheckedUpdateWithoutBankAccountInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBankAccountInput, Prisma.UserUncheckedCreateWithoutBankAccountInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutBankAccountInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBankAccountInput, Prisma.UserUncheckedUpdateWithoutBankAccountInput>
+}
+
+export type UserUpdateWithoutBankAccountInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referralCode?: Prisma.StringFieldUpdateOperationsInput | string
+  referredByCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.CustomRoleUpdateOneRequiredWithoutUsersNestedInput
+  bookings?: Prisma.BookingUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.TransactionUpdateManyWithoutUserNestedInput
+  referralRewardsGiven?: Prisma.ReferralRewardUpdateManyWithoutReferrerNestedInput
+  referralRewardsEarned?: Prisma.ReferralRewardUpdateManyWithoutRefereeNestedInput
+  emailVerifications?: Prisma.EmailVerificationUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUpdateManyWithoutAgentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutBankAccountInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  roleId?: Prisma.StringFieldUpdateOperationsInput | string
+  referralCode?: Prisma.StringFieldUpdateOperationsInput | string
+  referredByCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutUserNestedInput
+  referralRewardsGiven?: Prisma.ReferralRewardUncheckedUpdateManyWithoutReferrerNestedInput
+  referralRewardsEarned?: Prisma.ReferralRewardUncheckedUpdateManyWithoutRefereeNestedInput
+  emailVerifications?: Prisma.EmailVerificationUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedUpdateManyWithoutAgentNestedInput
+}
+
+export type UserCreateWithoutWithdrawalRequestsInput = {
+  id?: string
+  email: string
+  password: string
+  name?: string | null
+  phone?: string | null
+  address?: string | null
+  referralCode: string
+  referredByCode?: string | null
+  emailVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  role: Prisma.CustomRoleCreateNestedOneWithoutUsersInput
+  bookings?: Prisma.BookingCreateNestedManyWithoutUserInput
+  transactions?: Prisma.TransactionCreateNestedManyWithoutUserInput
+  referralRewardsGiven?: Prisma.ReferralRewardCreateNestedManyWithoutReferrerInput
+  referralRewardsEarned?: Prisma.ReferralRewardCreateNestedManyWithoutRefereeInput
+  emailVerifications?: Prisma.EmailVerificationCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutWithdrawalRequestsInput = {
+  id?: string
+  email: string
+  password: string
+  name?: string | null
+  phone?: string | null
+  address?: string | null
+  roleId: string
+  referralCode: string
+  referredByCode?: string | null
+  emailVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  bookings?: Prisma.BookingUncheckedCreateNestedManyWithoutUserInput
+  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutUserInput
+  referralRewardsGiven?: Prisma.ReferralRewardUncheckedCreateNestedManyWithoutReferrerInput
+  referralRewardsEarned?: Prisma.ReferralRewardUncheckedCreateNestedManyWithoutRefereeInput
+  emailVerifications?: Prisma.EmailVerificationUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutWithdrawalRequestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutWithdrawalRequestsInput, Prisma.UserUncheckedCreateWithoutWithdrawalRequestsInput>
+}
+
+export type UserUpsertWithoutWithdrawalRequestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutWithdrawalRequestsInput, Prisma.UserUncheckedUpdateWithoutWithdrawalRequestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutWithdrawalRequestsInput, Prisma.UserUncheckedCreateWithoutWithdrawalRequestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutWithdrawalRequestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutWithdrawalRequestsInput, Prisma.UserUncheckedUpdateWithoutWithdrawalRequestsInput>
+}
+
+export type UserUpdateWithoutWithdrawalRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  referralCode?: Prisma.StringFieldUpdateOperationsInput | string
+  referredByCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  role?: Prisma.CustomRoleUpdateOneRequiredWithoutUsersNestedInput
+  bookings?: Prisma.BookingUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.TransactionUpdateManyWithoutUserNestedInput
+  referralRewardsGiven?: Prisma.ReferralRewardUpdateManyWithoutReferrerNestedInput
+  referralRewardsEarned?: Prisma.ReferralRewardUpdateManyWithoutRefereeNestedInput
+  emailVerifications?: Prisma.EmailVerificationUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutWithdrawalRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  roleId?: Prisma.StringFieldUpdateOperationsInput | string
+  referralCode?: Prisma.StringFieldUpdateOperationsInput | string
+  referredByCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  bookings?: Prisma.BookingUncheckedUpdateManyWithoutUserNestedInput
+  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutUserNestedInput
+  referralRewardsGiven?: Prisma.ReferralRewardUncheckedUpdateManyWithoutReferrerNestedInput
+  referralRewardsEarned?: Prisma.ReferralRewardUncheckedUpdateManyWithoutRefereeNestedInput
+  emailVerifications?: Prisma.EmailVerificationUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedUpdateOneWithoutUserNestedInput
 }
 
 export type UserCreateManyRoleInput = {
@@ -1500,6 +1818,8 @@ export type UserUpdateWithoutRoleInput = {
   emailVerifications?: Prisma.EmailVerificationUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUpdateManyWithoutAgentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRoleInput = {
@@ -1521,6 +1841,8 @@ export type UserUncheckedUpdateWithoutRoleInput = {
   emailVerifications?: Prisma.EmailVerificationUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  bankAccount?: Prisma.AgentBankAccountUncheckedUpdateOneWithoutUserNestedInput
+  withdrawalRequests?: Prisma.WithdrawalRequestUncheckedUpdateManyWithoutAgentNestedInput
 }
 
 export type UserUncheckedUpdateManyWithoutRoleInput = {
@@ -1550,6 +1872,7 @@ export type UserCountOutputType = {
   emailVerifications: number
   notifications: number
   passwordResets: number
+  withdrawalRequests: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1560,6 +1883,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   emailVerifications?: boolean | UserCountOutputTypeCountEmailVerificationsArgs
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   passwordResets?: boolean | UserCountOutputTypeCountPasswordResetsArgs
+  withdrawalRequests?: boolean | UserCountOutputTypeCountWithdrawalRequestsArgs
 }
 
 /**
@@ -1621,6 +1945,13 @@ export type UserCountOutputTypeCountPasswordResetsArgs<ExtArgs extends runtime.T
   where?: Prisma.PasswordResetWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountWithdrawalRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WithdrawalRequestWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1643,6 +1974,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   emailVerifications?: boolean | Prisma.User$emailVerificationsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   passwordResets?: boolean | Prisma.User$passwordResetsArgs<ExtArgs>
+  bankAccount?: boolean | Prisma.User$bankAccountArgs<ExtArgs>
+  withdrawalRequests?: boolean | Prisma.User$withdrawalRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1703,6 +2036,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   emailVerifications?: boolean | Prisma.User$emailVerificationsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   passwordResets?: boolean | Prisma.User$passwordResetsArgs<ExtArgs>
+  bankAccount?: boolean | Prisma.User$bankAccountArgs<ExtArgs>
+  withdrawalRequests?: boolean | Prisma.User$withdrawalRequestsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1723,6 +2058,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     emailVerifications: Prisma.$EmailVerificationPayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     passwordResets: Prisma.$PasswordResetPayload<ExtArgs>[]
+    bankAccount: Prisma.$AgentBankAccountPayload<ExtArgs> | null
+    withdrawalRequests: Prisma.$WithdrawalRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2139,6 +2476,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   emailVerifications<T extends Prisma.User$emailVerificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$emailVerificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$EmailVerificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   passwordResets<T extends Prisma.User$passwordResetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$passwordResetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bankAccount<T extends Prisma.User$bankAccountArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$bankAccountArgs<ExtArgs>>): Prisma.Prisma__AgentBankAccountClient<runtime.Types.Result.GetResult<Prisma.$AgentBankAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  withdrawalRequests<T extends Prisma.User$withdrawalRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$withdrawalRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WithdrawalRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2741,6 +3080,49 @@ export type User$passwordResetsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.PasswordResetScalarFieldEnum | Prisma.PasswordResetScalarFieldEnum[]
+}
+
+/**
+ * User.bankAccount
+ */
+export type User$bankAccountArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AgentBankAccount
+   */
+  select?: Prisma.AgentBankAccountSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AgentBankAccount
+   */
+  omit?: Prisma.AgentBankAccountOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AgentBankAccountInclude<ExtArgs> | null
+  where?: Prisma.AgentBankAccountWhereInput
+}
+
+/**
+ * User.withdrawalRequests
+ */
+export type User$withdrawalRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WithdrawalRequest
+   */
+  select?: Prisma.WithdrawalRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WithdrawalRequest
+   */
+  omit?: Prisma.WithdrawalRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WithdrawalRequestInclude<ExtArgs> | null
+  where?: Prisma.WithdrawalRequestWhereInput
+  orderBy?: Prisma.WithdrawalRequestOrderByWithRelationInput | Prisma.WithdrawalRequestOrderByWithRelationInput[]
+  cursor?: Prisma.WithdrawalRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WithdrawalRequestScalarFieldEnum | Prisma.WithdrawalRequestScalarFieldEnum[]
 }
 
 /**

@@ -44,11 +44,24 @@ export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
 
 export const ReferralRewardStatus = {
   PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
   PAID: 'PAID',
   CANCELLED: 'CANCELLED'
 } as const
 
 export type ReferralRewardStatus = (typeof ReferralRewardStatus)[keyof typeof ReferralRewardStatus]
+
+
+export const WithdrawalStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type WithdrawalStatus = (typeof WithdrawalStatus)[keyof typeof WithdrawalStatus]
 
 
 export const ReferralType = {
@@ -58,3 +71,12 @@ export const ReferralType = {
 } as const
 
 export type ReferralType = (typeof ReferralType)[keyof typeof ReferralType]
+
+
+export const AgentApplicationStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type AgentApplicationStatus = (typeof AgentApplicationStatus)[keyof typeof AgentApplicationStatus]
