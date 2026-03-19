@@ -5,22 +5,10 @@ import { Trash2, Check, Gift, Tag, AlertCircle, CreditCard, Calendar } from 'luc
 import { useCart } from '@/context/CartContext';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 import { getStoredReferralCode } from '@/components/ui/ReferralTracker';
 
-interface PromoResult {
-  id: string;
-  code: string;
-  discountType: 'PERCENTAGE' | 'FIXED';
-  discountValue: number;
-  minAmount: number | null;
-  maxDiscount: number | null;
-}
-
-interface ReferrerInfo {
-  id: string;
-  name: string;
-}
 
 declare global {
   interface Window {
@@ -40,7 +28,11 @@ declare global {
 const HOME_COLLECTION_FEE = 15000;
 
 export default function CheckoutPage() {
-  const { cart, removeFromCart, clearCart } = useCart();
+  const {
+    cart, removeFromCart, clearCart,
+    voucherCode, setVoucherCode, appliedPromo, setAppliedPromo,
+    referralCode, setReferralCode, appliedReferral, setAppliedReferral,
+  } = useCart();
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -51,15 +43,11 @@ export default function CheckoutPage() {
   const maxDate = (() => { const d = new Date(); d.setMonth(d.getMonth() + 3); return d.toISOString().split('T')[0]; })();
   const [selectedDate, setSelectedDate] = useState(minDate);
 
-  // Promo
-  const [voucherCode, setVoucherCode] = useState('');
-  const [appliedPromo, setAppliedPromo] = useState<PromoResult | null>(null);
+  // Promo (persisted in CartContext)
   const [promoError, setPromoError] = useState('');
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
 
-  // Referral
-  const [referralCode, setReferralCode] = useState('');
-  const [appliedReferral, setAppliedReferral] = useState<ReferrerInfo | null>(null);
+  // Referral (persisted in CartContext)
   const [referralError, setReferralError] = useState('');
   const [isValidatingReferral, setIsValidatingReferral] = useState(false);
 
@@ -70,16 +58,6 @@ export default function CheckoutPage() {
 
   const paystackScriptLoaded = useRef(false);
 
-  // Load Paystack inline script once
-  useEffect(() => {
-    if (paystackScriptLoaded.current) return;
-    const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
-    script.async = true;
-    document.body.appendChild(script);
-    paystackScriptLoaded.current = true;
-  }, []);
-
   // Auto-fill referral code from stored ?ref= param (set by ReferralTracker)
   useEffect(() => {
     const stored = getStoredReferralCode();
@@ -89,30 +67,32 @@ export default function CheckoutPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Reset promo/referral when cart changes
-  useEffect(() => {
-    setAppliedPromo(null);
-    setPromoError('');
-    setVoucherCode('');
-  }, [cart.length]);
+const cartPrices = cart.map((item) => ({
+    id: item.id,
+    title: item.title,
+    price: parseFloat(String(item.price).replace(/[^0-9.]/g, '')) || 0,
+  }));
 
-  const basePrice = cart.reduce((sum, item) => {
-    return sum + (parseFloat(String(item.price).replace(/[^0-9.]/g, '')) || 0);
-  }, 0);
+  const basePrice = cartPrices.reduce((sum, i) => sum + i.price, 0);
+  const homeCollectionFee = includeHomeCollection ? HOME_COLLECTION_FEE : 0;
 
-  const subtotal = basePrice + (includeHomeCollection ? HOME_COLLECTION_FEE : 0);
-
+  // Discount applies to package prices only — never to home collection fee
   const calculateDiscount = (): number => {
     if (!appliedPromo) return 0;
+    const eligibleTotal = appliedPromo.applyToAll
+      ? basePrice
+      : cartPrices
+          .filter((i) => appliedPromo.applicablePackageIds.includes(i.id))
+          .reduce((s, i) => s + i.price, 0);
     if (appliedPromo.discountType === 'PERCENTAGE') {
-      const raw = subtotal * (appliedPromo.discountValue / 100);
+      const raw = eligibleTotal * (appliedPromo.discountValue / 100);
       return appliedPromo.maxDiscount ? Math.min(raw, appliedPromo.maxDiscount) : raw;
     }
-    return Math.min(appliedPromo.discountValue, subtotal);
+    return Math.min(appliedPromo.discountValue, eligibleTotal);
   };
 
   const discount = calculateDiscount();
-  const total = Math.max(subtotal - discount, 0);
+  const total = Math.max(basePrice - discount + homeCollectionFee, 0);
 
   const fmt = (n: number) => `NGN ${n.toLocaleString()}`;
 
@@ -126,7 +106,7 @@ export default function CheckoutPage() {
       const res = await fetch('/api/promos/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: voucherCode.trim(), packageId: cart[0]?.id ?? '' }),
+        body: JSON.stringify({ code: voucherCode.trim(), packageIds: cart.map((i) => i.id) }),
       });
       const data = await res.json();
       if (!data.valid) setPromoError(data.message || 'Invalid promo code.');
@@ -150,7 +130,6 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: referralCode.trim().toUpperCase() }),
       });
-      if (res.status === 401) { router.push('/auth/login?callbackUrl=/checkout'); return; }
       const data = await res.json();
       if (!data.valid) setReferralError(data.message || 'Invalid referral code.');
       else setAppliedReferral(data.referrer);
@@ -367,6 +346,12 @@ export default function CheckoutPage() {
 
   // --- Render: Checkout ---
   return (
+    <>
+    <Script
+      src="https://js.paystack.co/v1/inline.js"
+      strategy="lazyOnload"
+      onLoad={() => { paystackScriptLoaded.current = true; }}
+    />
     <div className="bg-gray-50 min-h-screen pb-20 animate-fadeIn">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-8">
 
@@ -466,13 +451,57 @@ export default function CheckoutPage() {
                 </button>
               )}
             </div>
-            {appliedPromo && (
-              <p className="text-green-600 text-xs mt-2 flex items-center gap-1">
-                <Check className="w-3 h-3" />
-                &ldquo;{appliedPromo.code}&rdquo; applied —{' '}
-                {appliedPromo.discountType === 'PERCENTAGE' ? `${appliedPromo.discountValue}% off` : `NGN ${Number(appliedPromo.discountValue).toLocaleString()} off`}
-              </p>
-            )}
+            {appliedPromo && (() => {
+              const eligibleIds = appliedPromo.applicablePackageIds;
+              return (
+                <div className="mt-3 rounded-xl border border-green-100 bg-green-50 p-3 space-y-2">
+                  <p className="text-green-700 text-xs font-semibold flex items-center gap-1">
+                    <Check className="w-3 h-3" />
+                    &ldquo;{appliedPromo.code}&rdquo; applied —{' '}
+                    {appliedPromo.discountType === 'PERCENTAGE'
+                      ? `${appliedPromo.discountValue}% off eligible packages`
+                      : `NGN ${Number(appliedPromo.discountValue).toLocaleString()} off`}
+                  </p>
+                  <div className="space-y-1">
+                    {cartPrices.map((item) => {
+                      const eligible = eligibleIds.includes(item.id);
+                      const itemDiscount = eligible
+                        ? appliedPromo.discountType === 'PERCENTAGE'
+                          ? item.price * (appliedPromo.discountValue / 100)
+                          : 0 // fixed shown as total below
+                        : 0;
+                      return (
+                        <div key={item.id} className={`flex items-center justify-between text-xs gap-2 ${eligible ? 'text-gray-700' : 'text-gray-400'}`}>
+                          <span className="flex items-center gap-1 truncate">
+                            {eligible
+                              ? <Check className="w-3 h-3 text-green-500 shrink-0" />
+                              : <span className="w-3 h-3 shrink-0 inline-flex items-center justify-center text-gray-300">–</span>}
+                            <span className="truncate">{item.title}</span>
+                          </span>
+                          <span className="whitespace-nowrap font-medium shrink-0">
+                            {eligible && appliedPromo.discountType === 'PERCENTAGE'
+                              ? <span className="text-green-600">−NGN {itemDiscount.toLocaleString()}</span>
+                              : eligible
+                              ? <span className="text-green-600">eligible</span>
+                              : 'not eligible'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                    {appliedPromo.discountType === 'FIXED' && (
+                      <p className="text-xs text-green-700 pt-1 border-t border-green-100">
+                        NGN {Number(appliedPromo.discountValue).toLocaleString()} off applied to eligible packages · Home collection fee excluded
+                      </p>
+                    )}
+                    {appliedPromo.discountType === 'PERCENTAGE' && (
+                      <p className="text-xs text-gray-400 pt-1 border-t border-green-100">
+                        Home collection fee is excluded from discount
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
             {promoError && <p className="text-red-500 text-xs mt-2 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{promoError}</p>}
           </div>
 
@@ -481,7 +510,7 @@ export default function CheckoutPage() {
             <h3 className="text-sm font-bold text-gray-700 mb-1 flex items-center gap-2">
               <Gift className="w-4 h-4 text-primary" /> Referral Code
             </h3>
-            <p className="text-xs text-gray-400 mb-3">Enter a friend&apos;s referral code. They&apos;ll earn a reward when you pay.</p>
+            <p className="text-xs text-gray-400 mb-3">Have a referral code? Enter it here — the referrer earns a reward when you pay.</p>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -505,7 +534,7 @@ export default function CheckoutPage() {
             {appliedReferral && (
               <p className="text-green-600 text-xs mt-2 flex items-center gap-1">
                 <Check className="w-3 h-3" />
-                Referral applied — {appliedReferral.name} will earn 5% when you complete payment.
+                Referral applied — {appliedReferral.name} will earn a reward on your package price when you complete payment.
               </p>
             )}
             {referralError && <p className="text-red-500 text-xs mt-2 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{referralError}</p>}
@@ -518,16 +547,24 @@ export default function CheckoutPage() {
                 <span>Packages ({cart.length})</span>
                 <span>{fmt(basePrice)}</span>
               </div>
-              {includeHomeCollection && (
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Home Collection</span>
-                  <span>{fmt(HOME_COLLECTION_FEE)}</span>
-                </div>
-              )}
               {discount > 0 && (
                 <div className="flex justify-between text-sm text-green-600">
-                  <span>Discount ({appliedPromo?.code})</span>
+                  <span>Voucher discount ({appliedPromo?.code})</span>
                   <span>− {fmt(discount)}</span>
+                </div>
+              )}
+              {appliedReferral && (
+                <div className="flex justify-between text-sm text-purple-600">
+                  <span className="flex items-center gap-1">
+                    <Gift className="w-3 h-3" /> Referral code
+                  </span>
+                  <span className="font-mono font-semibold tracking-widest">{referralCode}</span>
+                </div>
+              )}
+              {includeHomeCollection && (
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Home Collection <span className="text-gray-400 font-normal">(not discounted)</span></span>
+                  <span>{fmt(HOME_COLLECTION_FEE)}</span>
                 </div>
               )}
               <div className="border-t border-gray-100 pt-3 flex justify-between items-center">
@@ -560,5 +597,6 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

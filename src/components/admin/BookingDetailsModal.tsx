@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   X, Save, Upload, FileText, Loader2, CheckCircle,
   Clock, CircleCheck, FlaskConical, Microscope, FileCheck,
-  CircleX, ChevronRight, Lock,
+  CircleX, ChevronRight, Lock, Activity,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/context/ToastContext";
@@ -17,8 +17,13 @@ interface Booking {
   homeCollection: boolean;
   resultPdfUrl: string | null;
   notes: string | null;
+  paymentRef: string | null;
+  referralCode: string | null;
   user: { name: string | null; email: string | null; phone: string | null };
   package: { title: string };
+  referralRewards?: Array<{
+    referrer: { name: string | null; referralCode: string };
+  }>;
 }
 
 interface BookingDetailsModalProps {
@@ -57,6 +62,21 @@ const TRANSITIONS: Record<string, string[]> = {
   CANCELLED:        [],                // terminal
 };
 
+interface BookingLog {
+  id: string;
+  event: string;
+  note: string;
+  actorName: string;
+  createdAt: string;
+}
+
+const EVENT_STYLES: Record<string, { dot: string; text: string }> = {
+  PAYMENT_CONFIRMED: { dot: "bg-green-500",  text: "text-green-700" },
+  STATUS_CHANGED:    { dot: "bg-blue-500",   text: "text-blue-700"  },
+  PDF_UPLOADED:      { dot: "bg-teal-500",   text: "text-teal-700"  },
+  NOTES_UPDATED:     { dot: "bg-gray-400",   text: "text-gray-600"  },
+};
+
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function BookingDetailsModal({ booking, onClose }: BookingDetailsModalProps) {
   const router = useRouter();
@@ -68,6 +88,14 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [resultUploaded, setResultUploaded] = useState(!!booking.resultPdfUrl);
+  const [logs, setLogs] = useState<BookingLog[]>([]);
+
+  useEffect(() => {
+    fetch(`/api/bookings/${booking.id}/logs`)
+      .then((r) => r.ok ? r.json() : [])
+      .then(setLogs)
+      .catch(() => {});
+  }, [booking.id]);
 
   const [formData, setFormData] = useState({
     status: booking.status,
@@ -75,7 +103,10 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
   });
 
   const allowed = TRANSITIONS[formData.status] ?? [];
-  const isTerminal = allowed.length === 0;
+  // isTerminal = the booking is ALREADY in a terminal state as saved on the server.
+  // Do NOT derive this from formData.status or the Save button disappears when
+  // transitioning TO a terminal state (e.g. clicking Completed hides the button).
+  const isTerminal = (TRANSITIONS[booking.status] ?? []).length === 0;
   const pdfActive = formData.status === "RESULTS_READY";
 
   // ── handlers ──────────────────────────────────────────────────────────────
@@ -88,6 +119,10 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
     const file = e.target.files?.[0] ?? null;
     if (file && file.type !== "application/pdf") {
       toast.error("Please select a PDF file.");
+      return;
+    }
+    if (file && file.size > 5 * 1024 * 1024) {
+      toast.error("PDF must be 5 MB or smaller.");
       return;
     }
     setSelectedFile(file);
@@ -108,7 +143,7 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
         toast.error(`Upload failed: ${await res.text()}`);
         return;
       }
-      toast.success("Result PDF uploaded — patient notified.");
+      toast.success("Result PDF uploaded. Click Save Changes to notify the patient.");
       setUploadSuccess(true);
       setResultUploaded(true);
       setSelectedFile(null);
@@ -123,9 +158,12 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // If nothing changed, just close
     if (formData.status === booking.status && formData.notes === (booking.notes || "")) {
       onClose();
+      return;
+    }
+    if (formData.status === "RESULTS_READY" && !resultUploaded) {
+      toast.error("Upload the result PDF before setting status to Results Ready.");
       return;
     }
     setSaving(true);
@@ -138,6 +176,9 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
       if (res.ok) {
         toast.success("Booking updated successfully.");
         router.refresh();
+        // Refresh logs before closing so the new entry is visible
+        const updated = await fetch(`/api/bookings/${booking.id}/logs`).then((r) => r.ok ? r.json() : logs);
+        setLogs(updated);
         onClose();
       } else {
         toast.error("Failed to update booking");
@@ -169,7 +210,14 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
 
           {/* ── Booking Info ── */}
           <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-            <h3 className="font-semibold text-gray-900">Booking Information</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900">Booking Information</h3>
+              {booking.paymentRef && (
+                <span className="font-mono text-xs text-gray-500 bg-white border border-gray-200 px-2 py-1 rounded-lg">
+                  {booking.paymentRef}
+                </span>
+              )}
+            </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-gray-600">User:</span>
@@ -190,6 +238,17 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
                 <span className="text-gray-600">Home Collection:</span>
                 <p className="font-medium">{booking.homeCollection ? "Yes" : "No"}</p>
               </div>
+              {booking.referralCode && (
+                <div className="col-span-2 flex items-center gap-2 mt-1 p-2 bg-purple-50 rounded-lg border border-purple-100">
+                  <span className="text-xs font-semibold text-purple-700">Referral code used:</span>
+                  <span className="font-mono text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full tracking-wider">{booking.referralCode}</span>
+                  {booking.referralRewards && booking.referralRewards.length > 0 && (
+                    <span className="ml-auto text-xs text-purple-600">
+                      by {booking.referralRewards[0].referrer.name ?? "Unknown"}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -296,7 +355,7 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
                   {resultUploaded && !selectedFile && (
                     <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg">
                       <CheckCircle className="w-4 h-4 shrink-0" />
-                      <span>Result PDF uploaded{uploadSuccess ? " — patient notified" : ""}.</span>
+                      <span>Result PDF uploaded{uploadSuccess ? " — save to notify patient" : ""}.</span>
                     </div>
                   )}
 
@@ -329,12 +388,12 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
                       className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-primary-dark disabled:opacity-50"
                     >
                       {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                      {uploading ? "Uploading..." : "Upload & Notify Patient"}
+                      {uploading ? "Uploading..." : "Upload Result"}
                     </button>
                   )}
 
                   <p className="text-xs text-gray-400">
-                    PDF only · max 20 MB · stored securely · patient notified by email + in-app
+                    PDF only · max 5 MB · patient notified when you Save Changes
                   </p>
                 </>
               )}
@@ -356,16 +415,49 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
             />
           </div>
 
+          {/* ── Activity Log ── */}
+          {logs.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Activity className="w-4 h-4 text-gray-400" />
+                <span className="text-sm font-medium text-gray-700">Activity Log</span>
+              </div>
+              <ol className="relative border-l border-gray-200 space-y-3 ml-2">
+                {logs.map((log) => {
+                  const style = EVENT_STYLES[log.event] ?? { dot: "bg-gray-400", text: "text-gray-600" };
+                  return (
+                    <li key={log.id} className="ml-4">
+                      <span className={`absolute -left-1.5 mt-1.5 w-3 h-3 rounded-full border-2 border-white ${style.dot}`} />
+                      <p className={`text-sm font-medium ${style.text}`}>{log.note}</p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(log.createdAt).toLocaleString("en-NG", {
+                          day: "numeric", month: "short", year: "numeric",
+                          hour: "2-digit", minute: "2-digit",
+                        })}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          )}
+
           {/* ── Actions ── */}
           <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-200">
+            {formData.status === "RESULTS_READY" && !resultUploaded && (
+              <p className="text-xs text-amber-600 flex items-center gap-1 mr-auto">
+                <Lock className="w-3 h-3" />
+                Upload the result PDF above to save this status.
+              </p>
+            )}
             <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
               Close
             </button>
             {!isTerminal && (
               <button
                 type="submit"
-                disabled={saving}
-                className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark disabled:opacity-50"
+                disabled={saving || (formData.status === "RESULTS_READY" && !resultUploaded)}
+                className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save className="w-4 h-4" />
                 {saving ? "Saving..." : "Save Changes"}

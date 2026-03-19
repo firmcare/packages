@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { sendBookingConfirmedEmail } from "@/lib/email";
-import { createNotification, notifyAdmins } from "@/lib/notify";
+import { createNotification, isNotifEnabled, notifyAdmins } from "@/lib/notify";
+import { logBookingEvent } from "@/lib/booking-log";
 
 const REFERRAL_REWARD_PERCENT_DEFAULTS: Record<string, number> = {
   USER: 5, ADMIN: 3, AGENT: 10,
@@ -71,7 +72,11 @@ export async function POST(req: Request) {
     const referralCode: string | null = meta.referralCode ?? null;
     const discount: number = Number(meta.discount ?? 0);
     const totalPaid = tx.amount / 100; // kobo → NGN
-    const perItemAmount = cartItems.length > 0 ? totalPaid / cartItems.length : totalPaid;
+    const n = cartItems.length > 0 ? cartItems.length : 1;
+    // Per-item breakdown: originalAmount = gross, discountAmount = discount split, netAmount = actual paid
+    const originalPerItem = (totalPaid + discount) / n;
+    const discountPerItem = discount / n;
+    const netPerItem = totalPaid / n;
 
     // ── Upgrade PENDING bookings created by initialize ────────────────────────
     const pendingBookings = await prisma.booking.findMany({
@@ -81,9 +86,10 @@ export async function POST(req: Request) {
     let bookings: { id: string; totalAmount: { toNumber(): number } }[];
 
     if (pendingBookings.length > 0) {
+      // totalAmount was already stored as gross in initialize; just set status + discountAmount
       await prisma.booking.updateMany({
         where: { paymentRef: reference, userId: session.user.id, status: "PENDING" },
-        data: { status: "CONFIRMED", totalAmount: perItemAmount },
+        data: { status: "CONFIRMED", discountAmount: discountPerItem },
       });
       bookings = pendingBookings;
     } else {
@@ -93,7 +99,7 @@ export async function POST(req: Request) {
         ? new Date(meta.bookingDate)
         : (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d; })();
 
-      const resolved = await resolveCartItems(cartItems, totalPaid);
+      const resolved = await resolveCartItems(cartItems, totalPaid + discount);
       bookings = await Promise.all(
         resolved.map(({ packageId, notes }) =>
           prisma.booking.create({
@@ -102,7 +108,8 @@ export async function POST(req: Request) {
               packageId,
               date: bookingDate,
               homeCollection,
-              totalAmount: perItemAmount,
+              totalAmount: originalPerItem,
+              discountAmount: discountPerItem,
               status: "CONFIRMED",
               paymentRef: reference,
               ...(notes ? { notes } : {}),
@@ -134,52 +141,69 @@ export async function POST(req: Request) {
         select: { id: true, role: { select: { name: true } } },
       });
 
-      const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { referredByCode: true },
-      });
-      if (!user?.referredByCode) {
-        await prisma.user.update({
-          where: { id: session.user.id },
-          data: { referredByCode: referralCode.toUpperCase() },
-        });
-      }
-
       if (referrer && referrer.id !== session.user.id) {
         const roleName = referrer.role.name;
+        // Only record referredByCode for user-to-user referrals
+        if (roleName === "USER") {
+          const existingUser = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { referredByCode: true },
+          });
+          if (!existingUser?.referredByCode) {
+            await prisma.user.update({
+              where: { id: session.user.id },
+              data: { referredByCode: referralCode.toUpperCase() },
+            });
+          }
+        }
         const rewardPercent = await getReferralPercent(roleName);
         const referralType =
           roleName === "AGENT" ? "AGENT"
           : roleName === "ADMIN" || roleName === "SUPERADMIN" ? "ADMIN"
           : "USER";
 
+        // Reward is calculated on the net amount paid per booking (after any voucher discount)
+        const rewardAmount = Math.round(netPerItem * rewardPercent) / 100;
         await Promise.all(
-          bookings.map((booking) => {
-            const rewardAmount = Math.round(booking.totalAmount.toNumber() * rewardPercent) / 100;
-            return prisma.referralReward.create({
+          bookings.map((booking) =>
+            prisma.referralReward.create({
               data: {
                 referrerId: referrer.id,
                 refereeId: session.user.id,
                 bookingId: booking.id,
                 amount: rewardAmount,
+                rewardPercent,
                 status: "PENDING",
                 referralType,
               },
-            });
-          })
+            })
+          )
         );
       }
     }
 
+    // ── Booking logs ─────────────────────────────────────────────────────────
+    await Promise.all(
+      bookings.map((b) =>
+        logBookingEvent(b.id, "PAYMENT_CONFIRMED", "Payment confirmed by Paystack", "Paystack")
+      )
+    );
+
     // ── In-app notifications ──────────────────────────────────────────────────
     const pkgTitles = cartItems.map((i) => i.title).join(", ");
-    createNotification({
-      userId: session.user.id,
-      type: "booking_confirmed",
-      title: "Booking Confirmed",
-      message: `Your payment was successful and ${bookings.length} booking${bookings.length > 1 ? "s have" : " has"} been confirmed: ${pkgTitles}.`,
-      bookingId: bookings[0]?.id,
-    });
+    if (await isNotifEnabled("notify_on_booking_confirmed")) {
+      await Promise.all(
+        bookings.map((b, i) =>
+          createNotification({
+            userId: session.user.id,
+            type: "booking_confirmed",
+            title: "Booking Confirmed",
+            message: `Your booking for "${cartItems[i]?.title ?? pkgTitles}" has been confirmed. We look forward to seeing you!`,
+            bookingId: b.id,
+          })
+        )
+      );
+    }
     notifyAdmins(
       "New Booking",
       `A new booking was placed for: ${pkgTitles}. Reference: ${reference}.`,
@@ -200,7 +224,7 @@ export async function POST(req: Request) {
         }
         return [{
           title: item.title,
-          amount: parseFloat(item.price.replace(/[^0-9.]/g, "")) || perItemAmount,
+          amount: parseFloat(item.price.replace(/[^0-9.]/g, "")) || netPerItem,
         }];
       });
 

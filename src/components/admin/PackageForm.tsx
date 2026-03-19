@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Save, X, Upload, ImageIcon, Search, CheckSquare, Square, Loader2, Edit } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/context/ToastContext";
+import PriceInput from "@/components/ui/PriceInput";
 
 interface Category {
   id: string;
@@ -141,7 +142,7 @@ export default function PackageForm({ categories, tests, initialData, readOnly =
             <button
               type="button"
               onClick={() => router.push(`/admin/packages/${initialData.id}/edit`)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#8a3a7a] text-sm font-medium transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark text-sm font-medium transition-colors"
             >
               <Edit className="w-4 h-4" />
               Edit
@@ -184,16 +185,12 @@ export default function PackageForm({ categories, tests, initialData, readOnly =
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Price (₦) <span className="text-red-500">*</span>
             </label>
-            <input
-              type="number"
-              required
-              min="0"
-              step="0.01"
+            <PriceInput
               value={formData.price}
-              onChange={(e) =>
-                setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })
-              }
+              onChange={(v) => setFormData({ ...formData, price: v })}
+              required
               disabled={readOnly}
+              prefix="₦"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none disabled:bg-gray-50 disabled:text-gray-700"
             />
           </div>

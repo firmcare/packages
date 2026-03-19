@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSuperAdmin } from "@/lib/auth-utils";
+import { auth } from "@/auth";
+import { logAudit } from "@/lib/audit";
 
 // Default values used when a setting hasn't been saved yet
 const DEFAULTS: Record<string, string> = {
@@ -13,9 +15,15 @@ const DEFAULTS: Record<string, string> = {
   referral_reward_percent_user:  "5",
   referral_reward_percent_admin: "3",
   referral_reward_percent_agent: "10",
-  business_hours_open:     "08:00",
-  business_hours_close:    "17:00",
-  business_days:           "Monday,Tuesday,Wednesday,Thursday,Friday",
+  business_hours_schedule: JSON.stringify({
+    Monday:    { enabled: true,  open: "08:00", close: "17:00" },
+    Tuesday:   { enabled: true,  open: "08:00", close: "17:00" },
+    Wednesday: { enabled: true,  open: "08:00", close: "17:00" },
+    Thursday:  { enabled: true,  open: "08:00", close: "17:00" },
+    Friday:    { enabled: true,  open: "08:00", close: "17:00" },
+    Saturday:  { enabled: true,  open: "09:00", close: "14:00" },
+    Sunday:    { enabled: false, open: "09:00", close: "12:00" },
+  }),
   smtp_host:               "",
   smtp_port:               "587",
   smtp_user:               "",
@@ -46,6 +54,7 @@ export async function GET() {
 export async function PATCH(req: Request) {
   try {
     await requireSuperAdmin();
+    const session = await auth();
 
     const updates: Record<string, string> = await req.json();
 
@@ -58,6 +67,12 @@ export async function PATCH(req: Request) {
         })
       )
     );
+
+    if (session?.user?.id) {
+      const keys = Object.keys(updates).join(", ");
+      await logAudit(session.user.id, "SETTINGS_UPDATED", "SiteSetting", null,
+        `Updated settings: ${keys}`);
+    }
 
     return NextResponse.json({ success: true });
   } catch {

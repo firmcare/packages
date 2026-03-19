@@ -19,7 +19,7 @@ interface AnalyticsData {
   }>;
   recentActivity: Array<{
     id: string;
-    createdAt: Date;
+    createdAt: string;
     status: string;
     user: { name: string | null };
     package: { title: string };

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import AgentSidebar from "./AgentSidebar";
 import AgentHeader from "./AgentHeader";
 
@@ -13,6 +14,24 @@ interface AgentShellProps {
 export default function AgentShell({ children, user }: AgentShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  // Poll the session every 30 s; redirect immediately if role is no longer AGENT
+  const { data: session, update } = useSession();
+
+  useEffect(() => {
+    const id = setInterval(() => update(), 30_000);
+    return () => clearInterval(id);
+  }, [update]);
+
+  useEffect(() => {
+    if (!session) return;
+    const user = session.user as { role?: string; isActive?: boolean };
+    // Redirect if deactivated agent — role stays AGENT but isActive flips to false
+    if (user.role === "AGENT" && user.isActive === false) {
+      router.replace("/auth/login?error=account_deactivated");
+    }
+  }, [session, router]);
 
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
 

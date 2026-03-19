@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { Edit, Trash2, Tag, ToggleLeft, ToggleRight } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
+import Pagination from "@/components/ui/Pagination";
+import { usePagination } from "@/hooks/usePagination";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface Promo {
   id: string;
@@ -29,11 +32,13 @@ export default function PromoList({ promos }: PromoListProps) {
   const router = useRouter();
   const toast = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const filteredPromos = promos.filter((promo) =>
     promo.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
     promo.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(filteredPromos, 15);
 
   const handleToggleActive = async (id: string, currentStatus: boolean) => {
     try {
@@ -55,8 +60,6 @@ export default function PromoList({ promos }: PromoListProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this promo code?")) return;
-
     try {
       const response = await fetch(`/api/promos/${id}`, {
         method: "DELETE",
@@ -113,7 +116,7 @@ export default function PromoList({ promos }: PromoListProps) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredPromos.map((promo) => (
+            {paged.map((promo) => (
               <tr key={promo.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
@@ -181,7 +184,7 @@ export default function PromoList({ promos }: PromoListProps) {
                       <Edit className="w-4 h-4" />
                     </Link>
                     <button
-                      onClick={() => handleDelete(promo.id)}
+                      onClick={() => setConfirmDeleteId(promo.id)}
                       className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
                       title="Delete"
                     >
@@ -194,6 +197,18 @@ export default function PromoList({ promos }: PromoListProps) {
           </tbody>
         </table>
       </div>
+      <div className="px-6 pb-4">
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={totalItems} pageSize={pageSize} />
+      </div>
+
+      <ConfirmModal
+        open={!!confirmDeleteId}
+        title="Delete this promo code?"
+        description="This promo code will be permanently removed and can no longer be applied at checkout."
+        confirmLabel="Yes, Delete"
+        onConfirm={() => { if (confirmDeleteId) handleDelete(confirmDeleteId); setConfirmDeleteId(null); }}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }

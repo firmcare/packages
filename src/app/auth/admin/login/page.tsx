@@ -1,24 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [isDeactivated, setIsDeactivated] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+
+  useEffect(() => {
+    if (searchParams.get('error') === 'account_deactivated') {
+      setIsDeactivated(true)
+      setError('Your admin account has been deactivated. Please contact the super administrator.')
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setIsDeactivated(false)
 
     try {
       const result = await signIn('credentials', {
@@ -28,7 +38,12 @@ export default function AdminLoginPage() {
       })
 
       if (result?.error) {
-        setError('Invalid email or password')
+        if ((result as any).code === 'account_deactivated') {
+          setIsDeactivated(true)
+          setError('Your admin account has been deactivated. Please contact the super administrator.')
+        } else {
+          setError('Invalid email or password')
+        }
         setLoading(false)
         return
       }
@@ -107,12 +122,8 @@ export default function AdminLoginPage() {
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="flex">
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">{error}</h3>
-                </div>
-              </div>
+            <div className={`rounded-md p-4 ${isDeactivated ? "bg-amber-50 border border-amber-200" : "bg-red-50"}`}>
+              <h3 className={`text-sm font-medium ${isDeactivated ? "text-amber-800" : "text-red-800"}`}>{error}</h3>
             </div>
           )}
 
@@ -135,5 +146,13 @@ export default function AdminLoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense>
+      <AdminLoginForm />
+    </Suspense>
   )
 }

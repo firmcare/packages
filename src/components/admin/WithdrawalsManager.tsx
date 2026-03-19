@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, XCircle, AlertCircle, Loader2, Building2, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
+import Pagination from "@/components/ui/Pagination";
+import { usePagination } from "@/hooks/usePagination";
 
 interface BankAccount {
   bankName: string;
@@ -53,6 +55,7 @@ export default function WithdrawalsManager({ initialWithdrawals }: { initialWith
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const filtered = filter === "ALL" ? withdrawals : withdrawals.filter((w) => w.status === filter);
+  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(filtered, 20);
 
   const fmt = (n: number) =>
     "₦" + n.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -110,7 +113,7 @@ export default function WithdrawalsManager({ initialWithdrawals }: { initialWith
         <p className="text-center text-gray-400 text-sm py-12">No withdrawals found.</p>
       ) : (
         <div className="divide-y divide-gray-50">
-          {filtered.map((w) => {
+          {paged.map((w) => {
             const expanded = expandedId === w.id;
             const busy = loading[w.id];
 
@@ -230,6 +233,11 @@ export default function WithdrawalsManager({ initialWithdrawals }: { initialWith
               </div>
             );
           })}
+        </div>
+      )}
+      {filtered.length > 0 && (
+        <div className="px-5 pb-4">
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={totalItems} pageSize={pageSize} />
         </div>
       )}
     </div>

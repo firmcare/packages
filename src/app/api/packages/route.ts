@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { checkPermission } from "@/lib/permissions";
+import { logAudit } from "@/lib/audit";
 
 // Helper function to generate slug from title
 function generateSlug(title: string): string {
@@ -51,6 +52,11 @@ export async function POST(req: Request) {
       },
     });
 
+    await logAudit(session.user.id, "PACKAGE_CREATED", "Package", pkg.id, `Created package "${title}"`, {
+      resourceName: title,
+      metadata: { price: rest.price, categoryId: rest.categoryId, testCount: testIds?.length ?? 0 },
+    });
+
     return NextResponse.json(pkg);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -65,7 +71,10 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const categoryId = searchParams.get('categoryId');
 
-    const where = categoryId ? { categoryId } : {};
+    const where = {
+      isActive: true,
+      ...(categoryId ? { categoryId } : {}),
+    };
 
     const packages = await prisma.package.findMany({
       where,

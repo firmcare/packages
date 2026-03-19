@@ -6,7 +6,7 @@ import { serializeForClient } from "@/lib/serialize-for-client"
 export async function getPackages() {
   try {
     const packages = await prisma.package.findMany({
-      where: { isActive: true },
+      where: { isActive: true, price: { gt: 0 } },
       include: {
          category: true,
       },

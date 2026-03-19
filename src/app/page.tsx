@@ -1,4 +1,6 @@
 
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import Hero from "@/components/home/Hero";
 import InfoSection from "@/components/home/InfoSection";
 import PackageList from "@/components/home/PackageList";
@@ -44,6 +46,11 @@ async function getAgentPercent(): Promise<number> {
 }
 
 export default async function Home() {
+  const session = await auth();
+  const role = (session?.user as any)?.role;
+  if (role === "ADMIN" || role === "SUPERADMIN") redirect("/admin");
+  if (role === "AGENT") redirect("/agent/dashboard");
+
   const agentPercent = await getAgentPercent();
   return (
     <>

@@ -2,7 +2,11 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createNotification, STATUS_NOTIFICATION } from "@/lib/notify";
+import { createNotification, isNotifEnabled, STATUS_NOTIFICATION, STATUS_NOTIFY_KEY } from "@/lib/notify";
+import { logAudit } from "@/lib/audit";
+import { sendBookingStatusEmail, sendResultsReadyEmail } from "@/lib/email";
+import { getPresignedUrl } from "@/lib/s3";
+import { logBookingEvent } from "@/lib/booking-log";
 
 const VALID_STATUSES = [
   "PENDING",
@@ -35,7 +39,10 @@ export async function PUT(
 
     const existing = await prisma.booking.findUnique({
       where: { id },
-      include: { package: { select: { title: true } } },
+      include: {
+        package: { select: { title: true } },
+        user: { select: { name: true, email: true } },
+      },
     });
 
     if (!existing) {
@@ -55,13 +62,17 @@ export async function PUT(
     if (newStatus && newStatus !== existing.status) {
       const tpl = STATUS_NOTIFICATION[newStatus];
       if (tpl) {
-        createNotification({
-          userId: existing.userId,
-          type: newStatus === "RESULTS_READY" ? "results_ready" : "status_update",
-          title: tpl.title,
-          message: tpl.message(existing.package.title),
-          bookingId: id,
-        });
+        const notifKey = STATUS_NOTIFY_KEY[newStatus];
+        const notifEnabled = notifKey ? await isNotifEnabled(notifKey) : true;
+        if (notifEnabled) {
+          createNotification({
+            userId: existing.userId,
+            type: newStatus === "RESULTS_READY" ? "results_ready" : "status_update",
+            title: tpl.title,
+            message: tpl.message(existing.package.title),
+            bookingId: id,
+          });
+        }
       }
 
       // Auto-confirm referral rewards when booking is COMPLETED
@@ -79,6 +90,53 @@ export async function PUT(
           data: { status: "CANCELLED" },
         });
       }
+
+      // Email notification (non-blocking)
+      if (existing.user.email) {
+        const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+        if (newStatus === "RESULTS_READY" && booking.resultPdfUrl) {
+          getPresignedUrl(booking.resultPdfUrl, 900)
+            .then((presignedUrl) =>
+              sendResultsReadyEmail(
+                existing.user.email!,
+                existing.user.name,
+                existing.package.title,
+                existing.date,
+                presignedUrl,
+                baseUrl
+              )
+            )
+            .catch(() => {});
+        } else {
+          sendBookingStatusEmail(
+            existing.user.email,
+            existing.user.name,
+            existing.package.title,
+            newStatus,
+            existing.date,
+            validatedData.notes ?? existing.notes,
+            baseUrl
+          ).catch(() => {});
+        }
+      }
+    }
+
+    const actorName = session.user.name || session.user.email || "Admin";
+
+    if (validatedData.status && validatedData.status !== existing.status) {
+      await logAudit(session.user.id, "BOOKING_STATUS_UPDATE", "Booking", id,
+        `Status: ${existing.status} → ${validatedData.status} (${existing.package.title})`);
+      const statusLabel: Record<string, string> = {
+        CONFIRMED: "Confirmed", SAMPLE_COLLECTED: "Sample collected",
+        IN_PROGRESS: "Test in progress", RESULTS_READY: "Results ready",
+        COMPLETED: "Completed", CANCELLED: "Cancelled",
+      };
+      const label = statusLabel[validatedData.status] ?? validatedData.status;
+      await logBookingEvent(id, "STATUS_CHANGED", `${label} by ${actorName}`, actorName);
+    } else if (validatedData.notes !== undefined) {
+      await logAudit(session.user.id, "BOOKING_NOTES_UPDATE", "Booking", id,
+        `Updated notes for ${existing.package.title}`);
+      await logBookingEvent(id, "NOTES_UPDATED", `Notes updated by ${actorName}`, actorName);
     }
 
     return NextResponse.json(booking);

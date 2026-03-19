@@ -5,6 +5,9 @@ import Image from "next/image";
 import { Edit, Eye, Ban, CheckCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/context/ToastContext";
+import Pagination from "@/components/ui/Pagination";
+import { usePagination } from "@/hooks/usePagination";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface Package {
   id: string;
@@ -32,18 +35,17 @@ export default function PackageList({ packages: initialPackages }: PackageListPr
   const [searchTerm, setSearchTerm] = useState("");
   const [packageList, setPackageList] = useState(initialPackages);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [confirmToggle, setConfirmToggle] = useState<{ id: string; isActive: boolean } | null>(null);
 
   const filteredPackages = packageList.filter((pkg) =>
     pkg.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pkg.category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(filteredPackages, 15);
 
   const handleToggleActive = async (id: string, currentStatus: boolean) => {
     const action = currentStatus ? "disable" : "enable";
-    if (!confirm(`Are you sure you want to ${action} this package?`)) return;
-
     setTogglingId(id);
-    // Optimistic update
     setPackageList((prev) =>
       prev.map((pkg) => (pkg.id === id ? { ...pkg, isActive: !currentStatus } : pkg))
     );
@@ -54,14 +56,12 @@ export default function PackageList({ packages: initialPackages }: PackageListPr
       if (response.ok) {
         toast.success(`Package ${action}d successfully.`);
       } else {
-        // Revert on failure
         setPackageList((prev) =>
           prev.map((pkg) => (pkg.id === id ? { ...pkg, isActive: currentStatus } : pkg))
         );
         toast.error(`Failed to ${action} package`);
       }
     } catch {
-      // Revert on error
       setPackageList((prev) =>
         prev.map((pkg) => (pkg.id === id ? { ...pkg, isActive: currentStatus } : pkg))
       );
@@ -111,7 +111,7 @@ export default function PackageList({ packages: initialPackages }: PackageListPr
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredPackages.map((pkg) => (
+            {paged.map((pkg) => (
               <tr key={pkg.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
@@ -166,7 +166,7 @@ export default function PackageList({ packages: initialPackages }: PackageListPr
                       <Edit className="w-4 h-4" />
                     </Link>
                     <button
-                      onClick={() => handleToggleActive(pkg.id, pkg.isActive)}
+                      onClick={() => setConfirmToggle({ id: pkg.id, isActive: pkg.isActive })}
                       disabled={togglingId === pkg.id}
                       className={`p-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed ${
                         pkg.isActive
@@ -190,6 +190,26 @@ export default function PackageList({ packages: initialPackages }: PackageListPr
           </tbody>
         </table>
       </div>
+      <div className="px-6 pb-4">
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={totalItems} pageSize={pageSize} />
+      </div>
+
+      <ConfirmModal
+        open={!!confirmToggle}
+        title={confirmToggle?.isActive ? "Disable this package?" : "Enable this package?"}
+        description={
+          confirmToggle?.isActive
+            ? "This package will no longer be visible to users and cannot be booked."
+            : "This package will become visible to users and available for booking."
+        }
+        confirmLabel={confirmToggle?.isActive ? "Yes, Disable" : "Yes, Enable"}
+        variant={confirmToggle?.isActive ? "danger" : "warning"}
+        onConfirm={() => {
+          if (confirmToggle) handleToggleActive(confirmToggle.id, confirmToggle.isActive);
+          setConfirmToggle(null);
+        }}
+        onCancel={() => setConfirmToggle(null)}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { logAudit } from "@/lib/audit";
 
 const promoSchema = z.object({
   code: z.string().min(1),
@@ -51,6 +52,11 @@ export async function POST(req: Request) {
       include: {
         packages: { include: { package: { select: { title: true } } } },
       },
+    });
+
+    await logAudit(session.user.id, "PROMO_CREATED", "Promo", promo.id, `Created promo "${promo.code}"`, {
+      resourceName: promo.code,
+      metadata: { discountType: validatedData.discountType, discountValue: validatedData.discountValue, applyToAll: validatedData.applyToAll },
     });
 
     return NextResponse.json(promoWithPackages);

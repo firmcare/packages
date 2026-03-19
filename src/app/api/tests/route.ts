@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { logAudit } from "@/lib/audit";
 
 const testSchema = z.object({
   name: z.string().min(1),
@@ -22,6 +23,11 @@ export async function POST(req: Request) {
 
     const test = await prisma.test.create({
       data: validatedData,
+    });
+
+    await logAudit(session.user.id, "TEST_CREATED", "Test", test.id, `Created test "${validatedData.name}"`, {
+      resourceName: validatedData.name,
+      metadata: { price: validatedData.price },
     });
 
     return NextResponse.json(test);

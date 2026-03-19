@@ -1,28 +1,38 @@
-
 'use client';
 
 import React from 'react';
-import { PACKAGES } from '@/lib/constants';
-import { Package } from '@/lib/types';
 import Link from 'next/link';
+import Image from 'next/image';
 import ShareButton from '@/components/ui/ShareButton';
 
-interface CategoryViewProps {
+interface PackageItem {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  price: string;
+  imageUrl: string | null;
   category: string;
 }
 
-const CategoryView: React.FC<CategoryViewProps> = ({ category }) => {
+interface CategoryViewProps {
+  category: string;
+  packages: PackageItem[];
+}
+
+const CategoryView: React.FC<CategoryViewProps> = ({ category, packages }) => {
   const isAllPackages = category.toLowerCase() === 'all packages' || category.toLowerCase() === 'all';
   const displayCategoryName = isAllPackages ? 'All Packages' : category;
-  const displayPackages = isAllPackages ? PACKAGES : PACKAGES.slice(0, 3);
 
-  const renderPackageCard = (pkg: Package, idx: number) => (
+  const renderPackageCard = (pkg: PackageItem, idx: number) => (
     <div key={`${pkg.id}-${idx}`} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col group">
       <div className="h-64 overflow-hidden relative">
-        <img
-          src={pkg.imageUrl}
+        <Image
+          src={pkg.imageUrl || '/placeholder.jpg'}
           alt={pkg.title}
-          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover transform group-hover:scale-105 transition-transform duration-500"
         />
       </div>
       <div className="p-6 flex flex-col grow">
@@ -52,10 +62,7 @@ const CategoryView: React.FC<CategoryViewProps> = ({ category }) => {
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm mb-12">
-          <Link
-            href="/"
-            className="text-gray-500 hover:text-[#9d4496] hover:underline transition-colors font-medium"
-          >
+          <Link href="/" className="text-gray-500 hover:text-[#9d4496] hover:underline transition-colors font-medium">
             Home
           </Link>
           <span className="text-gray-400">&gt;</span>
@@ -64,12 +71,14 @@ const CategoryView: React.FC<CategoryViewProps> = ({ category }) => {
 
         <div className="mb-20">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 capitalize">{displayCategoryName}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {displayPackages.map((pkg, idx) => renderPackageCard(pkg, idx))}
-            {!isAllPackages && displayPackages.length === 0 && (
-              <p>No packages found for this category.</p>
-            )}
-          </div>
+
+          {packages.length === 0 ? (
+            <p className="text-gray-500">No packages found{!isAllPackages ? ` in this category` : ""}.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {packages.map((pkg, idx) => renderPackageCard(pkg, idx))}
+            </div>
+          )}
 
           {!isAllPackages && (
             <div className="mt-12 text-center">

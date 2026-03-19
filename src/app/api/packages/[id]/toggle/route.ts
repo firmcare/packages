@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
+import { logAudit } from "@/lib/audit";
 
 export async function PATCH(
   req: NextRequest,
@@ -23,6 +24,9 @@ export async function PATCH(
       where: { id },
       data: { isActive: !pkg.isActive },
     });
+
+    await logAudit(session.user.id, "PACKAGE_TOGGLED", "Package", id,
+      `"${pkg.title}" ${updated.isActive ? "enabled" : "disabled"}`);
 
     return NextResponse.json(updated);
   } catch (error) {

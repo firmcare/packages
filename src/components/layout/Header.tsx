@@ -5,18 +5,28 @@ import { ShoppingCart, Menu, X, User } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { useSession } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 
 const NAV_LINKS = [
   { label: 'Packages', href: '/category/all' },
   { label: 'Custom Package', href: '/custom-package' },
+  { label: 'Become a Partner', href: '/#become-agent' },
 ];
 
 const Header: React.FC = () => {
   const { cartCount } = useCart();
   const { data: session } = useSession();
+  const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  const isActive = (href: string) => {
+    if (href.includes('#')) return false;
+    if (href === '/custom-package') return pathname === '/custom-package';
+    // "Packages" is active on /category/*, /package/*, but NOT /custom-package
+    return (pathname.startsWith('/category') || pathname.startsWith('/package')) && pathname !== '/custom-package';
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -27,7 +37,11 @@ const Header: React.FC = () => {
   const close = () => setIsMobileMenuOpen(false);
 
   const portalHref = session?.user
-    ? (session.user.role === 'ADMIN' || session.user.role === 'SUPERADMIN' ? '/admin' : '/dashboard')
+    ? (session.user.role === 'ADMIN' || session.user.role === 'SUPERADMIN'
+        ? '/admin'
+        : session.user.role === 'AGENT'
+        ? '/agent/dashboard'
+        : '/dashboard')
     : '/auth/login';
 
   return (
@@ -52,16 +66,23 @@ const Header: React.FC = () => {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-gray-600 hover:text-primary transition-colors relative group"
-            >
-              {link.label}
-              <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-primary rounded-full transition-all duration-300 group-hover:w-full" />
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`text-sm font-medium transition-colors relative group ${
+                  active ? 'text-primary' : 'text-gray-600 hover:text-primary'
+                }`}
+              >
+                {link.label}
+                <span className={`absolute -bottom-0.5 left-0 h-0.5 bg-primary rounded-full transition-all duration-300 ${
+                  active ? 'w-full' : 'w-0 group-hover:w-full'
+                }`} />
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Desktop Right Actions */}
@@ -81,7 +102,7 @@ const Header: React.FC = () => {
 
           <Link
             href={portalHref}
-            className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-[#8a3a7a] transition-colors shadow-sm hover:shadow-md"
+            className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-primary-dark transition-colors shadow-sm hover:shadow-md"
           >
             <User className="w-4 h-4" />
             {session?.user ? 'My Portal' : 'Patient Portal'}
@@ -117,21 +138,28 @@ const Header: React.FC = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-gray-100 bg-white animate-slideInUp">
           <nav className="px-4 py-4 space-y-1">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={close}
-                className="block px-4 py-3 text-sm font-medium text-gray-700 hover:text-primary hover:bg-purple-50 rounded-xl transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={close}
+                  className={`block px-4 py-3 text-sm font-medium rounded-xl transition-colors ${
+                    active
+                      ? 'text-primary bg-purple-50 font-semibold'
+                      : 'text-gray-700 hover:text-primary hover:bg-purple-50'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
             <div className="pt-2">
               <Link
                 href={portalHref}
                 onClick={close}
-                className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-[#8a3a7a] transition-colors"
+                className="flex items-center justify-center gap-2 bg-primary text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-primary-dark transition-colors"
               >
                 <User className="w-4 h-4" />
                 {session?.user ? 'My Portal' : 'Patient Portal'}

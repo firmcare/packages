@@ -1,31 +1,39 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-utils";
+import { logAudit } from "@/lib/audit";
+import { auth } from "@/auth";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const session = await auth();
     await requireAdmin();
     const { id } = await params;
     const body = await req.json();
 
-    // Deactivate: change role to USER
+    // Deactivate: set isActive = false (role stays AGENT)
     if (body.action === "deactivate") {
-      const userRole = await prisma.customRole.findUnique({ where: { name: "USER" } });
-      if (!userRole) return new NextResponse("USER role not found", { status: 500 });
-      await prisma.user.update({ where: { id }, data: { roleId: userRole.id } });
+      const target = await prisma.user.findUnique({ where: { id }, select: { name: true, email: true } });
+      await prisma.user.update({ where: { id }, data: { isActive: false } });
+      if (session?.user?.id) {
+        await logAudit(session.user.id, "AGENT_DEACTIVATED", "User", id, `Deactivated agent ${target?.name ?? target?.email}`, {
+          resourceName: target?.name ?? target?.email ?? undefined,
+        });
+      }
       return NextResponse.json({ success: true });
     }
 
-    // Reactivate: change role back to AGENT
+    // Reactivate: set isActive = true
     if (body.action === "reactivate") {
-      const agentRole = await prisma.customRole.upsert({
-        where: { name: "AGENT" },
-        update: {},
-        create: { name: "AGENT", description: "Marketing agent", isSystem: true },
-      });
-      await prisma.user.update({ where: { id }, data: { roleId: agentRole.id } });
+      const target = await prisma.user.findUnique({ where: { id }, select: { name: true, email: true } });
+      await prisma.user.update({ where: { id }, data: { isActive: true } });
+      if (session?.user?.id) {
+        await logAudit(session.user.id, "AGENT_REACTIVATED", "User", id, `Reactivated agent ${target?.name ?? target?.email}`, {
+          resourceName: target?.name ?? target?.email ?? undefined,
+        });
+      }
       return NextResponse.json({ success: true });
     }
 
@@ -57,10 +65,8 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     await requireAdmin();
     const { id } = await params;
 
-    // Only deactivate (change to USER role) rather than hard-delete to preserve referral history
-    const userRole = await prisma.customRole.findUnique({ where: { name: "USER" } });
-    if (!userRole) return new NextResponse("USER role not found", { status: 500 });
-    await prisma.user.update({ where: { id }, data: { roleId: userRole.id } });
+    // Soft-deactivate rather than hard-delete to preserve referral history
+    await prisma.user.update({ where: { id }, data: { isActive: false } });
     return NextResponse.json({ success: true });
   } catch {
     return new NextResponse("Internal Server Error", { status: 500 });

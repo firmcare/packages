@@ -4,11 +4,6 @@ import { auth } from "@/auth";
 
 export async function POST(req: Request) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
-
     const { code } = await req.json();
     if (!code?.trim()) {
       return NextResponse.json({ valid: false, message: "Referral code is required." });
@@ -16,14 +11,16 @@ export async function POST(req: Request) {
 
     const upperCode = String(code).trim().toUpperCase();
 
-    // Cannot use your own referral code
-    const currentUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { referralCode: true },
-    });
-
-    if (currentUser?.referralCode === upperCode) {
-      return NextResponse.json({ valid: false, message: "You cannot use your own referral code." });
+    // Self-referral check only applies when authenticated
+    const session = await auth();
+    if (session?.user?.id) {
+      const currentUser = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { referralCode: true },
+      });
+      if (currentUser?.referralCode === upperCode) {
+        return NextResponse.json({ valid: false, message: "You cannot use your own referral code." });
+      }
     }
 
     const referrer = await prisma.user.findUnique({

@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { logAudit } from "@/lib/audit";
 
 const updateUserSchema = z.object({
   roleId: z.string(),
@@ -73,6 +74,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         createdAt: true,
       },
     });
+
+    await logAudit(session.user.id, "USER_ROLE_CHANGE", "User", id,
+      `Changed role of ${targetUser.name ?? targetUser.email} from ${targetUser.role.name} to ${newRole.name}`);
 
     return NextResponse.json(updatedUser);
   } catch (error) {

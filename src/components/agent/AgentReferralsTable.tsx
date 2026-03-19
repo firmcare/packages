@@ -2,16 +2,18 @@
 
 import { useState } from "react";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
+import { usePagination } from "@/hooks/usePagination";
 
 type RewardStatus = "PENDING" | "CONFIRMED" | "PAID" | "CANCELLED";
 
 interface Reward {
   id: string;
-  amount: any;
+  amount: number;
   status: RewardStatus;
-  createdAt: Date;
+  createdAt: string;
   referee: { name: string | null; email: string | null };
-  booking: { id: string; totalAmount: any; createdAt: Date; package: { title: string } };
+  booking: { id: string; totalAmount: number; createdAt: string; package: { title: string } } | null;
 }
 
 const STATUS_CONFIG: Record<RewardStatus, { label: string; icon: typeof Clock; classes: string }> = {
@@ -24,6 +26,7 @@ const STATUS_CONFIG: Record<RewardStatus, { label: string; icon: typeof Clock; c
 export default function AgentReferralsTable({ rewards: initial }: { rewards: Reward[] }) {
   const [filter, setFilter] = useState<RewardStatus | "ALL">("ALL");
   const filtered = filter === "ALL" ? initial : initial.filter((r) => r.status === filter);
+  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(filtered, 15);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100">
@@ -63,7 +66,7 @@ export default function AgentReferralsTable({ rewards: initial }: { rewards: Rew
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {filtered.map((reward) => {
+              {paged.map((reward) => {
                 const cfg = STATUS_CONFIG[reward.status];
                 const Icon = cfg.icon;
                 return (
@@ -73,10 +76,10 @@ export default function AgentReferralsTable({ rewards: initial }: { rewards: Rew
                       <p className="text-xs text-gray-400">{reward.referee.email}</p>
                     </td>
                     <td className="px-5 py-4 max-w-[180px]">
-                      <p className="text-gray-700 truncate">{reward.booking.package.title}</p>
+                      <p className="text-gray-700 truncate">{reward.booking?.package.title ?? "—"}</p>
                     </td>
                     <td className="px-5 py-4 font-medium text-gray-700">
-                      ₦{Number(reward.booking.totalAmount).toLocaleString()}
+                      {reward.booking ? `₦${reward.booking.totalAmount.toLocaleString()}` : "—"}
                     </td>
                     <td className="px-5 py-4 font-bold text-gray-900">
                       ₦{Number(reward.amount).toLocaleString()}
@@ -97,6 +100,11 @@ export default function AgentReferralsTable({ rewards: initial }: { rewards: Rew
               })}
             </tbody>
           </table>
+        </div>
+      )}
+      {filtered.length > 0 && (
+        <div className="px-5 pb-4">
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={totalItems} pageSize={pageSize} />
         </div>
       )}
     </div>

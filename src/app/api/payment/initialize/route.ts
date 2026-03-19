@@ -34,8 +34,21 @@ export async function POST(req: Request) {
     const reference = `FC-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
     const bookingDate = new Date(data.bookingDate);
 
-    // Resolve cart items to real package IDs
-    const resolved = await resolveCartItems(data.cartItems, data.amount);
+    // Resolve cart items using the ORIGINAL total (before discount) so totalAmount captures gross price
+    const originalTotal = data.amount + data.discount;
+    const resolved = await resolveCartItems(data.cartItems, originalTotal);
+
+    // Remove any abandoned PENDING bookings for these packages before creating fresh ones
+    const packageIds = resolved.map((r) => r.packageId);
+    if (packageIds.length > 0) {
+      await prisma.booking.deleteMany({
+        where: {
+          userId: session.user.id,
+          packageId: { in: packageIds },
+          status: "PENDING",
+        },
+      });
+    }
 
     // Create PENDING bookings — these exist even if the user abandons payment
     await prisma.booking.createMany({
@@ -44,9 +57,10 @@ export async function POST(req: Request) {
         packageId,
         date: bookingDate,
         homeCollection: data.homeCollection,
-        totalAmount: unitAmount,
+        totalAmount: unitAmount,       // gross (pre-discount) per-item amount
         status: "PENDING" as const,
         paymentRef: reference,
+        referralCode: data.referralCode ?? null,
         notes: notes ?? undefined,
       })),
     });
@@ -95,6 +109,7 @@ export async function POST(req: Request) {
     if (error instanceof z.ZodError) {
       return new NextResponse(JSON.stringify(error.issues), { status: 400 });
     }
+    console.error("Payment initialize error:", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

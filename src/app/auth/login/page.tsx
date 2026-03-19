@@ -1,18 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams.get('callbackUrl') || ''
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const urlError = searchParams.get('error')
+  const [error, setError] = useState(urlError === 'account_deactivated' ? 'Your account has been deactivated.' : '')
   const [isEmailUnverified, setIsEmailUnverified] = useState(false)
+  const [isDeactivated, setIsDeactivated] = useState(urlError === 'account_deactivated')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
@@ -21,6 +25,7 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     setIsEmailUnverified(false)
+    setIsDeactivated(false)
 
     try {
       const result = await signIn('credentials', {
@@ -33,6 +38,9 @@ export default function LoginPage() {
         if (result.code === 'email_not_verified') {
           setError('Your email address has not been verified.')
           setIsEmailUnverified(true)
+        } else if (result.code === 'account_deactivated') {
+          setError('Your account has been deactivated.')
+          setIsDeactivated(true)
         } else {
           setError('Invalid email or password')
         }
@@ -41,12 +49,15 @@ export default function LoginPage() {
         const response = await fetch('/api/auth/session')
         const session = await response.json()
 
-        // Redirect based on role
+        // Admins always go to admin; agents to agent dashboard.
+        // Regular users go to callbackUrl if present, otherwise dashboard.
         const role = session?.user?.role
         if (role === 'ADMIN' || role === 'SUPERADMIN') {
           router.push('/admin')
         } else if (role === 'AGENT') {
           router.push('/agent/dashboard')
+        } else if (callbackUrl && callbackUrl.startsWith('/')) {
+          router.push(callbackUrl)
         } else {
           router.push('/dashboard')
         }
@@ -157,6 +168,11 @@ export default function LoginPage() {
                         </Link>.
                       </p>
                     )}
+                    {isDeactivated && (
+                      <p className="mt-1 text-sm text-red-700">
+                        Please contact the administrator to restore access.
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -183,7 +199,7 @@ export default function LoginPage() {
 
             <button
               type="button"
-              onClick={() => signIn('google', { callbackUrl: '/' })}
+              onClick={() => signIn('google', { callbackUrl: callbackUrl && callbackUrl.startsWith('/') ? callbackUrl : '/dashboard' })}
               className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-xl shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -198,5 +214,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }

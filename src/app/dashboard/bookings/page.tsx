@@ -1,7 +1,10 @@
+export const dynamic = "force-dynamic";
+
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import AutoRefresh from "@/components/AutoRefresh";
 import {
   Calendar,
   Clock,
@@ -130,6 +133,7 @@ export default async function BookingsPage() {
 
   return (
     <div className="space-y-8">
+      <AutoRefresh intervalMs={30000} />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Bookings</h1>

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Pencil, X } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
+import { usePagination } from "@/hooks/usePagination";
 
 interface Package {
   id: string;
@@ -21,6 +23,7 @@ interface Test {
 
 export default function TestList({ tests }: { tests: Test[] }) {
   const [selectedTest, setSelectedTest] = useState<Test | null>(null);
+  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(tests, 20);
 
   return (
     <>
@@ -37,7 +40,7 @@ export default function TestList({ tests }: { tests: Test[] }) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-100">
-            {tests.map((test) => (
+            {paged.map((test) => (
               <tr key={test.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{test.name}</td>
                 <td className="px-6 py-4 text-gray-500 max-w-xs">
@@ -81,6 +84,9 @@ export default function TestList({ tests }: { tests: Test[] }) {
             )}
           </tbody>
         </table>
+        <div className="px-6 pb-4">
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={totalItems} pageSize={pageSize} />
+        </div>
       </div>
 
       {/* Packages modal */}

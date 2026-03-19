@@ -1,7 +1,7 @@
 import PackageDetailView from '@/components/pages/PackageDetailView';
 import { getPackageBySlug, getSimilarPackages } from '@/app/actions';
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -56,6 +56,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page({ params }: Props) {
   const { slug } = await params;
+
+  // Custom package has its own dedicated builder flow
+  if (slug === 'custom-tailored-package') {
+    redirect('/custom-package');
+  }
+
   const pkg = await getPackageBySlug(slug);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://firmcare.com.ng";
 

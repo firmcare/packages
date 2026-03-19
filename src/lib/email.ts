@@ -62,7 +62,8 @@ function baseHtml(title: string, preheader: string, body: string): string {
 <style>
   body{margin:0;padding:0;background:#f4f4f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
   .wrapper{max-width:600px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.07);}
-  .header{background:#A44692;padding:32px 40px;text-align:center;}
+  .header{background:#A44692;padding:28px 40px;text-align:center;}
+  .header img{display:block;margin:0 auto 12px;height:52px;width:auto;}
   .header h1{margin:0;color:#fff;font-size:22px;font-weight:700;letter-spacing:.3px;}
   .header p{margin:6px 0 0;color:rgba(255,255,255,.8);font-size:13px;}
   .body{padding:36px 40px;}
@@ -81,6 +82,7 @@ function baseHtml(title: string, preheader: string, body: string): string {
 <span style="display:none;font-size:1px;color:#fff;max-height:0;overflow:hidden;">${preheader}&nbsp;</span>
 <div class="wrapper">
   <div class="header">
+    <img src="${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/logo.png" alt="FirmCare Diagnostics" />
     <h1>FirmCare Diagnostics</h1>
     <p>Your trusted health screening partner</p>
   </div>

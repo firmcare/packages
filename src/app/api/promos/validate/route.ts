@@ -3,16 +3,29 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { code, packageId } = await req.json();
+    const { code, packageId, packageIds, isCustomPackage } = await req.json();
 
-    if (!code || !packageId) {
-      return new NextResponse("Code and packageId are required", { status: 400 });
+    if (!code) {
+      return new NextResponse("Code is required", { status: 400 });
+    }
+
+    // Support both single packageId (legacy) and packageIds array
+    const allPackageIds: string[] = packageIds
+      ? packageIds
+      : packageId
+      ? [packageId]
+      : [];
+
+    if (allPackageIds.length === 0 && !isCustomPackage) {
+      return new NextResponse("packageId or isCustomPackage is required", { status: 400 });
     }
 
     const promo = await prisma.promo.findUnique({
       where: { code },
       include: {
-        packages: { where: { packageId } },
+        packages: allPackageIds.length > 0
+          ? { where: { packageId: { in: allPackageIds } }, include: { package: { select: { id: true, title: true } } } }
+          : { include: { package: { select: { id: true, title: true } } } },
       },
     });
 
@@ -33,9 +46,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ valid: false, message: "Promo code usage limit reached" });
     }
 
-    if (!promo.applyToAll && promo.packages.length === 0) {
+    // For custom packages, only apply if the promo is set to apply to all
+    if (isCustomPackage && !promo.applyToAll) {
+      return NextResponse.json({ valid: false, message: "Promo code not valid for custom packages" });
+    }
+
+    if (!isCustomPackage && !promo.applyToAll && promo.packages.length === 0) {
       return NextResponse.json({ valid: false, message: "Promo code not valid for this package" });
     }
+
+    // Determine which package IDs from the cart this promo applies to
+    const applicablePackageIds: string[] = promo.applyToAll
+      ? allPackageIds
+      : promo.packages.map((p) => p.packageId);
 
     return NextResponse.json({
       valid: true,
@@ -43,9 +66,11 @@ export async function POST(req: Request) {
         id: promo.id,
         code: promo.code,
         discountType: promo.discountType,
-        discountValue: promo.discountValue,
-        minAmount: promo.minAmount,
-        maxDiscount: promo.maxDiscount,
+        discountValue: Number(promo.discountValue),
+        minAmount: promo.minAmount ? Number(promo.minAmount) : null,
+        maxDiscount: promo.maxDiscount ? Number(promo.maxDiscount) : null,
+        applyToAll: promo.applyToAll,
+        applicablePackageIds,
       },
     });
   } catch (error) {

@@ -37,8 +37,8 @@ export default function ShareButton({ slug, title, className = "", variant = "ic
 
   const buttonClass =
     variant === "full"
-      ? `flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors ${className}`
-      : `p-2 rounded-full text-gray-400 hover:text-primary hover:bg-purple-50 transition-colors ${className}`;
+      ? `flex items-center gap-2 px-4 py-2 border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors ${className || "rounded-lg"}`
+      : className || `p-2 rounded-full text-gray-400 hover:text-primary hover:bg-purple-50 transition-colors`;
 
   return (
     <div className="relative">

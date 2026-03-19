@@ -392,6 +392,7 @@ export const ModelName = {
   Test: 'Test',
   Package: 'Package',
   Booking: 'Booking',
+  BookingLog: 'BookingLog',
   Promo: 'Promo',
   PromoPackage: 'PromoPackage',
   Transaction: 'Transaction',
@@ -403,7 +404,9 @@ export const ModelName = {
   EmailLog: 'EmailLog',
   AgentApplication: 'AgentApplication',
   AgentBankAccount: 'AgentBankAccount',
-  WithdrawalRequest: 'WithdrawalRequest'
+  WithdrawalRequest: 'WithdrawalRequest',
+  Cart: 'Cart',
+  AuditLog: 'AuditLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -419,7 +422,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "customRole" | "permission" | "rolePermission" | "category" | "test" | "package" | "booking" | "promo" | "promoPackage" | "transaction" | "siteSetting" | "referralReward" | "notification" | "emailVerification" | "passwordReset" | "emailLog" | "agentApplication" | "agentBankAccount" | "withdrawalRequest"
+    modelProps: "user" | "customRole" | "permission" | "rolePermission" | "category" | "test" | "package" | "booking" | "bookingLog" | "promo" | "promoPackage" | "transaction" | "siteSetting" | "referralReward" | "notification" | "emailVerification" | "passwordReset" | "emailLog" | "agentApplication" | "agentBankAccount" | "withdrawalRequest" | "cart" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1012,6 +1015,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.BookingCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.BookingCountAggregateOutputType> | number
+        }
+      }
+    }
+    BookingLog: {
+      payload: Prisma.$BookingLogPayload<ExtArgs>
+      fields: Prisma.BookingLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BookingLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BookingLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingLogPayload>
+        }
+        findFirst: {
+          args: Prisma.BookingLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BookingLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingLogPayload>
+        }
+        findMany: {
+          args: Prisma.BookingLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingLogPayload>[]
+        }
+        create: {
+          args: Prisma.BookingLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingLogPayload>
+        }
+        createMany: {
+          args: Prisma.BookingLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BookingLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingLogPayload>[]
+        }
+        delete: {
+          args: Prisma.BookingLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingLogPayload>
+        }
+        update: {
+          args: Prisma.BookingLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.BookingLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BookingLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BookingLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.BookingLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookingLogPayload>
+        }
+        aggregate: {
+          args: Prisma.BookingLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBookingLog>
+        }
+        groupBy: {
+          args: Prisma.BookingLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BookingLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BookingLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BookingLogCountAggregateOutputType> | number
         }
       }
     }
@@ -1903,6 +1980,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Cart: {
+      payload: Prisma.$CartPayload<ExtArgs>
+      fields: Prisma.CartFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CartFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CartPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CartFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CartPayload>
+        }
+        findFirst: {
+          args: Prisma.CartFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CartPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CartFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CartPayload>
+        }
+        findMany: {
+          args: Prisma.CartFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CartPayload>[]
+        }
+        create: {
+          args: Prisma.CartCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CartPayload>
+        }
+        createMany: {
+          args: Prisma.CartCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CartCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CartPayload>[]
+        }
+        delete: {
+          args: Prisma.CartDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CartPayload>
+        }
+        update: {
+          args: Prisma.CartUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CartPayload>
+        }
+        deleteMany: {
+          args: Prisma.CartDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CartUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CartUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CartPayload>[]
+        }
+        upsert: {
+          args: Prisma.CartUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CartPayload>
+        }
+        aggregate: {
+          args: Prisma.CartAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCart>
+        }
+        groupBy: {
+          args: Prisma.CartGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CartGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CartCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CartCountAggregateOutputType> | number
+        }
+      }
+    }
+    AuditLog: {
+      payload: Prisma.$AuditLogPayload<ExtArgs>
+      fields: Prisma.AuditLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuditLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuditLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        findFirst: {
+          args: Prisma.AuditLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuditLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        findMany: {
+          args: Prisma.AuditLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+        }
+        create: {
+          args: Prisma.AuditLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        createMany: {
+          args: Prisma.AuditLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AuditLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+        }
+        delete: {
+          args: Prisma.AuditLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        update: {
+          args: Prisma.AuditLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.AuditLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuditLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AuditLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.AuditLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        aggregate: {
+          args: Prisma.AuditLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuditLog>
+        }
+        groupBy: {
+          args: Prisma.AuditLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuditLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1953,6 +2178,7 @@ export const UserScalarFieldEnum = {
   referralCode: 'referralCode',
   referredByCode: 'referredByCode',
   emailVerified: 'emailVerified',
+  isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2044,6 +2270,8 @@ export const BookingScalarFieldEnum = {
   homeCollection: 'homeCollection',
   totalAmount: 'totalAmount',
   paymentRef: 'paymentRef',
+  referralCode: 'referralCode',
+  discountAmount: 'discountAmount',
   resultPdfUrl: 'resultPdfUrl',
   notes: 'notes',
   createdAt: 'createdAt',
@@ -2051,6 +2279,18 @@ export const BookingScalarFieldEnum = {
 } as const
 
 export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
+
+
+export const BookingLogScalarFieldEnum = {
+  id: 'id',
+  bookingId: 'bookingId',
+  event: 'event',
+  note: 'note',
+  actorName: 'actorName',
+  createdAt: 'createdAt'
+} as const
+
+export type BookingLogScalarFieldEnum = (typeof BookingLogScalarFieldEnum)[keyof typeof BookingLogScalarFieldEnum]
 
 
 export const PromoScalarFieldEnum = {
@@ -2119,6 +2359,7 @@ export const ReferralRewardScalarFieldEnum = {
   refereeId: 'refereeId',
   bookingId: 'bookingId',
   amount: 'amount',
+  rewardPercent: 'rewardPercent',
   status: 'status',
   referralType: 'referralType',
   withdrawalId: 'withdrawalId',
@@ -2226,6 +2467,33 @@ export const WithdrawalRequestScalarFieldEnum = {
 } as const
 
 export type WithdrawalRequestScalarFieldEnum = (typeof WithdrawalRequestScalarFieldEnum)[keyof typeof WithdrawalRequestScalarFieldEnum]
+
+
+export const CartScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  items: 'items',
+  extras: 'extras',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CartScalarFieldEnum = (typeof CartScalarFieldEnum)[keyof typeof CartScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  actorId: 'actorId',
+  action: 'action',
+  resource: 'resource',
+  resourceId: 'resourceId',
+  resourceName: 'resourceName',
+  detail: 'detail',
+  metadata: 'metadata',
+  ip: 'ip',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2535,6 +2803,7 @@ export type GlobalOmitConfig = {
   test?: Prisma.TestOmit
   package?: Prisma.PackageOmit
   booking?: Prisma.BookingOmit
+  bookingLog?: Prisma.BookingLogOmit
   promo?: Prisma.PromoOmit
   promoPackage?: Prisma.PromoPackageOmit
   transaction?: Prisma.TransactionOmit
@@ -2547,6 +2816,8 @@ export type GlobalOmitConfig = {
   agentApplication?: Prisma.AgentApplicationOmit
   agentBankAccount?: Prisma.AgentBankAccountOmit
   withdrawalRequest?: Prisma.WithdrawalRequestOmit
+  cart?: Prisma.CartOmit
+  auditLog?: Prisma.AuditLogOmit
 }
 
 /* Types for Logging */

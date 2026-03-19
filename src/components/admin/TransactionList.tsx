@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, User, Calendar, Tag } from "lucide-react";
+import { User, Calendar, Tag, FileX2 } from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
+import { usePagination } from "@/hooks/usePagination";
+import DateRangeFilter, { DateRange, inRange } from "@/components/ui/DateRangeFilter";
 
 interface Transaction {
   id: string;
@@ -11,14 +14,15 @@ interface Transaction {
   paymentMethod: string;
   status: string;
   reference: string | null;
-  createdAt: Date;
+  createdAt: string;
+  updatedAt?: string;
   user: {
     name: string | null;
     email: string | null;
   };
   booking: {
     id: string;
-    date: Date;
+    date: string;
   };
   promo: {
     code: string;
@@ -33,18 +37,21 @@ export default function TransactionList({ transactions }: TransactionListProps) 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [methodFilter, setMethodFilter] = useState("ALL");
+  const [dateRange, setDateRange] = useState<DateRange>({ from: "", to: "" });
 
   const filteredTransactions = transactions.filter((txn) => {
-    const matchesSearch =
-      txn.user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      txn.user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      txn.reference?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const q = searchTerm.toLowerCase();
+    const matchesSearch = !q ||
+      txn.user.name?.toLowerCase().includes(q) ||
+      txn.user.email?.toLowerCase().includes(q) ||
+      txn.reference?.toLowerCase().includes(q);
     const matchesStatus = statusFilter === "ALL" || txn.status === statusFilter;
     const matchesMethod = methodFilter === "ALL" || txn.paymentMethod === methodFilter;
-    
-    return matchesSearch && matchesStatus && matchesMethod;
+    const matchesDate = inRange(txn.createdAt, dateRange.from, dateRange.to);
+    return matchesSearch && matchesStatus && matchesMethod && matchesDate;
   });
+
+  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(filteredTransactions, 20);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -78,8 +85,8 @@ export default function TransactionList({ transactions }: TransactionListProps) 
 
   return (
     <div className="bg-white rounded-lg shadow">
-      <div className="p-6 border-b border-gray-200 space-y-4">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="p-4 border-b border-gray-200 space-y-3">
+        <div className="flex flex-col md:flex-row gap-3">
           <input
             type="text"
             placeholder="Search by user, email, or reference..."
@@ -110,8 +117,17 @@ export default function TransactionList({ transactions }: TransactionListProps) 
             <option value="WALLET">Wallet</option>
           </select>
         </div>
+        <DateRangeFilter value={dateRange} onChange={(r) => { setDateRange(r); setPage(1); }} />
       </div>
 
+      {filteredTransactions.length === 0 ? (
+        <div className="py-16 text-center text-gray-400">
+          <FileX2 className="w-10 h-10 mx-auto mb-3 text-gray-200" />
+          <p className="text-sm font-medium text-gray-500">No transactions found</p>
+          <p className="text-xs mt-1">Try adjusting your search, status, method, or date filter</p>
+        </div>
+      ) : (
+      <>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
@@ -143,7 +159,7 @@ export default function TransactionList({ transactions }: TransactionListProps) 
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredTransactions.map((txn) => (
+            {paged.map((txn) => (
               <tr key={txn.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
@@ -209,6 +225,11 @@ export default function TransactionList({ transactions }: TransactionListProps) 
           </tbody>
         </table>
       </div>
+      <div className="px-6 pb-4">
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={totalItems} pageSize={pageSize} />
+      </div>
+      </>
+      )}
     </div>
   );
 }

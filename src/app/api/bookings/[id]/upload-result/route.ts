@@ -1,9 +1,8 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import { uploadToS3, deleteFromS3, getPresignedUrl } from "@/lib/s3";
-import { sendResultsReadyEmail } from "@/lib/email";
-import { createNotification } from "@/lib/notify";
+import { uploadToS3, deleteFromS3 } from "@/lib/s3";
+import { logBookingEvent } from "@/lib/booking-log";
 
 export async function POST(
   req: Request,
@@ -40,8 +39,8 @@ export async function POST(
       return new NextResponse("Only PDF files are allowed", { status: 400 });
     }
 
-    if (file.size > 20 * 1024 * 1024) {
-      return new NextResponse("File exceeds 20 MB limit", { status: 400 });
+    if (file.size > 5 * 1024 * 1024) {
+      return new NextResponse("File exceeds 5 MB limit", { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -54,40 +53,14 @@ export async function POST(
 
     await uploadToS3(key, buffer, "application/pdf");
 
-    // Update booking with new S3 key and set status to RESULTS_READY
+    // Update booking with new S3 key only — notification happens on Save Changes
     const updated = await prisma.booking.update({
       where: { id },
-      data: {
-        resultPdfUrl: key,
-        status: "RESULTS_READY",
-      },
+      data: { resultPdfUrl: key },
     });
 
-    // In-app notification
-    createNotification({
-      userId: booking.userId,
-      type: "results_ready",
-      title: "Results Ready",
-      message: `Your test results for "${booking.package.title}" are ready. Open your bookings to view and download.`,
-      bookingId: id,
-    });
-
-    // Email notification (only for results — non-blocking)
-    if (booking.user.email) {
-      const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-      getPresignedUrl(key, 900)
-        .then((presignedUrl) =>
-          sendResultsReadyEmail(
-            booking.user.email!,
-            booking.user.name,
-            booking.package.title,
-            booking.date,
-            presignedUrl,
-            baseUrl
-          )
-        )
-        .catch(() => {});
-    }
+    const actorName = (session.user as any).name || session.user.email || "Admin";
+    await logBookingEvent(id, "PDF_UPLOADED", `Result PDF uploaded by ${actorName}`, actorName);
 
     return NextResponse.json({ success: true, booking: updated });
   } catch (error) {

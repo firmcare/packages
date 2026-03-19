@@ -78,5 +78,18 @@ export async function sendReminders(): Promise<ReminderResult> {
     }),
   ]).catch(console.error);
 
+  // Auto-cleanup old notifications
+  try {
+    const retentionSetting = await prisma.siteSetting.findUnique({
+      where: { key: "notification_retention_days" },
+    });
+    const days = Math.max(1, parseInt(retentionSetting?.value ?? "30", 10) || 30);
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    await prisma.notification.deleteMany({ where: { createdAt: { lt: cutoff } } });
+  } catch {
+    // non-fatal
+  }
+
   return { sent: totalSent, failed: totalFailed };
 }

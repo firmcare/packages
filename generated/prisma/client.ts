@@ -80,6 +80,11 @@ export type Package = Prisma.PackageModel
  */
 export type Booking = Prisma.BookingModel
 /**
+ * Model BookingLog
+ * 
+ */
+export type BookingLog = Prisma.BookingLogModel
+/**
  * Model Promo
  * 
  */
@@ -139,3 +144,13 @@ export type AgentBankAccount = Prisma.AgentBankAccountModel
  * 
  */
 export type WithdrawalRequest = Prisma.WithdrawalRequestModel
+/**
+ * Model Cart
+ * 
+ */
+export type Cart = Prisma.CartModel
+/**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = Prisma.AuditLogModel

@@ -1,6 +1,13 @@
 
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -134,14 +141,17 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <head>
+        {/* Preconnect for Cloudinary image CDN */}
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="antialiased font-sans bg-gray-50 flex flex-col min-h-screen">
+      <body className={`${inter.className} antialiased bg-gray-50 flex flex-col min-h-screen`}>
         <PWARegister />
         <SessionProvider>
           <ToastProvider>

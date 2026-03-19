@@ -53,7 +53,16 @@ export default async function AgentReferralsPage() {
         ))}
       </div>
 
-      <AgentReferralsTable rewards={rewards} />
+      <AgentReferralsTable rewards={rewards.map((r) => ({
+        id: r.id,
+        amount: Number(r.amount),
+        status: r.status,
+        createdAt: r.createdAt.toISOString(),
+        referee: r.referee,
+        booking: r.booking
+          ? { id: r.booking.id, totalAmount: Number(r.booking.totalAmount), createdAt: r.booking.createdAt.toISOString(), package: r.booking.package }
+          : null,
+      }))} />
     </div>
   );
 }

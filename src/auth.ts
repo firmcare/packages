@@ -15,6 +15,10 @@ class EmailNotVerifiedError extends CredentialsSignin {
   code = "email_not_verified";
 }
 
+class AccountDeactivatedError extends CredentialsSignin {
+  code = "account_deactivated";
+}
+
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
@@ -68,6 +72,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.role = dbUser.role.name as "ADMIN" | "USER" | "SUPERADMIN" | "AGENT";
           token.id = dbUser.id;
           token.referralCode = dbUser.referralCode;
+          token.isActive = dbUser.isActive;
         }
       } else if (token.email) {
         const dbUser = await prisma.user.findUnique({
@@ -78,6 +83,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.role = dbUser.role.name as "ADMIN" | "USER" | "SUPERADMIN" | "AGENT";
           token.id = dbUser.id;
           token.referralCode = dbUser.referralCode;
+          token.isActive = dbUser.isActive;
         }
       }
       return token;
@@ -121,6 +127,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!user.emailVerified) {
           throw new EmailNotVerifiedError();
+        }
+
+        if (!user.isActive) {
+          throw new AccountDeactivatedError();
         }
 
         return { ...user, role: user.role.name as "ADMIN" | "USER" | "SUPERADMIN" | "AGENT" };

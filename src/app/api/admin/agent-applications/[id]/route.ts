@@ -4,6 +4,8 @@ import { requireAdmin } from "@/lib/auth-utils";
 import { sendAgentApprovedEmail, sendAgentRejectedEmail } from "@/lib/email";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { auth } from "@/auth";
+import { logAudit } from "@/lib/audit";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -31,6 +33,8 @@ export async function PATCH(
 ) {
   try {
     await requireAdmin();
+    const session = await auth();
+    const actorId = session?.user?.id ?? "";
     const { id } = await params;
     const { action, adminNotes } = await req.json();
     // action: "approve" | "reject"
@@ -58,6 +62,8 @@ export async function PATCH(
         console.error
       );
 
+      if (actorId) await logAudit(actorId, "AGENT_APPLICATION_REJECTED", "AgentApplication", id,
+        `Rejected agent application from ${application.name} (${application.email})`);
       return NextResponse.json({ success: true, status: "REJECTED" });
     }
 
@@ -117,6 +123,8 @@ export async function PATCH(
         BASE_URL
       ).catch(console.error);
 
+      if (actorId) await logAudit(actorId, "AGENT_APPLICATION_APPROVED", "AgentApplication", id,
+        `Approved agent application from ${application.name} (${application.email})`);
       return NextResponse.json({ success: true, status: "APPROVED", userId: user.id });
     }
 

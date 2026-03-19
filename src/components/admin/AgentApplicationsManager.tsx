@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { CheckCircle, XCircle, Clock, RefreshCw, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { useRouter } from "next/navigation";
+import Pagination from "@/components/ui/Pagination";
+import { usePagination } from "@/hooks/usePagination";
 
 interface Application {
   id: string;
@@ -38,6 +40,7 @@ export default function AgentApplicationsManager() {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("PENDING");
   const [apps, setApps] = useState<Application[]>([]);
+  const { page, setPage, totalPages, paged: pagedApps, totalItems, pageSize } = usePagination(apps, 15);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [processing, setProcessing] = useState<string | null>(null);
@@ -116,7 +119,7 @@ export default function AgentApplicationsManager() {
         </div>
       ) : (
         <div className="divide-y divide-gray-50">
-          {apps.map((app) => (
+          {pagedApps.map((app) => (
             <div key={app.id}>
               {/* Row */}
               <div className="px-6 py-4 flex items-center gap-4">
@@ -212,6 +215,11 @@ export default function AgentApplicationsManager() {
               )}
             </div>
           ))}
+        </div>
+      )}
+      {apps.length > 0 && (
+        <div className="px-6 pb-4">
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={totalItems} pageSize={pageSize} />
         </div>
       )}
     </div>

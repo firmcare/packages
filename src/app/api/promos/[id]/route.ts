@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { logAudit } from "@/lib/audit";
 
 const updatePromoSchema = z.object({
   code: z.string().min(1).optional(),
@@ -39,6 +40,10 @@ export async function PUT(
       },
     });
 
+    await logAudit(session.user.id, "PROMO_UPDATED", "Promo", id, `Updated promo "${promo.code}"`, {
+      resourceName: promo.code,
+    });
+
     return NextResponse.json(promo);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -67,6 +72,11 @@ export async function PATCH(
       data: { isActive },
     });
 
+    await logAudit(session.user.id, "PROMO_TOGGLED", "Promo", id, `${isActive ? "Activated" : "Deactivated"} promo "${promo.code}"`, {
+      resourceName: promo.code,
+      metadata: { isActive },
+    });
+
     return NextResponse.json(promo);
   } catch (error) {
     return new NextResponse("Internal Server Error", { status: 500 });
@@ -84,8 +94,11 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    await prisma.promo.delete({
-      where: { id },
+    const promo = await prisma.promo.findUnique({ where: { id }, select: { code: true } });
+    await prisma.promo.delete({ where: { id } });
+
+    await logAudit(session.user.id, "PROMO_DELETED", "Promo", id, `Deleted promo "${promo?.code ?? id}"`, {
+      resourceName: promo?.code ?? id,
     });
 
     return new NextResponse(null, { status: 204 });

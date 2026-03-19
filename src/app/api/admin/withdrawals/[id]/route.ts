@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { initiateTransfer } from "@/lib/paystack-transfer";
 import crypto from "crypto";
+import { logAudit } from "@/lib/audit";
 
 export async function PATCH(
   req: Request,
@@ -12,6 +13,7 @@ export async function PATCH(
   if (session?.user?.role !== "ADMIN" && session?.user?.role !== "SUPERADMIN") {
     return new NextResponse("Unauthorized", { status: 401 });
   }
+  const actorId = session.user.id;
 
   const { id } = await params;
   const { action, reason } = await req.json();
@@ -61,6 +63,8 @@ export async function PATCH(
         },
       });
 
+      await logAudit(actorId, "WITHDRAWAL_APPROVED", "WithdrawalRequest", id,
+        `Approved withdrawal of ₦${Number(withdrawal.amount).toLocaleString()} for ${withdrawal.agent.name ?? withdrawal.agent.email}`);
       return NextResponse.json({ success: true, withdrawal: updated });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Transfer failed";
@@ -85,6 +89,8 @@ export async function PATCH(
       }),
     ]);
 
+    await logAudit(actorId, "WITHDRAWAL_COMPLETED", "WithdrawalRequest", id,
+      `Marked withdrawal of ₦${Number(withdrawal.amount).toLocaleString()} as completed`);
     return NextResponse.json({ success: true });
   }
 
@@ -99,13 +105,14 @@ export async function PATCH(
         where: { id },
         data: { status: "REJECTED", failureReason: reason ?? "Rejected by admin" },
       }),
-      // Release rewards back to CONFIRMED so agent can try again
       prisma.referralReward.updateMany({
         where: { withdrawalId: id },
         data: { withdrawalId: null },
       }),
     ]);
 
+    await logAudit(actorId, "WITHDRAWAL_REJECTED", "WithdrawalRequest", id,
+      `Rejected withdrawal for ${withdrawal.agent.name ?? withdrawal.agent.email}${reason ? `: ${reason}` : ""}`);
     return NextResponse.json({ success: true });
   }
 
@@ -116,13 +123,14 @@ export async function PATCH(
         where: { id },
         data: { status: "FAILED", failureReason: reason ?? "Transfer failed" },
       }),
-      // Release rewards so agent can retry
       prisma.referralReward.updateMany({
         where: { withdrawalId: id },
         data: { withdrawalId: null },
       }),
     ]);
 
+    await logAudit(actorId, "WITHDRAWAL_FAILED", "WithdrawalRequest", id,
+      `Marked withdrawal as failed for ${withdrawal.agent.name ?? withdrawal.agent.email}`);
     return NextResponse.json({ success: true });
   }
 

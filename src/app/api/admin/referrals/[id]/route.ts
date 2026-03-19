@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth-utils";
+import { auth } from "@/auth";
+import { logAudit } from "@/lib/audit";
 
 export async function PATCH(
   req: Request,
@@ -8,6 +10,7 @@ export async function PATCH(
 ) {
   try {
     await requireAdmin();
+    const session = await auth();
     const { id } = await params;
     const { status } = await req.json();
 
@@ -19,6 +22,11 @@ export async function PATCH(
       where: { id },
       data: { status },
     });
+
+    if (session?.user?.id) {
+      await logAudit(session.user.id, "REFERRAL_STATUS_UPDATE", "ReferralReward", id,
+        `Referral reward status set to ${status}`);
+    }
 
     return NextResponse.json(reward);
   } catch {

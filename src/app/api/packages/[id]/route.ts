@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { logAudit } from "@/lib/audit";
 
 function generateSlug(title: string): string {
   return title
@@ -49,6 +50,11 @@ export async function PUT(
       },
     });
 
+    await logAudit(session.user.id, "PACKAGE_UPDATED", "Package", id, `Updated package "${title}"`, {
+      resourceName: title,
+      metadata: { price: rest.price, categoryId: rest.categoryId, testCount: testIds?.length ?? 0 },
+    });
+
     return NextResponse.json(pkg);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -69,8 +75,11 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    await prisma.package.delete({
-      where: { id },
+    const pkg = await prisma.package.findUnique({ where: { id }, select: { title: true } });
+    await prisma.package.delete({ where: { id } });
+
+    await logAudit(session.user.id, "PACKAGE_DELETED", "Package", id, `Deleted package "${pkg?.title ?? id}"`, {
+      resourceName: pkg?.title ?? id,
     });
 
     return new NextResponse(null, { status: 204 });

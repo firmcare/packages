@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Calendar, FileText, ShoppingBag, User, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import ResultViewer from "@/components/ResultViewer";
 
 const statusIcon: Record<string, React.ReactNode> = {
   PENDING: <Clock className="w-4 h-4 text-yellow-500" />,
@@ -159,15 +160,7 @@ export default async function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   {booking.resultPdfUrl && (
-                    <a
-                      href={booking.resultPdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs text-primary hover:text-[#8a3a7a] font-medium"
-                    >
-                      <FileText className="w-4 h-4" />
-                      Result
-                    </a>
+                    <ResultViewer bookingId={booking.id} packageTitle={booking.package.title} />
                   )}
                   <span className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${statusColor[booking.status]}`}>
                     {statusIcon[booking.status]}

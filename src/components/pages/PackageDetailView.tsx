@@ -4,6 +4,7 @@
 import React from 'react';
 import { ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import ShareButton from '@/components/ui/ShareButton';
@@ -81,12 +82,15 @@ const PackageDetailView: React.FC<PackageDetailViewProps> = ({ packageData, simi
         {/* Main Details Section */}
         <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 flex flex-col lg:flex-row gap-8 lg:gap-12 mb-20">
           {/* Image */}
-          <div className="w-full lg:w-1/2 h-80 lg:h-auto rounded-3xl overflow-hidden">
-             <img
-               src={packageData.imageUrl || '/placeholder.jpg'}
-               alt={packageData.title}
-               className="w-full h-full object-cover"
-             />
+          <div className="w-full lg:w-1/2 h-80 lg:h-120 rounded-3xl overflow-hidden relative">
+            <Image
+              src={packageData.imageUrl || '/placeholder.jpg'}
+              alt={packageData.title}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
           </div>
 
           {/* Info */}
@@ -128,7 +132,7 @@ const PackageDetailView: React.FC<PackageDetailViewProps> = ({ packageData, simi
                     <ShoppingCart className="w-5 h-5 group-hover:scale-110 transition-transform" />
                     Add to Cart
                  </button>
-                 <ShareButton slug={packageData.slug} title={packageData.title} variant="full" className="rounded-full" />
+                 <ShareButton slug={packageData.slug} title={packageData.title} variant="icon" className="w-12 h-12 bg-primary/10 hover:bg-primary/20 text-primary rounded-full flex items-center justify-center shadow-sm transition-colors" />
                </div>
             </div>
           </div>
@@ -141,10 +145,12 @@ const PackageDetailView: React.FC<PackageDetailViewProps> = ({ packageData, simi
             {similarPackages.map((pkg, idx) => (
               <div key={idx} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow border border-gray-100 flex flex-col">
                 <div className="h-64 overflow-hidden relative">
-                   <img
+                  <Image
                     src={pkg.imageUrl || '/placeholder.jpg'}
                     alt={pkg.title}
-                    className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-500"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover object-center transform hover:scale-105 transition-transform duration-500"
                   />
                 </div>
                 <div className="p-8 flex flex-col flex-grow">

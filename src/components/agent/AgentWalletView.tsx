@@ -1,16 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import Pagination from "@/components/ui/Pagination";
+import { usePagination } from "@/hooks/usePagination";
 import { useRouter } from "next/navigation";
 import {
   Wallet, CreditCard, Clock, CheckCircle2, XCircle,
-  ChevronDown, ChevronUp, AlertCircle, Loader2, Building2,
+  ChevronDown, ChevronUp, AlertCircle, Loader2, Building2, Info,
 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 
 interface Reward {
   id: string;
   amount: number;
+  rewardPercent: number;
+  bookingAmount: number;
   status: string;
   referralType: string;
   packageTitle: string;
@@ -38,6 +42,8 @@ interface Props {
   confirmedBalance: number;
   pendingBalance: number;
   totalPaid: number;
+  totalEarned: number;
+  agentRewardPercent: number;
   rewards: Reward[];
   withdrawals: WithdrawalRecord[];
   bankAccount: BankAccount | null;
@@ -60,7 +66,7 @@ const W_STATUS_BADGE: Record<string, string> = {
 };
 
 export default function AgentWalletView({
-  confirmedBalance, pendingBalance, totalPaid,
+  confirmedBalance, pendingBalance, totalPaid, totalEarned, agentRewardPercent,
   rewards, withdrawals, bankAccount,
 }: Props) {
   const router = useRouter();
@@ -165,6 +171,9 @@ export default function AgentWalletView({
     }
   }
 
+  const rewardsPagination = usePagination(rewards, 15);
+  const withdrawalsPagination = usePagination(withdrawals, 10);
+
   const hasOpenWithdrawal = withdrawals.some(
     (w) => w.status === "PENDING" || w.status === "APPROVED" || w.status === "PROCESSING"
   );
@@ -174,7 +183,18 @@ export default function AgentWalletView({
       <h1 className="text-2xl font-bold text-gray-900">Wallet</h1>
 
       {/* Balance cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+              <CheckCircle2 className="w-5 h-5 text-purple-600" />
+            </div>
+            <p className="text-sm font-medium text-gray-500">Total Earned</p>
+          </div>
+          <p className="text-2xl font-bold text-gray-900">{fmt(totalEarned)}</p>
+          <p className="text-xs text-gray-400 mt-1">All-time (excl. cancelled)</p>
+        </div>
+
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
@@ -190,20 +210,30 @@ export default function AgentWalletView({
             <div className="w-10 h-10 bg-yellow-50 rounded-xl flex items-center justify-center">
               <Clock className="w-5 h-5 text-yellow-600" />
             </div>
-            <p className="text-sm font-medium text-gray-500">Pending (in-progress bookings)</p>
+            <p className="text-sm font-medium text-gray-500">Pending</p>
           </div>
           <p className="text-2xl font-bold text-gray-900">{fmt(pendingBalance)}</p>
+          <p className="text-xs text-gray-400 mt-1">Awaiting booking completion</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
+              <CreditCard className="w-5 h-5 text-green-600" />
             </div>
             <p className="text-sm font-medium text-gray-500">Total Paid Out</p>
           </div>
           <p className="text-2xl font-bold text-gray-900">{fmt(totalPaid)}</p>
+          <p className="text-xs text-gray-400 mt-1">Transferred to your bank</p>
         </div>
+      </div>
+
+      {/* Commission info banner */}
+      <div className="flex items-start gap-3 px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl text-sm text-blue-800">
+        <Info className="w-4 h-4 mt-0.5 shrink-0 text-blue-500" />
+        <p>
+          Your referral commission is <strong>{agentRewardPercent}%</strong> of each booking value paid by the patient (calculated on the amount actually paid after any discount vouchers are applied).
+        </p>
       </div>
 
       {/* Bank account + withdraw */}
@@ -337,20 +367,36 @@ export default function AgentWalletView({
             {rewards.length === 0 ? (
               <p className="text-center text-gray-400 text-sm py-10">No earnings yet.</p>
             ) : (
-              rewards.map((r) => (
-                <div key={r.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{r.packageTitle}</p>
-                    <p className="text-xs text-gray-400">{fmtDate(r.createdAt)}</p>
+              <>
+                {rewardsPagination.paged.map((r) => (
+                  <div key={r.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{r.packageTitle}</p>
+                      <p className="text-xs text-gray-400">{fmtDate(r.createdAt)}</p>
+                      {r.bookingAmount > 0 && r.rewardPercent > 0 && (
+                        <p className="text-xs text-blue-500 mt-0.5">
+                          {r.rewardPercent}% of {fmt(r.bookingAmount)}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_BADGE[r.status] ?? "bg-gray-100 text-gray-600"}`}>
+                        {r.status}
+                      </span>
+                      <p className="text-sm font-bold text-gray-900">{fmt(r.amount)}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_BADGE[r.status] ?? "bg-gray-100 text-gray-600"}`}>
-                      {r.status}
-                    </span>
-                    <p className="text-sm font-bold text-gray-900">{fmt(r.amount)}</p>
-                  </div>
+                ))}
+                <div className="px-5 pb-4">
+                  <Pagination
+                    page={rewardsPagination.page}
+                    totalPages={rewardsPagination.totalPages}
+                    onPageChange={rewardsPagination.setPage}
+                    totalItems={rewardsPagination.totalItems}
+                    pageSize={rewardsPagination.pageSize}
+                  />
                 </div>
-              ))
+              </>
             )}
           </div>
         )}
@@ -361,25 +407,36 @@ export default function AgentWalletView({
             {withdrawals.length === 0 ? (
               <p className="text-center text-gray-400 text-sm py-10">No withdrawals yet.</p>
             ) : (
-              withdrawals.map((w) => (
-                <div key={w.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      Withdrawal {w.paystackReference ? `· ${w.paystackReference}` : ""}
-                    </p>
-                    <p className="text-xs text-gray-400">{fmtDate(w.createdAt)}</p>
-                    {w.failureReason && (
-                      <p className="text-xs text-red-500 mt-0.5">{w.failureReason}</p>
-                    )}
+              <>
+                {withdrawalsPagination.paged.map((w) => (
+                  <div key={w.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        Withdrawal {w.paystackReference ? `· ${w.paystackReference}` : ""}
+                      </p>
+                      <p className="text-xs text-gray-400">{fmtDate(w.createdAt)}</p>
+                      {w.failureReason && (
+                        <p className="text-xs text-red-500 mt-0.5">{w.failureReason}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${W_STATUS_BADGE[w.status] ?? "bg-gray-100 text-gray-600"}`}>
+                        {w.status}
+                      </span>
+                      <p className="text-sm font-bold text-gray-900">{fmt(w.amount)}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${W_STATUS_BADGE[w.status] ?? "bg-gray-100 text-gray-600"}`}>
-                      {w.status}
-                    </span>
-                    <p className="text-sm font-bold text-gray-900">{fmt(w.amount)}</p>
-                  </div>
+                ))}
+                <div className="px-5 pb-4">
+                  <Pagination
+                    page={withdrawalsPagination.page}
+                    totalPages={withdrawalsPagination.totalPages}
+                    onPageChange={withdrawalsPagination.setPage}
+                    totalItems={withdrawalsPagination.totalItems}
+                    pageSize={withdrawalsPagination.pageSize}
+                  />
                 </div>
-              ))
+              </>
             )}
           </div>
         )}

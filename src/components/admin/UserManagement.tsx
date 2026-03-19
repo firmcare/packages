@@ -1,153 +1,223 @@
 "use client";
 
 import { useState } from "react";
-import { User, Mail, Phone, Calendar, Shield } from "lucide-react";
+import {
+  User, Mail, Phone, Calendar, MapPin,
+  CheckCircle, XCircle, Gift, X, BookOpen,
+} from "lucide-react";
+import Pagination from "@/components/ui/Pagination";
+import { usePagination } from "@/hooks/usePagination";
 
 interface UserData {
   id: string;
   email: string | null;
   name: string | null;
   phone: string | null;
-  role: {
-    id: string;
-    name: string;
-  };
-  createdAt: Date;
-  _count: {
-    bookings: number;
-  };
+  address: string | null;
+  emailVerified: boolean;
+  referralCode: string | null;
+  referredByCode: string | null;
+  createdAt: string;
+  _count: { bookings: number };
 }
 
 interface UserManagementProps {
   users: UserData[];
 }
 
-export default function UserManagement({ users }: UserManagementProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [roleFilter, setRoleFilter] = useState("ALL");
-
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.phone?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesRole = roleFilter === "ALL" || user.role.name === roleFilter;
-    
-    return matchesSearch && matchesRole;
-  });
-
-  const getRoleBadge = (role: string) => {
-    switch (role) {
-      case "SUPERADMIN":
-        return "bg-red-100 text-red-800";
-      case "ADMIN":
-        return "bg-purple-100 text-purple-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+function UserDetailsModal({ user, onClose }: { user: UserData; onClose: () => void }) {
+  const fmt = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" });
 
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="p-6 border-b border-gray-200 space-y-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-          />
-          <select
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/60">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <span className="text-sm font-bold text-primary">
+                {(user.name ?? user.email ?? "U").charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div>
+              <p className="font-bold text-gray-900">{user.name ?? "—"}</p>
+              <p className="text-xs text-gray-400">{user.email}</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
           >
-            <option value="ALL">All Roles</option>
-            <option value="USER">User</option>
-            <option value="ADMIN">Admin</option>
-            <option value="SUPERADMIN">Super Admin</option>
-          </select>
+            <X className="w-4 h-4" />
+          </button>
         </div>
-      </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                User
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Contact
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Role
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Bookings
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Joined
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredUsers.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-gray-400" />
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {user.name || "N/A"}
-                      </div>
-                      <div className="text-sm text-gray-500">{user.email}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-sm text-gray-900">
-                      <Mail className="w-4 h-4 text-gray-400" />
-                      {user.email}
-                    </div>
-                    {user.phone && (
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <Phone className="w-4 h-4 text-gray-400" />
-                        {user.phone}
-                      </div>
-                    )}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 py-1 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-full ${getRoleBadge(
-                      user.role.name
-                    )}`}
-                  >
-                    <Shield className="w-3 h-3" />
-                    {user.role.name}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {user._count.bookings}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm text-gray-900">
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* Details */}
+        <div className="px-6 py-5 space-y-3">
+          <Row icon={<Mail className="w-4 h-4" />} label="Email" value={user.email ?? "—"} />
+          <Row icon={<Phone className="w-4 h-4" />} label="Phone" value={user.phone ?? "—"} />
+          <Row icon={<MapPin className="w-4 h-4" />} label="Address" value={user.address ?? "—"} />
+          <Row
+            icon={user.emailVerified
+              ? <CheckCircle className="w-4 h-4 text-green-500" />
+              : <XCircle className="w-4 h-4 text-red-400" />}
+            label="Email Verified"
+            value={user.emailVerified ? "Verified" : "Not verified"}
+            valueClass={user.emailVerified ? "text-green-600" : "text-red-500"}
+          />
+          <Row
+            icon={<BookOpen className="w-4 h-4" />}
+            label="Total Bookings"
+            value={String(user._count.bookings)}
+          />
+          <Row
+            icon={<Gift className="w-4 h-4" />}
+            label="Referral Code"
+            value={user.referralCode ?? "—"}
+            mono
+          />
+          <Row
+            icon={<Gift className="w-4 h-4" />}
+            label="Referred By"
+            value={user.referredByCode ?? "—"}
+            mono
+          />
+          <Row
+            icon={<Calendar className="w-4 h-4" />}
+            label="Joined"
+            value={fmt(user.createdAt)}
+          />
+        </div>
       </div>
     </div>
   );
 }
 
+function Row({
+  icon, label, value, valueClass = "text-gray-900", mono = false,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  valueClass?: string;
+  mono?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-3 py-1">
+      <span className="text-gray-300 shrink-0">{icon}</span>
+      <span className="text-xs font-semibold text-gray-400 w-28 shrink-0">{label}</span>
+      <span className={`text-sm truncate ${valueClass} ${mono ? "font-mono" : ""}`}>{value}</span>
+    </div>
+  );
+}
+
+export default function UserManagement({ users }: UserManagementProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selected, setSelected] = useState<UserData | null>(null);
+
+  const filteredUsers = users.filter((user) =>
+    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.phone?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(filteredUsers, 25);
+
+  const fmt = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" });
+
+  return (
+    <>
+      <div className="bg-white rounded-lg shadow">
+        <div className="p-6 border-b border-gray-200">
+          <input
+            type="text"
+            placeholder="Search by name, email or phone…"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+          />
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Email</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Phone</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">Bookings</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Joined</th>
+                <th className="px-6 py-3" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {paged.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-10 text-center text-sm text-gray-400 italic">
+                    No users found.
+                  </td>
+                </tr>
+              ) : paged.map((user) => (
+                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-3 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <span className="text-xs font-bold text-primary">
+                          {(user.name ?? user.email ?? "U").charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <span className="font-medium text-gray-900 truncate max-w-35">
+                        {user.name ?? <span className="text-gray-400 italic">No name</span>}
+                      </span>
+                      {!user.emailVerified && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 shrink-0">
+                          Unverified
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-3 whitespace-nowrap text-gray-500 hidden md:table-cell max-w-45">
+                    <span className="truncate block max-w-45">{user.email ?? "—"}</span>
+                  </td>
+                  <td className="px-6 py-3 whitespace-nowrap text-gray-500 hidden lg:table-cell">
+                    {user.phone ?? "—"}
+                  </td>
+                  <td className="px-6 py-3 whitespace-nowrap text-gray-900 hidden sm:table-cell">
+                    {user._count.bookings}
+                  </td>
+                  <td className="px-6 py-3 whitespace-nowrap text-gray-500 hidden lg:table-cell">
+                    {fmt(user.createdAt)}
+                  </td>
+                  <td className="px-6 py-3 whitespace-nowrap text-right">
+                    <button
+                      onClick={() => setSelected(user)}
+                      className="text-xs font-semibold text-primary hover:underline"
+                    >
+                      Details
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="px-6 pb-4">
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={totalItems} pageSize={pageSize} />
+        </div>
+      </div>
+
+      {selected && (
+        <UserDetailsModal user={selected} onClose={() => setSelected(null)} />
+      )}
+    </>
+  );
+}

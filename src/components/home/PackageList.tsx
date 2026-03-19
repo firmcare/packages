@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { getPackages } from '@/app/actions';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import ShareButton from '@/components/ui/ShareButton';
@@ -28,10 +29,12 @@ const PackageList: React.FC = async () => {
 
                 {/* Image */}
                 <div className="h-52 overflow-hidden relative">
-                  <img
+                  <Image
                     src={pkg.imageUrl || '/placeholder.jpg'}
                     alt={pkg.title}
-                    className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-500"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover object-center transform group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute top-3 left-3">
                     <span className="bg-white/90 backdrop-blur-sm text-primary text-[11px] font-bold px-3 py-1 rounded-full shadow-sm">

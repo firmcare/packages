@@ -17,6 +17,8 @@ import {
   X,
   UserSquare2,
   Wallet,
+  Shield,
+  ClipboardList,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -38,6 +40,8 @@ const menuItems = [
   { name: "Withdrawals",  href: "/admin/withdrawals",  icon: Wallet,          roles: ["ADMIN", "SUPERADMIN"] },
   { name: "Email",        href: "/admin/email",        icon: Mail,            roles: ["ADMIN", "SUPERADMIN"] },
   { name: "Users",        href: "/admin/users",        icon: Users,           roles: ["SUPERADMIN"] },
+  { name: "Admins",       href: "/admin/admins",       icon: Shield,          roles: ["SUPERADMIN"] },
+  { name: "Audit Log",    href: "/admin/audit",        icon: ClipboardList,   roles: ["SUPERADMIN"] },
   { name: "Settings",     href: "/admin/settings",     icon: Settings,        roles: ["SUPERADMIN"] },
 ];
 
@@ -55,7 +59,7 @@ export default function AdminSidebar({ userRole, isOpen, onClose }: AdminSidebar
       `}
     >
       {/* Logo + mobile close button */}
-      <div className="p-5 border-b border-gray-200 flex items-center justify-between shrink-0">
+      <div className="p-3.5 border-b border-gray-200 flex items-center justify-between shrink-0">
         <Link href="/admin" className="flex items-center gap-2" onClick={onClose}>
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
             <span className="text-white font-bold text-lg">F</span>

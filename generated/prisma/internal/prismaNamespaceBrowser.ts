@@ -59,6 +59,7 @@ export const ModelName = {
   Test: 'Test',
   Package: 'Package',
   Booking: 'Booking',
+  BookingLog: 'BookingLog',
   Promo: 'Promo',
   PromoPackage: 'PromoPackage',
   Transaction: 'Transaction',
@@ -70,7 +71,9 @@ export const ModelName = {
   EmailLog: 'EmailLog',
   AgentApplication: 'AgentApplication',
   AgentBankAccount: 'AgentBankAccount',
-  WithdrawalRequest: 'WithdrawalRequest'
+  WithdrawalRequest: 'WithdrawalRequest',
+  Cart: 'Cart',
+  AuditLog: 'AuditLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -100,6 +103,7 @@ export const UserScalarFieldEnum = {
   referralCode: 'referralCode',
   referredByCode: 'referredByCode',
   emailVerified: 'emailVerified',
+  isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -191,6 +195,8 @@ export const BookingScalarFieldEnum = {
   homeCollection: 'homeCollection',
   totalAmount: 'totalAmount',
   paymentRef: 'paymentRef',
+  referralCode: 'referralCode',
+  discountAmount: 'discountAmount',
   resultPdfUrl: 'resultPdfUrl',
   notes: 'notes',
   createdAt: 'createdAt',
@@ -198,6 +204,18 @@ export const BookingScalarFieldEnum = {
 } as const
 
 export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
+
+
+export const BookingLogScalarFieldEnum = {
+  id: 'id',
+  bookingId: 'bookingId',
+  event: 'event',
+  note: 'note',
+  actorName: 'actorName',
+  createdAt: 'createdAt'
+} as const
+
+export type BookingLogScalarFieldEnum = (typeof BookingLogScalarFieldEnum)[keyof typeof BookingLogScalarFieldEnum]
 
 
 export const PromoScalarFieldEnum = {
@@ -266,6 +284,7 @@ export const ReferralRewardScalarFieldEnum = {
   refereeId: 'refereeId',
   bookingId: 'bookingId',
   amount: 'amount',
+  rewardPercent: 'rewardPercent',
   status: 'status',
   referralType: 'referralType',
   withdrawalId: 'withdrawalId',
@@ -373,6 +392,33 @@ export const WithdrawalRequestScalarFieldEnum = {
 } as const
 
 export type WithdrawalRequestScalarFieldEnum = (typeof WithdrawalRequestScalarFieldEnum)[keyof typeof WithdrawalRequestScalarFieldEnum]
+
+
+export const CartScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  items: 'items',
+  extras: 'extras',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CartScalarFieldEnum = (typeof CartScalarFieldEnum)[keyof typeof CartScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  actorId: 'actorId',
+  action: 'action',
+  resource: 'resource',
+  resourceId: 'resourceId',
+  resourceName: 'resourceName',
+  detail: 'detail',
+  metadata: 'metadata',
+  ip: 'ip',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -1,10 +1,10 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import { LogOut, Menu, ChevronRight, Home } from "lucide-react";
+import { LogOut, Menu, ChevronRight, ChevronLeft, Home } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import { useState, useRef, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 
 interface AdminHeaderProps {
@@ -27,6 +27,8 @@ const segmentLabels: Record<string, string> = {
   referrals: "Referrals",
   tests: "Tests",
   users: "Users",
+  admins: "Admin Management",
+  audit: "Audit Log",
   settings: "Settings",
   new: "New",
   edit: "Edit",
@@ -53,6 +55,8 @@ export default function AdminHeader({ user, onMenuOpen }: AdminHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const breadcrumbs = useBreadcrumbs();
+  const router = useRouter();
+  const canGoBack = breadcrumbs.length > 1;
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -75,8 +79,8 @@ export default function AdminHeader({ user, onMenuOpen }: AdminHeaderProps) {
     <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
       <div className="flex items-center justify-between px-4 lg:px-8 h-16">
 
-        {/* Left: hamburger + breadcrumb */}
-        <div className="flex items-center gap-3 min-w-0">
+        {/* Left: hamburger + back button + breadcrumb */}
+        <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={onMenuOpen}
             className="lg:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors shrink-0"
@@ -84,6 +88,18 @@ export default function AdminHeader({ user, onMenuOpen }: AdminHeaderProps) {
           >
             <Menu className="w-5 h-5" />
           </button>
+
+          {/* Back button — visible when deeper than /admin */}
+          {canGoBack && (
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors shrink-0 text-sm font-medium"
+              aria-label="Go back"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Back</span>
+            </button>
+          )}
 
           {/* Breadcrumb — sm and up */}
           <nav className="hidden sm:flex items-center gap-1 text-sm min-w-0" aria-label="Breadcrumb">

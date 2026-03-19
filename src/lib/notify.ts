@@ -14,23 +14,31 @@ interface CreateNotificationInput {
   bookingId?: string;
 }
 
+/** Returns true if the notification setting is enabled (default: true when key is absent). */
+export async function isNotifEnabled(key: string): Promise<boolean> {
+  try {
+    const s = await prisma.siteSetting.findUnique({ where: { key } });
+    return !s || s.value !== "false";
+  } catch {
+    return true;
+  }
+}
+
 export async function createNotification(input: CreateNotificationInput) {
   try {
     return await prisma.notification.create({ data: input });
   } catch {
-    // non-fatal — notifications should never break the main flow
+    // non-fatal
   }
 }
 
-/**
- * Notify every ADMIN and SUPERADMIN user about a new booking.
- */
 export async function notifyAdmins(
   title: string,
   message: string,
   bookingId?: string
 ) {
   try {
+    if (!(await isNotifEnabled("notify_admin_new_booking"))) return;
     const admins = await prisma.user.findMany({
       where: { role: { name: { in: ["ADMIN", "SUPERADMIN"] } } },
       select: { id: true },
@@ -79,4 +87,13 @@ export const STATUS_NOTIFICATION: Record<
     message: (pkg) =>
       `Your booking for "${pkg}" has been cancelled. Contact us if you have questions.`,
   },
+};
+
+// Map each BookingStatus to the SiteSetting key that controls its notification
+export const STATUS_NOTIFY_KEY: Record<string, string> = {
+  SAMPLE_COLLECTED: "notify_on_sample_collected",
+  IN_PROGRESS:      "notify_on_in_progress",
+  RESULTS_READY:    "notify_on_results_ready",
+  COMPLETED:        "notify_on_completed",
+  CANCELLED:        "notify_on_cancelled",
 };

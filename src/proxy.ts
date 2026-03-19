@@ -19,6 +19,13 @@ export async function proxy(request: NextRequest) {
     if (role !== "ADMIN" && role !== "SUPERADMIN") {
       return NextResponse.redirect(new URL("/", request.url));
     }
+
+    // Block deactivated admins — redirect to admin login with error
+    if (token.isActive === false) {
+      const loginUrl = new URL("/auth/admin/login", request.url);
+      loginUrl.searchParams.set("error", "account_deactivated");
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   // Protect /agent routes
@@ -34,6 +41,13 @@ export async function proxy(request: NextRequest) {
     const role = token.role as string;
     if (role !== "AGENT" && role !== "ADMIN" && role !== "SUPERADMIN") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    // Block deactivated agents — redirect to login with error
+    if (role === "AGENT" && token.isActive === false) {
+      const loginUrl = new URL("/auth/login", request.url);
+      loginUrl.searchParams.set("error", "account_deactivated");
+      return NextResponse.redirect(loginUrl);
     }
   }
 
