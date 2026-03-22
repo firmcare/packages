@@ -39,19 +39,25 @@ function ProgressBarInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, searchParams])
 
-  // Patch history.pushState to detect navigation start
+  // Start bar immediately on anchor click (before navigation begins)
   useEffect(() => {
-    const originalPushState = history.pushState.bind(history)
-    history.pushState = (...args) => {
-      const result = originalPushState(...args)
-      // Defer to avoid calling setState during React's internal commit phase
-      setTimeout(start, 0)
-      return result
+    const handleClick = (e: MouseEvent) => {
+      const anchor = (e.target as HTMLElement).closest('a')
+      if (!anchor) return
+      const href = anchor.getAttribute('href')
+      if (!href) return
+      // Skip hash links, external URLs, mailto/tel
+      if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto:') || href.startsWith('tel:')) return
+      // Skip modified clicks (new tab, etc.)
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+      if (anchor.target === '_blank') return
+      start()
     }
-    const onPopState = () => setTimeout(start, 0)
+    const onPopState = () => start()
+    document.addEventListener('click', handleClick)
     window.addEventListener('popstate', onPopState)
     return () => {
-      history.pushState = originalPushState
+      document.removeEventListener('click', handleClick)
       window.removeEventListener('popstate', onPopState)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

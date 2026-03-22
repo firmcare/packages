@@ -19,11 +19,18 @@ export async function PUT(req: Request) {
 
   const { items, extras } = await req.json();
 
-  await prisma.cart.upsert({
-    where:  { userId: session.user.id },
-    update: { items: JSON.stringify(items ?? []), extras: JSON.stringify(extras ?? {}) },
-    create: { userId: session.user.id, items: JSON.stringify(items ?? []), extras: JSON.stringify(extras ?? {}) },
-  });
+  try {
+    await prisma.cart.upsert({
+      where:  { userId: session.user.id },
+      update: { items: JSON.stringify(items ?? []), extras: JSON.stringify(extras ?? {}) },
+      create: { userId: session.user.id, items: JSON.stringify(items ?? []), extras: JSON.stringify(extras ?? {}) },
+    });
+  } catch (e: any) {
+    if (e.code === 'P2003') {
+      return new NextResponse("Session invalid", { status: 401 });
+    }
+    throw e;
+  }
 
   return NextResponse.json({ ok: true });
 }

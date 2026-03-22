@@ -4,10 +4,10 @@ import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
 
 const SLIDES = [
-  { src: '/hero/slide1.png', alt: 'FirmCare diagnostics and wellness' },
-  { src: '/hero/slide2.png', alt: 'Family health checkup at FirmCare' },
-  { src: '/hero/slide3.png', alt: 'Medical diagnostics at FirmCare' },
-  { src: '/hero/slide4.png', alt: 'Wellness screening at FirmCare' },
+  { src: '/hero/slide1.webp', alt: 'FirmCare diagnostics and wellness' },
+  { src: '/hero/slide2.webp', alt: 'Family health checkup at FirmCare' },
+  { src: '/hero/slide3.webp', alt: 'Medical diagnostics at FirmCare' },
+  { src: '/hero/slide4.webp', alt: 'Wellness screening at FirmCare' },
 ];
 
 const INTERVAL = 4500;
