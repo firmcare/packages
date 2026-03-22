@@ -94,7 +94,11 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const promo = await prisma.promo.findUnique({ where: { id }, select: { code: true } });
+    const promo = await prisma.promo.findUnique({ where: { id }, select: { code: true, usageCount: true } });
+    if (!promo) return new NextResponse("Not found", { status: 404 });
+    if (promo.usageCount > 0) {
+      return new NextResponse("Cannot delete a promo that has already been used.", { status: 409 });
+    }
     await prisma.promo.delete({ where: { id } });
 
     await logAudit(session.user.id, "PROMO_DELETED", "Promo", id, `Deleted promo "${promo?.code ?? id}"`, {

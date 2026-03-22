@@ -5,6 +5,7 @@ import next from "next";
 import cron, { ScheduledTask } from "node-cron";
 import { prisma } from "./src/lib/prisma";
 import { sendReminders } from "./src/lib/send-reminders";
+import { processNextEmailJob } from "./src/lib/email-queue";
 
 const DEFAULT_SCHEDULE = "0 7 * * *";
 const POLL_INTERVAL_MS = 60 * 1000; // check DB for schedule changes every 60 seconds
@@ -72,6 +73,24 @@ async function initCron() {
   }, POLL_INTERVAL_MS);
 }
 
+let emailQueueRunning = false;
+
+function initEmailQueue() {
+  // Poll every 15 seconds; only one job runs at a time
+  setInterval(async () => {
+    if (emailQueueRunning) return;
+    emailQueueRunning = true;
+    try {
+      await processNextEmailJob();
+    } catch (err) {
+      console.error("[EmailQueue] Error:", err);
+    } finally {
+      emailQueueRunning = false;
+    }
+  }, 15_000);
+  console.log("> Email broadcast queue active (polling every 15s)");
+}
+
 app.prepare().then(() => {
   createServer((req, res) => {
     const parsedUrl = parse(req.url!, true);
@@ -79,5 +98,6 @@ app.prepare().then(() => {
   }).listen(port, () => {
     console.log(`> Server ready on http://localhost:${port} [${process.env.NODE_ENV ?? "development"}]`);
     initCron();
+    initEmailQueue();
   });
 });

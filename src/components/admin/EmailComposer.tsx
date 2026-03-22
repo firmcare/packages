@@ -1,9 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Send, RefreshCw, CheckCircle, AlertCircle, ChevronDown, ChevronUp, Mail,
+  Clock, Loader2, Users, CheckCheck,
 } from "lucide-react";
+import RichTextEditor from "@/components/ui/RichTextEditor";
+
+interface EmailJob {
+  id: string;
+  status: string;
+  subject: string;
+  recipientType: string;
+  totalRecipients: number;
+  sent: number;
+  failed: number;
+  errorMessage: string | null;
+  createdAt: string;
+  actor: { name: string | null; email: string | null };
+}
 
 interface EmailLog {
   id: string;
@@ -26,11 +41,13 @@ const TYPE_LABELS: Record<string, string> = {
 export default function EmailComposer() {
   const [subject, setSubject] = useState("");
   const [htmlContent, setHtmlContent] = useState("");
-  const [recipientType, setRecipientType] = useState<"all" | "verified" | "specific">("all");
+  const [recipientType, setRecipientType] = useState<"all" | "users" | "agents" | "admins" | "specific">("all");
   const [specificEmails, setSpecificEmails] = useState("");
   const [sending, setSending] = useState(false);
-  const [result, setResult] = useState<{ sent: number; failed: number; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [jobs, setJobs] = useState<EmailJob[]>([]);
+  const [showJobs, setShowJobs] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [logs, setLogs] = useState<EmailLog[]>([]);
   const [logsTotal, setLogsTotal] = useState(0);
@@ -41,9 +58,32 @@ export default function EmailComposer() {
   const [reminderLoading, setReminderLoading] = useState(false);
   const [reminderResult, setReminderResult] = useState<string | null>(null);
 
+  useEffect(() => { fetchJobs(); }, []);
+
+  // Poll active jobs every 5s until all are settled
+  useEffect(() => {
+    const hasActive = jobs.some((j) => j.status === "QUEUED" || j.status === "PROCESSING");
+    if (hasActive && !pollRef.current) {
+      pollRef.current = setInterval(fetchJobs, 5_000);
+    } else if (!hasActive && pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+    return () => {
+      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+    };
+  }, [jobs]);
+
   useEffect(() => {
     if (showLogs) fetchLogs();
   }, [showLogs]);
+
+  async function fetchJobs() {
+    try {
+      const res = await fetch("/api/admin/email/jobs");
+      if (res.ok) setJobs(await res.json());
+    } catch {}
+  }
 
   async function fetchLogs() {
     setLogsLoading(true);
@@ -60,7 +100,6 @@ export default function EmailComposer() {
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    setResult(null);
     setSending(true);
 
     const emails = specificEmails
@@ -72,22 +111,17 @@ export default function EmailComposer() {
       const res = await fetch("/api/admin/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          subject,
-          htmlContent,
-          recipientType,
-          specificEmails: emails,
-        }),
+        body: JSON.stringify({ subject, htmlContent, recipientType, specificEmails: emails }),
       });
 
       if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
-      setResult(data);
+      // 202 — job queued; refresh job list immediately
       setSubject("");
       setHtmlContent("");
       setSpecificEmails("");
+      await fetchJobs();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send emails.");
+      setError(err instanceof Error ? err.message : "Failed to queue email job.");
     } finally {
       setSending(false);
     }
@@ -131,30 +165,29 @@ export default function EmailComposer() {
               <AlertCircle className="w-4 h-4 shrink-0" /> {error}
             </div>
           )}
-          {result && (
-            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
-              <CheckCircle className="w-4 h-4 shrink-0" />
-              Sent {result.sent} / {result.total} emails.
-              {result.failed > 0 && ` (${result.failed} failed)`}
-            </div>
-          )}
 
           {/* Recipients */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Recipients</label>
             <div className="flex flex-wrap gap-2">
-              {(["all", "verified", "specific"] as const).map((t) => (
+              {([
+                { value: "all",      label: "Everyone" },
+                { value: "users",    label: "Users" },
+                { value: "agents",   label: "Agents" },
+                { value: "admins",   label: "Admins" },
+                { value: "specific", label: "Specific Emails" },
+              ] as const).map(({ value, label }) => (
                 <button
-                  key={t}
+                  key={value}
                   type="button"
-                  onClick={() => setRecipientType(t)}
+                  onClick={() => setRecipientType(value)}
                   className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
-                    recipientType === t
+                    recipientType === value
                       ? "bg-primary text-white border-primary"
                       : "bg-white text-gray-600 border-gray-200 hover:border-primary/40"
                   }`}
                 >
-                  {t === "all" ? "All Users" : t === "verified" ? "Verified Users" : "Specific Emails"}
+                  {label}
                 </button>
               ))}
             </div>
@@ -191,17 +224,12 @@ export default function EmailComposer() {
 
           {/* Body */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-              Message Body
-              <span className="ml-2 font-normal text-gray-400 text-xs">(HTML supported)</span>
-            </label>
-            <textarea
-              required
-              rows={8}
-              placeholder="<p>Dear valued customer,</p><p>...</p>"
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Message Body</label>
+            <RichTextEditor
               value={htmlContent}
-              onChange={(e) => setHtmlContent(e.target.value)}
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-y"
+              onChange={setHtmlContent}
+              placeholder="Dear valued customer, …"
+              minHeight={280}
             />
             <p className="text-xs text-gray-400 mt-1">
               Your message will be wrapped in the FirmCare branded email template automatically.
@@ -220,6 +248,84 @@ export default function EmailComposer() {
           </div>
         </form>
       </div>
+
+      {/* ── Broadcast jobs ── */}
+      {jobs.length > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <button
+            onClick={() => setShowJobs((v) => !v)}
+            className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50/60 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                <Send className="w-5 h-5 text-blue-500" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 text-sm">Broadcast Queue</h3>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {jobs.filter((j) => j.status === "QUEUED" || j.status === "PROCESSING").length > 0
+                    ? "Sending in progress…"
+                    : `${jobs.length} job${jobs.length !== 1 ? "s" : ""}`}
+                </p>
+              </div>
+            </div>
+            {showJobs ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+          </button>
+
+          {showJobs && (
+            <div className="border-t border-gray-100 divide-y divide-gray-50">
+              {jobs.map((job) => {
+                const progress = job.totalRecipients > 0
+                  ? Math.round(((job.sent + job.failed) / job.totalRecipients) * 100)
+                  : 0;
+                const isActive = job.status === "QUEUED" || job.status === "PROCESSING";
+                return (
+                  <div key={job.id} className="px-6 py-4">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 truncate">{job.subject}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {new Date(job.createdAt).toLocaleString("en-NG", { dateStyle: "medium", timeStyle: "short" })}
+                          {" · "}{job.recipientType}
+                        </p>
+                      </div>
+                      <span className={`shrink-0 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        job.status === "COMPLETED" ? "bg-green-50 text-green-700" :
+                        job.status === "FAILED"    ? "bg-red-50 text-red-600" :
+                        job.status === "PROCESSING"? "bg-blue-50 text-blue-600" :
+                                                     "bg-yellow-50 text-yellow-700"
+                      }`}>
+                        {job.status === "PROCESSING" && <Loader2 className="w-3 h-3 animate-spin" />}
+                        {job.status === "COMPLETED"  && <CheckCheck className="w-3 h-3" />}
+                        {job.status === "QUEUED"     && <Clock className="w-3 h-3" />}
+                        {job.status}
+                      </span>
+                    </div>
+
+                    {job.totalRecipients > 0 && (
+                      <>
+                        <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+                          <span className="flex items-center gap-1"><Users className="w-3 h-3" />{job.totalRecipients} recipients</span>
+                          <span>{job.sent} sent · {job.failed} failed</span>
+                        </div>
+                        <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${job.failed > 0 && !isActive ? "bg-red-400" : "bg-primary"}`}
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </>
+                    )}
+                    {job.errorMessage && (
+                      <p className="mt-1.5 text-xs text-red-500">{job.errorMessage}</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Manual reminder trigger */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">

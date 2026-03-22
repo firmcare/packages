@@ -52,7 +52,7 @@ function createTransporter(cfg: SmtpConfig) {
 
 // ─── HTML template helpers ──────────────────────────────────────────────────
 
-function baseHtml(title: string, preheader: string, body: string): string {
+function baseHtml(title: string, preheader: string, body: string, unsubscribeUrl?: string | null): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -88,9 +88,10 @@ function baseHtml(title: string, preheader: string, body: string): string {
   </div>
   <div class="body">${body}</div>
   <div class="footer">
-    <p>FirmCare Diagnostics &bull; Lagos, Nigeria</p>
+    <p>FirmCare Diagnostics &bull; Abuja, Nigeria</p>
     <p>Need help? <a href="mailto:info@firmcare.com.ng" style="color:#A44692;">info@firmcare.com.ng</a> &bull; +234-808-874-3272</p>
     <p style="margin-top:12px;color:#bbb;font-size:11px;">This email was sent to you because you have an account with FirmCare.</p>
+    ${unsubscribeUrl ? `<p style="margin-top:8px;font-size:11px;color:#ccc;">Don't want to receive promotional emails? <a href="${unsubscribeUrl}" style="color:#bbb;text-decoration:underline;">Unsubscribe</a></p>` : ""}
   </div>
 </div>
 </body>
@@ -491,7 +492,8 @@ export async function sendResultsReadyEmail(
 export async function sendGeneralEmail(
   to: string,
   subject: string,
-  htmlContent: string
+  htmlContent: string,
+  unsubscribeUrl?: string | null
 ): Promise<SendResult> {
   const cfg = await getSmtpConfig();
   if (!cfg.host || !cfg.user || !cfg.pass) {
@@ -506,7 +508,7 @@ export async function sendGeneralEmail(
       from: `"${cfg.fromName}" <${cfg.fromEmail}>`,
       to,
       subject,
-      html: baseHtml(subject, subject, body),
+      html: baseHtml(subject, subject, body, unsubscribeUrl),
     });
     await logEmail(to, subject, "general", "sent");
     return { success: true };

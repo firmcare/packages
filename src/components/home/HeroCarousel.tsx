@@ -4,22 +4,10 @@ import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
 
 const SLIDES = [
-  {
-    src: 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?auto=format&fit=crop&q=80&w=1200',
-    alt: 'Laboratory technician analysing blood samples at FirmCare',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1200',
-    alt: 'Modern diagnostic equipment at FirmCare Diagnostics',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&q=80&w=1200',
-    alt: 'Doctor reviewing patient results at FirmCare',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=1200',
-    alt: 'Friendly medical professional welcoming a patient',
-  },
+  { src: '/hero/slide1.png', alt: 'FirmCare diagnostics and wellness' },
+  { src: '/hero/slide2.png', alt: 'Family health checkup at FirmCare' },
+  { src: '/hero/slide3.png', alt: 'Medical diagnostics at FirmCare' },
+  { src: '/hero/slide4.png', alt: 'Wellness screening at FirmCare' },
 ];
 
 const INTERVAL = 4500;

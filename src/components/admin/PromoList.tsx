@@ -184,9 +184,10 @@ export default function PromoList({ promos }: PromoListProps) {
                       <Edit className="w-4 h-4" />
                     </Link>
                     <button
-                      onClick={() => setConfirmDeleteId(promo.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                      title="Delete"
+                      onClick={() => promo.usageCount === 0 && setConfirmDeleteId(promo.id)}
+                      disabled={promo.usageCount > 0}
+                      className={`p-2 rounded-lg ${promo.usageCount > 0 ? "text-gray-300 cursor-not-allowed" : "text-red-600 hover:bg-red-50"}`}
+                      title={promo.usageCount > 0 ? "Cannot delete — promo has been used" : "Delete"}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

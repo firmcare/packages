@@ -1,2 +1,0 @@
--- This migration was rolled back. The Package<->Test relation remains many-to-many via _PackageTests.
--- No schema changes needed.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Copy, Check, RefreshCw, UserMinus, UserPlus, Loader2, X, Phone, Mail, Calendar, Tag, TrendingUp, Clock, Wallet } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import Pagination from "@/components/ui/Pagination";
@@ -174,6 +174,7 @@ function AgentModal({
 export default function AgentsManager({ initialAgents }: { initialAgents: Agent[] }) {
   const toast = useToast();
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
+  useEffect(() => { setAgents(initialAgents); }, [initialAgents]);
   const { page, setPage, totalPages, paged: pagedAgents, totalItems, pageSize } = usePagination(agents, 20);
   const [selected, setSelected] = useState<Agent | null>(null);
   const [showForm, setShowForm] = useState(false);

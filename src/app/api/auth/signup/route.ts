@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import crypto from "crypto";
+import { normalizeEmail, emailVariantsFilter } from "@/lib/email-utils";
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -17,9 +18,10 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const validatedData = signupSchema.parse(body);
+    const normalisedEmail = normalizeEmail(validatedData.email);
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email: validatedData.email },
+    const existingUser = await prisma.user.findFirst({
+      where: emailVariantsFilter(normalisedEmail),
     });
 
     if (existingUser) {
@@ -27,7 +29,7 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = await bcrypt.hash(validatedData.password, 10);
-    const referralCode = await generateReferralCode(validatedData.email, validatedData.name);
+    const referralCode = await generateReferralCode(normalisedEmail, validatedData.name);
 
     const userRole = await prisma.customRole.findUnique({ where: { name: "USER" } });
     if (!userRole) {
@@ -36,7 +38,7 @@ export async function POST(req: Request) {
 
     const user = await prisma.user.create({
       data: {
-        email: validatedData.email,
+        email: normalisedEmail,
         password: hashedPassword,
         name: validatedData.name,
         phone: validatedData.phone,
@@ -65,7 +67,7 @@ export async function POST(req: Request) {
 
     // Send verification email (non-blocking — don't fail signup if email fails)
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-    sendVerificationEmail(user.email, user.name, token, baseUrl).catch(console.error);
+    sendVerificationEmail(normalisedEmail, user.name, token, baseUrl).catch(console.error);
 
     return NextResponse.json({ ...user, requiresVerification: true });
   } catch (error) {

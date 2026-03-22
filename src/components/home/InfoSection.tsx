@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Check, Mail, Phone, Sparkles, FlaskConical, CalendarCheck, ClipboardList, HeartPulse } from 'lucide-react';
-import { generateHealthTip } from '@/services/geminiService';
+import { generateHealthTip, getCuratedHealthTip } from '@/services/geminiService';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 
 const HOW_IT_WORKS = [
@@ -41,7 +41,7 @@ const InfoSection: React.FC = () => {
     const randomTopic = topics[Math.floor(Math.random() * topics.length)];
     generateHealthTip(randomTopic)
       .then((tip) => setHealthTip(tip))
-      .catch(() => setHealthTip('Drink plenty of water and get at least 8 hours of sleep for optimal health.'));
+      .catch(() => setHealthTip(getCuratedHealthTip(randomTopic)));
   }, []);
 
   return (

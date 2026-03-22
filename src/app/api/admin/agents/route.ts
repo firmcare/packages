@@ -5,6 +5,7 @@ import { logAudit } from "@/lib/audit";
 import { auth } from "@/auth";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { normalizeEmail, emailVariantsFilter } from "@/lib/email-utils";
 
 async function ensureAgentRole() {
   return prisma.customRole.upsert({
@@ -76,11 +77,12 @@ export async function POST(req: Request) {
   try {
     const session = await auth();
     await requireAdmin();
-    const { name, email, phone } = await req.json();
-    if (!name?.trim() || !email?.trim()) {
+    const { name, email: rawEmail, phone } = await req.json();
+    if (!name?.trim() || !rawEmail?.trim()) {
       return new NextResponse("Name and email are required", { status: 400 });
     }
-    const existing = await prisma.user.findUnique({ where: { email: email.trim().toLowerCase() } });
+    const email = normalizeEmail(rawEmail);
+    const existing = await prisma.user.findFirst({ where: emailVariantsFilter(email) });
     if (existing) return new NextResponse("Email already in use", { status: 409 });
 
     const agentRole = await ensureAgentRole();
@@ -90,7 +92,7 @@ export async function POST(req: Request) {
 
     const agent = await prisma.user.create({
       data: {
-        name: name.trim(), email: email.trim().toLowerCase(), phone: phone?.trim() || null,
+        name: name.trim(), email, phone: phone?.trim() || null,
         password: hashedPassword, roleId: agentRole.id, referralCode, emailVerified: true,
       },
       select: { id: true, name: true, email: true, phone: true, referralCode: true, createdAt: true },

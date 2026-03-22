@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { logAudit } from "@/lib/audit";
+import { normalizeEmail, emailVariantsFilter } from "@/lib/email-utils";
 
 async function requireSuperAdminApi() {
   const session = await auth();
@@ -64,16 +65,17 @@ export async function POST(req: Request) {
     const session = await requireSuperAdminApi();
     if (!session) return new NextResponse("Forbidden", { status: 403 });
 
-    const { name, email, role: roleName, password: rawPassword } = await req.json();
+    const { name, email: rawEmail, role: roleName, password: rawPassword } = await req.json();
 
-    if (!name || !email || !roleName) {
+    if (!name || !rawEmail || !roleName) {
       return NextResponse.json({ error: "name, email, and role are required" }, { status: 400 });
     }
     if (!["ADMIN", "SUPERADMIN"].includes(roleName)) {
       return NextResponse.json({ error: "Role must be ADMIN or SUPERADMIN" }, { status: 400 });
     }
 
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const email = normalizeEmail(rawEmail);
+    const existing = await prisma.user.findFirst({ where: emailVariantsFilter(email) });
     if (existing) {
       // Upgrade existing user to the specified admin role
       const targetRole = await prisma.customRole.findUnique({ where: { name: roleName } });

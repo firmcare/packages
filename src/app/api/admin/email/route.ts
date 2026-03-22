@@ -1,45 +1,36 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth-utils";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { sendGeneralEmail } from "@/lib/email";
 import { z } from "zod";
 
 const schema = z.object({
   subject: z.string().min(1),
   htmlContent: z.string().min(1),
-  recipientType: z.enum(["all", "verified", "specific"]),
+  recipientType: z.enum(["all", "users", "agents", "admins", "specific"]),
   specificEmails: z.array(z.string().email()).optional(),
 });
 
 export async function POST(req: Request) {
   try {
+    const session = await auth();
     await requireAdmin();
     const body = schema.parse(await req.json());
 
-    let emails: string[] = [];
+    const job = await prisma.emailBroadcastJob.create({
+      data: {
+        subject: body.subject,
+        htmlContent: body.htmlContent,
+        recipientType: body.recipientType,
+        specificEmails: body.specificEmails?.length
+          ? JSON.stringify(body.specificEmails)
+          : null,
+        actorId: session!.user.id,
+        status: "QUEUED",
+      },
+    });
 
-    if (body.recipientType === "specific") {
-      emails = body.specificEmails ?? [];
-    } else {
-      const where = body.recipientType === "verified" ? { emailVerified: true } : {};
-      const users = await prisma.user.findMany({ where, select: { email: true } });
-      emails = users.map((u) => u.email);
-    }
-
-    if (emails.length === 0) {
-      return NextResponse.json({ success: false, message: "No recipients found." }, { status: 400 });
-    }
-
-    // Send emails sequentially to avoid SMTP rate limits
-    let sent = 0;
-    let failed = 0;
-    for (const email of emails) {
-      const result = await sendGeneralEmail(email, body.subject, body.htmlContent);
-      if (result.success) sent++;
-      else failed++;
-    }
-
-    return NextResponse.json({ success: true, sent, failed, total: emails.length });
+    return NextResponse.json({ jobId: job.id, status: "QUEUED" }, { status: 202 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new NextResponse(JSON.stringify(error.issues), { status: 400 });

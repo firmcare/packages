@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { normalizeEmail, emailVariantsFilter } from "@/lib/email-utils";
 
 export async function POST(req: Request) {
   try {
@@ -12,12 +13,30 @@ export async function POST(req: Request) {
       );
     }
 
-    const emailLower = email.trim().toLowerCase();
+    const normalised = normalizeEmail(email);
 
-    // Block duplicate pending/approved applications from the same email
+    // Block if any user account resolves to the same base email
+    const existingUser = await prisma.user.findFirst({
+      where: emailVariantsFilter(normalised),
+      select: { role: { select: { name: true } } },
+    });
+    if (existingUser) {
+      const role = existingUser.role?.name;
+      return NextResponse.json(
+        {
+          error:
+            role === "AGENT"
+              ? "An agent account already exists for this email address."
+              : "This email is already registered. Please use a different email address to apply.",
+        },
+        { status: 409 }
+      );
+    }
+
+    // Block duplicate pending/approved applications for the same base email
     const existing = await prisma.agentApplication.findFirst({
       where: {
-        email: emailLower,
+        ...emailVariantsFilter(normalised),
         status: { in: ["PENDING", "APPROVED"] },
       },
     });
@@ -33,10 +52,11 @@ export async function POST(req: Request) {
       );
     }
 
+    // Store the normalised email so future lookups are consistent
     await prisma.agentApplication.create({
       data: {
         name: name.trim(),
-        email: emailLower,
+        email: normalised,
         phone: phone?.trim() || null,
         city: city?.trim() || null,
         motivation: motivation.trim(),

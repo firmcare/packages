@@ -1,3 +1,4 @@
+import 'dotenv/config'; // must be first — loads .env before prisma client initialises
 import bcrypt from 'bcryptjs';
 import { prisma } from '../src/lib/prisma';
 import { generateReferralCode } from '../src/lib/referral';
@@ -43,6 +44,13 @@ const rolePermissions: Record<string, { resource: string; action: string }[]> = 
     { resource: 'promos',       action: 'update' },
     { resource: 'promos',       action: 'delete' },
     { resource: 'transactions', action: 'read'   },
+  ],
+  AGENT: [
+    { resource: 'bookings',   action: 'read'   },
+    { resource: 'bookings',   action: 'update' },
+    { resource: 'packages',   action: 'read'   },
+    { resource: 'categories', action: 'read'   },
+    { resource: 'tests',      action: 'read'   },
   ],
   SUPERADMIN: [
     { resource: 'bookings',     action: 'create' },
@@ -98,6 +106,11 @@ async function main() {
     update: {},
     create: { name: 'ADMIN', description: 'Administrator', isSystem: true },
   });
+  const agentRole = await prisma.customRole.upsert({
+    where: { name: 'AGENT' },
+    update: {},
+    create: { name: 'AGENT', description: 'Marketing Agent', isSystem: true },
+  });
   const superAdminRole = await prisma.customRole.upsert({
     where: { name: 'SUPERADMIN' },
     update: {},
@@ -106,6 +119,7 @@ async function main() {
   const roleMap: Record<string, typeof userRole> = {
     USER: userRole,
     ADMIN: adminRole,
+    AGENT: agentRole,
     SUPERADMIN: superAdminRole,
   };
   console.log('Roles created');
@@ -232,7 +246,7 @@ async function main() {
       title: 'Elderly Care Package',
       description: 'Tailored for seniors, this package monitors age-related health concerns to maintain quality of life.',
       price: 'NGN850,000',
-      imageUrl: 'https://images.unsplash.com/photo-1581579186913-45ac3e6e3dd2?auto=format&fit=crop&q=80&w=800',
+      imageUrl: 'https://images.unsplash.com/photo-1581579186913-45ac3e6e3dd2?auto=format&fit=crop&q=80&w=800' ,
       categoryName: 'Elderly Wellness',
       includes: [
         'Bone Mineral Density', 'Lipid Profile', 'Blood Sugar (Fasting & PP)',

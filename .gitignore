@@ -16,7 +16,7 @@
 # next.js
 /.next/
 /out/
-
+/.claude/
 # production
 /build
 
@@ -35,6 +35,9 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# prisma generated client
+/generated/
 
 # typescript
 *.tsbuildinfo
