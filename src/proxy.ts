@@ -2,12 +2,19 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
+// NextAuth v5 uses a different cookie name than v4's default.
+// On HTTPS (production) it adds the __Secure- prefix.
+const cookieName =
+  process.env.NODE_ENV === "production"
+    ? "__Secure-authjs.session-token"
+    : "authjs.session-token";
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Protect /admin routes
   if (pathname.startsWith("/admin")) {
-    const token = await getToken({ req: request, secret: process.env.AUTH_SECRET });
+    const token = await getToken({ req: request, secret: process.env.AUTH_SECRET, cookieName });
 
     if (!token) {
       const loginUrl = new URL("/auth/admin/login", request.url);
@@ -30,7 +37,7 @@ export async function proxy(request: NextRequest) {
 
   // Protect /agent routes
   if (pathname.startsWith("/agent")) {
-    const token = await getToken({ req: request, secret: process.env.AUTH_SECRET });
+    const token = await getToken({ req: request, secret: process.env.AUTH_SECRET, cookieName });
 
     if (!token) {
       const loginUrl = new URL("/auth/login", request.url);

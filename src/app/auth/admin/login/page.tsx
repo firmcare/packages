@@ -6,10 +6,12 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { useToast } from '@/context/ToastContext'
 
 function AdminLoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const toast = useToast()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -52,8 +54,11 @@ function AdminLoginForm() {
       const session = await response.json()
 
       if (session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPERADMIN') {
-        router.push('/admin')
-        router.refresh()
+        toast.success('Welcome back! Redirecting to dashboard…')
+        setTimeout(() => {
+          router.push('/admin')
+          router.refresh()
+        }, 1000)
       } else {
         setError('Access denied. Admin credentials required.')
         setLoading(false)
