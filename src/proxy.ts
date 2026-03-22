@@ -2,19 +2,19 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-// NextAuth v5 uses a different cookie name than v4's default.
-// On HTTPS (production) it adds the __Secure- prefix.
-const cookieName =
-  process.env.NODE_ENV === "production"
-    ? "__Secure-authjs.session-token"
-    : "authjs.session-token";
+// secureCookie mirrors NextAuth v5's own logic: use __Secure- prefix when AUTH_URL is HTTPS.
+const secureCookie = (process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "").startsWith("https://");
+
+async function getSessionToken(request: NextRequest) {
+  return getToken({ req: request, secret: process.env.AUTH_SECRET, secureCookie, cookieName: secureCookie ? "__Secure-authjs.session-token" : "authjs.session-token" });
+}
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Protect /admin routes
   if (pathname.startsWith("/admin")) {
-    const token = await getToken({ req: request, secret: process.env.AUTH_SECRET, cookieName });
+    const token = await getSessionToken(request);
 
     if (!token) {
       const loginUrl = new URL("/auth/admin/login", request.url);
@@ -37,7 +37,7 @@ export async function proxy(request: NextRequest) {
 
   // Protect /agent routes
   if (pathname.startsWith("/agent")) {
-    const token = await getToken({ req: request, secret: process.env.AUTH_SECRET, cookieName });
+    const token = await getSessionToken(request);
 
     if (!token) {
       const loginUrl = new URL("/auth/login", request.url);
@@ -55,6 +55,11 @@ export async function proxy(request: NextRequest) {
       const loginUrl = new URL("/auth/login", request.url);
       loginUrl.searchParams.set("error", "account_deactivated");
       return NextResponse.redirect(loginUrl);
+    }
+
+    // Force password change on first login
+    if (token.mustChangePassword && !pathname.startsWith("/agent/change-password")) {
+      return NextResponse.redirect(new URL("/agent/change-password", request.url));
     }
   }
 

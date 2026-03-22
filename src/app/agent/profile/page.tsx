@@ -1,6 +1,6 @@
 import { requireAgent } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
-import AgentProfileForm from "@/components/agent/AgentProfileForm";
+import AgentProfileForm, { AgentChangePasswordForm } from "@/components/agent/AgentProfileForm";
 
 export default async function AgentProfilePage() {
   const session = await requireAgent();
@@ -19,6 +19,7 @@ export default async function AgentProfilePage() {
         <p className="text-gray-500 mt-1 text-sm">Update your contact information. Your referral code cannot be changed.</p>
       </div>
       <AgentProfileForm user={user} />
+      <AgentChangePasswordForm />
     </div>
   );
 }

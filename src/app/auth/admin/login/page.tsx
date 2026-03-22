@@ -56,8 +56,7 @@ function AdminLoginForm() {
       if (session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPERADMIN') {
         toast.success('Welcome back! Redirecting to dashboard…')
         setTimeout(() => {
-          router.push('/admin')
-          router.refresh()
+          window.location.href = '/admin'
         }, 1000)
       } else {
         setError('Access denied. Admin credentials required.')

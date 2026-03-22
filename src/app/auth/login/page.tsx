@@ -2,14 +2,15 @@
 
 import { Suspense, useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { useToast } from '@/context/ToastContext'
 
 function LoginForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
+  const toast = useToast()
   const callbackUrl = searchParams.get('callbackUrl') || ''
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -52,16 +53,18 @@ function LoginForm() {
         // Admins always go to admin; agents to agent dashboard.
         // Regular users go to callbackUrl if present, otherwise dashboard.
         const role = session?.user?.role
-        if (role === 'ADMIN' || role === 'SUPERADMIN') {
-          router.push('/admin')
-        } else if (role === 'AGENT') {
-          router.push('/agent/dashboard')
-        } else if (callbackUrl && callbackUrl.startsWith('/')) {
-          router.push(callbackUrl)
-        } else {
-          router.push('/dashboard')
-        }
-        router.refresh()
+        toast.success('Welcome back! Redirecting…')
+        setTimeout(() => {
+          if (role === 'ADMIN' || role === 'SUPERADMIN') {
+            window.location.href = '/admin'
+          } else if (role === 'AGENT') {
+            window.location.href = '/agent/dashboard'
+          } else if (callbackUrl && callbackUrl.startsWith('/')) {
+            window.location.href = callbackUrl
+          } else {
+            window.location.href = '/dashboard'
+          }
+        }, 1000)
       }
     } catch (error) {
       setError('An error occurred. Please try again.')

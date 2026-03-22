@@ -93,7 +93,7 @@ export async function POST(req: Request) {
     const agent = await prisma.user.create({
       data: {
         name: name.trim(), email, phone: phone?.trim() || null,
-        password: hashedPassword, roleId: agentRole.id, referralCode, emailVerified: true,
+        password: hashedPassword, roleId: agentRole.id, referralCode, emailVerified: true, mustChangePassword: true,
       },
       select: { id: true, name: true, email: true, phone: true, referralCode: true, createdAt: true },
     });

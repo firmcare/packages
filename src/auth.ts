@@ -73,6 +73,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.id = dbUser.id;
           token.referralCode = dbUser.referralCode;
           token.isActive = dbUser.isActive;
+          token.mustChangePassword = dbUser.mustChangePassword;
         }
       } else if (token.email) {
         const dbUser = await prisma.user.findUnique({
@@ -84,6 +85,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.id = dbUser.id;
           token.referralCode = dbUser.referralCode;
           token.isActive = dbUser.isActive;
+          token.mustChangePassword = dbUser.mustChangePassword;
         }
       }
       return token;

@@ -41,7 +41,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (body.action === "reset_password") {
       const newPassword = crypto.randomBytes(8).toString("hex");
       const hashed = await bcrypt.hash(newPassword, 12);
-      await prisma.user.update({ where: { id }, data: { password: hashed } });
+      await prisma.user.update({ where: { id }, data: { password: hashed, mustChangePassword: true } });
       return NextResponse.json({ tempPassword: newPassword });
     }
 
