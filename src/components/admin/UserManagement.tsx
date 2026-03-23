@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import {
   User, Mail, Phone, Calendar, MapPin,
   CheckCircle, XCircle, Gift, X, BookOpen,
@@ -26,6 +27,7 @@ interface UserManagementProps {
 }
 
 function UserDetailsModal({ user, onClose }: { user: UserData; onClose: () => void }) {
+  useScrollLock();
   const fmt = (iso: string) =>
     new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" });
 

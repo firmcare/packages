@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useScrollLock } from "@/hooks/useScrollLock";
 import { CheckCircle, XCircle, Clock, Users, UserSquare2, Shield, X, Loader2 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import Pagination from "@/components/ui/Pagination";
@@ -71,6 +72,7 @@ function RewardModal({
   onStatusChange: (id: string, status: RewardStatus) => void;
   updating: boolean;
 }) {
+  useScrollLock();
   const scfg = STATUS_CONFIG[reward.status];
   const tcfg = TYPE_CONFIG[reward.referralType ?? "USER"];
   const SIcon = scfg.icon;

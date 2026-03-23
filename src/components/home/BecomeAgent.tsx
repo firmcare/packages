@@ -198,7 +198,7 @@ export default function BecomeAgent({ agentPercent = 10 }: { agentPercent?: numb
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-semibold text-gray-600 mb-1.5">Phone Number</label>
                       <input

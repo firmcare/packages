@@ -1,6 +1,6 @@
 import { requireAgent } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
-import { Gift, Users, TrendingUp, Wallet, Copy } from "lucide-react";
+import { Gift, Users, TrendingUp, Wallet } from "lucide-react";
 
 async function getAgentStats(userId: string, referralCode: string) {
   const [statsByStatus, totalReferees, recentRewards] = await Promise.all([
@@ -72,7 +72,7 @@ export default async function AgentDashboard() {
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card) => {
           const Icon = card.icon;
           return (
@@ -88,11 +88,17 @@ export default async function AgentDashboard() {
       </div>
 
       {/* Recent rewards */}
-      {stats.recentRewards.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900">Recent Rewards</h2>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h2 className="font-semibold text-gray-900">Recent Rewards</h2>
+        </div>
+        {stats.recentRewards.length === 0 ? (
+          <div className="py-12 text-center text-gray-400">
+            <Gift className="w-10 h-10 mx-auto mb-3 text-gray-200" />
+            <p className="text-sm font-medium text-gray-500">No rewards yet</p>
+            <p className="text-xs mt-1">Share your referral code to start earning rewards</p>
           </div>
+        ) : (
           <div className="divide-y divide-gray-50">
             {stats.recentRewards.map((r) => (
               <div key={r.id} className="px-6 py-3 flex items-center justify-between">
@@ -113,8 +119,8 @@ export default async function AgentDashboard() {
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

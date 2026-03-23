@@ -229,9 +229,9 @@ function BusinessHoursSection({ initialRaw }: { initialRaw: string | undefined }
       </div>
 
       {/* Day rows */}
-      <div className="p-6 space-y-1">
-        {/* Column headers */}
-        <div className="grid grid-cols-[100px_44px_1fr_1fr] sm:grid-cols-[130px_44px_1fr_1fr] gap-3 mb-2 px-1">
+      <div className="p-6 space-y-2">
+        {/* Column headers — hidden on mobile */}
+        <div className="hidden sm:grid sm:grid-cols-[130px_44px_1fr_1fr] gap-3 mb-2 px-1">
           <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Day</span>
           <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">Open</span>
           <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Opens At</span>
@@ -243,50 +243,57 @@ function BusinessHoursSection({ initialRaw }: { initialRaw: string | undefined }
           return (
             <div
               key={day}
-              className={`grid grid-cols-[100px_44px_1fr_1fr] sm:grid-cols-[130px_44px_1fr_1fr] gap-3 items-center py-2 px-1 rounded-xl transition-colors ${
-                d.enabled ? "bg-white" : "bg-gray-50"
-              }`}
+              className={`rounded-xl px-3 py-2 transition-colors ${d.enabled ? "bg-white" : "bg-gray-50"}`}
             >
-              {/* Day name */}
-              <span className={`text-sm font-semibold truncate ${d.enabled ? "text-gray-900" : "text-gray-400"}`}>
-                <span className="hidden sm:inline">{day}</span>
-                <span className="sm:hidden">{day.slice(0, 3)}</span>
-              </span>
+              {/* Mobile: 2 rows. sm+: single 4-col grid row */}
+              <div className="sm:grid sm:grid-cols-[130px_44px_1fr_1fr] sm:gap-3 sm:items-center">
+                {/* Row 1 on mobile: day name + toggle */}
+                <div className="flex items-center justify-between mb-2 sm:contents">
+                  <span className={`text-sm font-semibold ${d.enabled ? "text-gray-900" : "text-gray-400"}`}>
+                    <span className="hidden sm:inline">{day}</span>
+                    <span className="sm:hidden">{day}</span>
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={d.enabled}
+                    onClick={() => update(day, "enabled", !d.enabled)}
+                    className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${
+                      d.enabled ? "bg-primary" : "bg-gray-200"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                        d.enabled ? "translate-x-4" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
 
-              {/* Toggle */}
-              <button
-                type="button"
-                role="switch"
-                aria-checked={d.enabled}
-                onClick={() => update(day, "enabled", !d.enabled)}
-                className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${
-                  d.enabled ? "bg-primary" : "bg-gray-200"
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                    d.enabled ? "translate-x-4" : "translate-x-0"
-                  }`}
-                />
-              </button>
-
-              {/* Opens At */}
-              <input
-                type="time"
-                value={d.open}
-                disabled={!d.enabled}
-                onChange={(e) => update(day, "open", e.target.value)}
-                className="h-9 px-3 border border-gray-200 rounded-xl text-sm bg-white disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed w-full"
-              />
-
-              {/* Closes At */}
-              <input
-                type="time"
-                value={d.close}
-                disabled={!d.enabled}
-                onChange={(e) => update(day, "close", e.target.value)}
-                className="h-9 px-3 border border-gray-200 rounded-xl text-sm bg-white disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed w-full"
-              />
+                {/* Row 2 on mobile: time inputs side by side */}
+                <div className="grid grid-cols-2 gap-2 sm:contents">
+                  <div className="sm:contents">
+                    <span className="block text-xs text-gray-400 mb-1 sm:hidden">Opens At</span>
+                    <input
+                      type="time"
+                      value={d.open}
+                      disabled={!d.enabled}
+                      onChange={(e) => update(day, "open", e.target.value)}
+                      className="h-9 px-3 border border-gray-200 rounded-xl text-sm bg-white disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed w-full"
+                    />
+                  </div>
+                  <div className="sm:contents">
+                    <span className="block text-xs text-gray-400 mb-1 sm:hidden">Closes At</span>
+                    <input
+                      type="time"
+                      value={d.close}
+                      disabled={!d.enabled}
+                      onChange={(e) => update(day, "close", e.target.value)}
+                      className="h-9 px-3 border border-gray-200 rounded-xl text-sm bg-white disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed w-full"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           );
         })}

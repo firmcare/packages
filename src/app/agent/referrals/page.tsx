@@ -38,7 +38,7 @@ export default async function AgentReferralsPage() {
         <p className="text-gray-500 mt-1 text-sm">Track all referral rewards earned through your referral code.</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Total Referrals", value: rewards.length,                                        sub: "All time" },
           { label: "Pending",         value: pending?._count ?? 0,                                  sub: `₦${Number(pending?._sum?.amount ?? 0).toLocaleString()} outstanding` },

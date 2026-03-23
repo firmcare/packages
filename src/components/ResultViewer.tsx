@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FileText, X, Download, Loader2, ExternalLink } from "lucide-react";
 
 interface ResultViewerProps {
@@ -13,6 +13,13 @@ export default function ResultViewer({ bookingId, packageTitle }: ResultViewerPr
   const [loading, setLoading] = useState(false);
   const [url, setUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = original; };
+  }, [open]);
 
   const fetchUrl = async () => {
     if (url) return url; // reuse if already fetched this session

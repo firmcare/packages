@@ -329,7 +329,7 @@ export default function EmailComposer() {
 
       {/* Manual reminder trigger */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h3 className="font-bold text-gray-900 text-sm">Booking Reminders</h3>
             <p className="text-xs text-gray-400 mt-1">

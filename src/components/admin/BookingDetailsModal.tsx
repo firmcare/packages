@@ -1,4 +1,5 @@
 "use client";
+import { useScrollLock } from "@/hooks/useScrollLock";
 
 import { useRef, useState, useEffect } from "react";
 import {
@@ -79,6 +80,7 @@ const EVENT_STYLES: Record<string, { dot: string; text: string }> = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function BookingDetailsModal({ booking, onClose }: BookingDetailsModalProps) {
+  useScrollLock();
   const router = useRouter();
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -218,7 +220,7 @@ export default function BookingDetailsModal({ booking, onClose }: BookingDetails
                 </span>
               )}
             </div>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-gray-600">User:</span>
                 <p className="font-medium">{booking.user.name || "N/A"}</p>

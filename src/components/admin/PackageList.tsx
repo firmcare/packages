@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Edit, Eye, Ban, CheckCircle, Loader2 } from "lucide-react";
+import { Edit, Eye, Ban, CheckCircle, Loader2, PackageX } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/context/ToastContext";
 import Pagination from "@/components/ui/Pagination";
@@ -83,6 +83,14 @@ export default function PackageList({ packages: initialPackages }: PackageListPr
         />
       </div>
 
+      {filteredPackages.length === 0 ? (
+        <div className="py-16 text-center text-gray-400">
+          <PackageX className="w-10 h-10 mx-auto mb-3 text-gray-200" />
+          <p className="text-sm font-medium text-gray-500">No packages found</p>
+          <p className="text-xs mt-1">Try adjusting your search or add a new package</p>
+        </div>
+      ) : (
+      <>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
@@ -193,6 +201,8 @@ export default function PackageList({ packages: initialPackages }: PackageListPr
       <div className="px-6 pb-4">
         <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={totalItems} pageSize={pageSize} />
       </div>
+      </>
+      )}
 
       <ConfirmModal
         open={!!confirmToggle}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ScrollLock } from "@/hooks/useScrollLock";
 import Link from "next/link";
 import { Pencil, X } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
@@ -92,6 +93,7 @@ export default function TestList({ tests }: { tests: Test[] }) {
       {/* Packages modal */}
       {selectedTest && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <ScrollLock />
           <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[80vh] flex flex-col">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <div>

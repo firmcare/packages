@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Calendar, User, Package } from "lucide-react";
+import { Calendar, User, Package, CalendarX2 } from "lucide-react";
 
 interface Booking {
   id: string;
@@ -48,6 +48,13 @@ export default function RecentBookings({ bookings }: RecentBookingsProps) {
           </Link>
         </div>
       </div>
+      {bookings.length === 0 ? (
+        <div className="py-16 text-center text-gray-400">
+          <CalendarX2 className="w-10 h-10 mx-auto mb-3 text-gray-200" />
+          <p className="text-sm font-medium text-gray-500">No recent bookings</p>
+          <p className="text-xs mt-1">Bookings will appear here once customers start booking</p>
+        </div>
+      ) : (
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
@@ -114,6 +121,7 @@ export default function RecentBookings({ bookings }: RecentBookingsProps) {
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }
