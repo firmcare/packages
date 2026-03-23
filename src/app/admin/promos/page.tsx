@@ -9,12 +9,12 @@ export default async function PromosPage() {
   const { promos } = await adminFetch<any>("/api/admin/promos");
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap gap-3 items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Promotional Codes</h1>
           <p className="text-gray-600 mt-2">Create and manage discount codes</p>
         </div>
-        <Link href="/admin/promos/new" className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-[#8a3a7a] transition-colors">
+        <Link href="/admin/promos/new" className="flex items-center text-sm gap-2 bg-primary text-white p-3 rounded-lg hover:bg-primary transition-colors">
           <Plus className="w-5 h-5" />
           Create Promo
         </Link>

@@ -264,7 +264,7 @@ export default function AdminsManager({ admins: initial, currentUserId }: Props)
               Auto-generated passwords are shown once in the toast notification — copy them immediately.
             </p>
 
-            <div className="flex items-center gap-3 pt-1">
+            <div className="flex flex-wrap items-center gap-3 pt-1">
               <button
                 type="submit"
                 disabled={creating}

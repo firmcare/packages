@@ -85,15 +85,15 @@ export default function AgentApplicationsManager() {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100">
       {/* Tabs */}
-      <div className="flex border-b border-gray-100">
+      <div className="flex flex-wrap items-center gap-1 p-3 border-b border-gray-100">
         {STATUS_TABS.map((t) => (
           <button
             key={t.value}
             onClick={() => setTab(t.value)}
-            className={`px-5 py-3 text-sm font-semibold transition-colors border-b-2 -mb-px ${
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap ${
               tab === t.value
-                ? "border-primary text-primary"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                ? "bg-primary text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             {t.label}
@@ -102,7 +102,7 @@ export default function AgentApplicationsManager() {
         <div className="flex-1" />
         <button
           onClick={fetchApps}
-          className="px-4 py-3 text-gray-400 hover:text-gray-600 transition-colors"
+          className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
           title="Refresh"
         >
           <RefreshCw className="w-4 h-4" />

@@ -65,19 +65,19 @@ export default function DateRangeFilter({ value, onChange, className }: Props) {
           </button>
         ))}
       </div>
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap w-full sm:w-auto">
         <input
           type="date"
           value={value.from}
           onChange={e => onChange({ ...value, from: e.target.value })}
-          className="h-7 px-2 text-xs border border-gray-200 rounded-lg bg-white text-gray-700 focus:ring-1 focus:ring-primary focus:outline-none"
+          className="h-7 flex-1 min-w-0 px-2 text-xs border border-gray-200 rounded-lg bg-white text-gray-700 focus:ring-1 focus:ring-primary focus:outline-none"
         />
-        <span className="text-xs text-gray-400">→</span>
+        <span className="text-xs text-gray-400 shrink-0">→</span>
         <input
           type="date"
           value={value.to}
           onChange={e => onChange({ ...value, to: e.target.value })}
-          className="h-7 px-2 text-xs border border-gray-200 rounded-lg bg-white text-gray-700 focus:ring-1 focus:ring-primary focus:outline-none"
+          className="h-7 flex-1 min-w-0 px-2 text-xs border border-gray-200 rounded-lg bg-white text-gray-700 focus:ring-1 focus:ring-primary focus:outline-none"
         />
       </div>
     </div>

@@ -26,6 +26,14 @@ export default function ConfirmModal({
 }: ConfirmModalProps) {
   const cancelRef = useRef<HTMLButtonElement>(null);
 
+  // Lock scroll when open
+  useEffect(() => {
+    if (!open) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = original; };
+  }, [open]);
+
   // Focus cancel button when modal opens
   useEffect(() => {
     if (open) cancelRef.current?.focus();

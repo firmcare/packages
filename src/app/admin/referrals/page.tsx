@@ -33,7 +33,7 @@ export default async function ReferralsPage() {
         <h1 className="text-3xl font-bold text-gray-900">Referrals</h1>
         <p className="text-gray-500 mt-1 text-sm">Track referral rewards and pay out earnings to users.</p>
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {summaryCards.map(card => (
           <div key={card.label} className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
             <p className="text-2xl font-extrabold text-gray-900">{card.value}</p>

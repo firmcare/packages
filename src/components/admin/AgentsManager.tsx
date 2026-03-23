@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Copy, Check, RefreshCw, UserMinus, UserPlus, Loader2, X, Phone, Mail, Calendar, Tag, TrendingUp, Clock, Wallet } from "lucide-react";
+import { useScrollLock, ScrollLock } from "@/hooks/useScrollLock";
+import { Plus, Copy, Check, RefreshCw, UserMinus, UserPlus, Loader2, X, Phone, Mail, Calendar, Tag, TrendingUp, Clock, Wallet, ChevronRight } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import Pagination from "@/components/ui/Pagination";
 import { usePagination } from "@/hooks/usePagination";
@@ -45,6 +46,7 @@ function AgentModal({
   onCopy: (text: string, id: string) => void;
   copied: string | null;
 }) {
+  useScrollLock();
   const busy = actionId === agent.id;
 
   return (
@@ -107,7 +109,7 @@ function AgentModal({
           {/* Earnings breakdown */}
           <div>
             <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Earnings Breakdown</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="bg-gray-50 rounded-xl p-3">
                 <div className="flex items-center gap-1.5 mb-1">
                   <Clock className="w-3.5 h-3.5 text-yellow-500" />
@@ -260,6 +262,7 @@ export default function AgentsManager({ initialAgents }: { initialAgents: Agent[
       {/* Temp credentials modal */}
       {tempCredentials && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <ScrollLock />
           <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-gray-900 text-lg">Agent Credentials</h3>
@@ -295,11 +298,11 @@ export default function AgentsManager({ initialAgents }: { initialAgents: Agent[
       )}
 
       {/* Header + Add button */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap-reverse gap-3 items-center justify-between">
         <p className="text-sm text-gray-500">{agents.filter(a => a.isActive).length} active · {agents.length} total</p>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
+          className="flex items-center gap-2 p-3 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary-dark transition-colors"
         >
           <Plus className="w-4 h-4" />
           Onboard Agent
@@ -360,16 +363,18 @@ export default function AgentsManager({ initialAgents }: { initialAgents: Agent[
             <p className="text-xs mt-1">Click "Onboard Agent" to add your first marketing officer.</p>
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">
                 <th className="px-5 py-3">Agent</th>
                 <th className="px-5 py-3">Referral Code</th>
-                <th className="px-5 py-3">Referrals</th>
-                <th className="px-5 py-3">Pending</th>
-                <th className="px-5 py-3">Available</th>
+                <th className="px-5 py-3 hidden sm:table-cell">Referrals</th>
+                <th className="px-5 py-3 hidden md:table-cell">Pending</th>
+                <th className="px-5 py-3 hidden md:table-cell">Available</th>
                 <th className="px-5 py-3">Total Earned</th>
-                <th className="px-5 py-3">Joined</th>
+                <th className="px-5 py-3 hidden lg:table-cell">Joined</th>
+                <th className="px-3 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -399,17 +404,21 @@ export default function AgentsManager({ initialAgents }: { initialAgents: Agent[
                       </button>
                     </div>
                   </td>
-                  <td className="px-5 py-3.5 font-medium text-gray-700">{agent.totalReferrals}</td>
-                  <td className="px-5 py-3.5 text-yellow-700 font-medium">{fmt(agent.pendingAmount)}</td>
-                  <td className="px-5 py-3.5 text-blue-700 font-medium">{fmt(agent.availableAmount)}</td>
+                  <td className="px-5 py-3.5 font-medium text-gray-700 hidden sm:table-cell">{agent.totalReferrals}</td>
+                  <td className="px-5 py-3.5 text-yellow-700 font-medium hidden md:table-cell">{fmt(agent.pendingAmount)}</td>
+                  <td className="px-5 py-3.5 text-blue-700 font-medium hidden md:table-cell">{fmt(agent.availableAmount)}</td>
                   <td className="px-5 py-3.5 font-bold text-green-700">{fmt(agent.totalEarned)}</td>
-                  <td className="px-5 py-3.5 text-xs text-gray-500 whitespace-nowrap">
+                  <td className="px-5 py-3.5 text-xs text-gray-500 whitespace-nowrap hidden lg:table-cell">
                     {new Date(agent.createdAt).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" })}
+                  </td>
+                  <td className="px-3 py-3.5">
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
         )}
         {agents.length > 0 && (
           <div className="px-5 pb-4 pt-2">

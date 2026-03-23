@@ -177,24 +177,25 @@ export default function AuditLogTable() {
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       {/* ── Toolbar ── */}
       <div className="px-4 pt-4 pb-3 border-b border-gray-100 space-y-3">
-        {/* Row 1: search + category + export */}
+        {/* Row 1: search (full width on mobile) */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by admin, resource, or detail…"
+            className="w-full h-9 pl-9 pr-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          />
+        </div>
+        {/* Row 2: category filter + export */}
         <div className="flex items-center gap-2">
-          <div className="relative flex-1 min-w-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by admin, resource, or detail…"
-              className="w-full h-9 pl-9 pr-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
-          </div>
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
             <Filter className="w-4 h-4 text-gray-400 shrink-0" />
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="h-9 px-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="flex-1 h-9 px-3 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             >
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
@@ -208,7 +209,7 @@ export default function AuditLogTable() {
             <span className="hidden sm:inline">Export CSV</span>
           </button>
         </div>
-        {/* Row 2: date range */}
+        {/* Row 3: date range */}
         <DateRangeFilter value={dateRange} onChange={(r) => setDateRange(r)} />
       </div>
 

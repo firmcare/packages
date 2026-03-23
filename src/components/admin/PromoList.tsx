@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Edit, Trash2, Tag, ToggleLeft, ToggleRight } from "lucide-react";
+import { Edit, Trash2, Tag, ToggleLeft, ToggleRight, FlagOff } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
 import Pagination from "@/components/ui/Pagination";
@@ -91,6 +91,14 @@ export default function PromoList({ promos }: PromoListProps) {
         />
       </div>
 
+      {filteredPromos.length === 0 ? (
+        <div className="py-16 text-center text-gray-400">
+          <FlagOff className="w-10 h-10 mx-auto mb-3 text-gray-200" />
+          <p className="text-sm font-medium text-gray-500">No promo codes found</p>
+          <p className="text-xs mt-1">Try adjusting your search or create a new promo code</p>
+        </div>
+      ) : (
+      <>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
@@ -201,6 +209,8 @@ export default function PromoList({ promos }: PromoListProps) {
       <div className="px-6 pb-4">
         <Pagination page={page} totalPages={totalPages} onPageChange={setPage} totalItems={totalItems} pageSize={pageSize} />
       </div>
+      </>
+      )}
 
       <ConfirmModal
         open={!!confirmDeleteId}

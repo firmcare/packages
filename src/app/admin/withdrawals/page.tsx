@@ -21,7 +21,7 @@ export default async function WithdrawalsPage() {
         <h1 className="text-2xl font-bold text-gray-900">Agent Withdrawals</h1>
         <p className="text-sm text-gray-500 mt-1">Review and process agent payout requests</p>
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Total Requests", value: stats.total, color: "text-gray-900" },
           { label: "Pending Review", value: stats.pending, color: "text-yellow-600" },
