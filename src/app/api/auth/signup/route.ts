@@ -12,6 +12,7 @@ const signupSchema = z.object({
   password: z.string().min(6),
   name: z.string().optional(),
   phone: z.string().optional(),
+  callbackUrl: z.string().optional(),
 });
 
 export async function POST(req: Request) {
@@ -67,7 +68,9 @@ export async function POST(req: Request) {
 
     // Send verification email (non-blocking — don't fail signup if email fails)
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-    sendVerificationEmail(normalisedEmail, user.name, token, baseUrl).catch(console.error);
+    const cb = validatedData.callbackUrl && validatedData.callbackUrl.startsWith('/')
+      ? validatedData.callbackUrl : undefined;
+    sendVerificationEmail(normalisedEmail, user.name, token, baseUrl, cb).catch(console.error);
 
     return NextResponse.json({ ...user, requiresVerification: true });
   } catch (error) {

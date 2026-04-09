@@ -1,13 +1,16 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Trash2, Check, Gift, Tag, AlertCircle, CreditCard, Calendar } from 'lucide-react';
+import useSWR from 'swr';
+import { Trash2, Check, Gift, Tag, AlertCircle, CreditCard, Calendar, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 import { getStoredReferralCode } from '@/components/ui/ReferralTracker';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { fmtNgn } from '@/lib/format';
 
 
 declare global {
@@ -25,23 +28,39 @@ declare global {
   }
 }
 
-const HOME_COLLECTION_FEE = 15000;
+interface HomeCollectionLocation {
+  id: string;
+  name: string;
+  price: number;
+}
 
 export default function CheckoutPage() {
   const {
     cart, removeFromCart, clearCart,
     voucherCode, setVoucherCode, appliedPromo, setAppliedPromo,
     referralCode, setReferralCode, appliedReferral, setAppliedReferral,
+    selectedLocationId, setSelectedLocationId,
+    selectedDate: savedDate, setSelectedDate: setSavedDate,
   } = useCart();
   const { data: session } = useSession();
   const router = useRouter();
+  const { track } = useAnalytics();
 
-  const [includeHomeCollection, setIncludeHomeCollection] = useState(false);
+  const [showAllLocations, setShowAllLocations] = useState(false);
+  const { data: locations = [], isLoading: locationsLoading } = useSWR<HomeCollectionLocation[]>(
+    '/api/home-collection-locations',
+  );
+  const selectedLocation = locations.find((l) => l.id === selectedLocationId) ?? null;
+  const homeCollectionAvailable = !locationsLoading && locations.length > 0;
+  const LOCATIONS_COLLAPSE_THRESHOLD = 4;
+  const visibleLocations = showAllLocations ? locations : locations.slice(0, LOCATIONS_COLLAPSE_THRESHOLD);
 
   // Appointment date
   const minDate = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; })();
   const maxDate = (() => { const d = new Date(); d.setMonth(d.getMonth() + 3); return d.toISOString().split('T')[0]; })();
-  const [selectedDate, setSelectedDate] = useState(minDate);
+  // Use CartContext-backed date so it survives auth redirects; fall back to minDate if not set
+  const selectedDate = savedDate || minDate;
+  const setSelectedDate = (d: string) => { setSavedDate(d); };
 
   // Promo (persisted in CartContext)
   const [promoError, setPromoError] = useState('');
@@ -57,6 +76,8 @@ export default function CheckoutPage() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const paystackScriptLoaded = useRef(false);
+
+  // (no auto-select — user explicitly picks a location)
 
   // Auto-fill referral code from stored ?ref= param (set by ReferralTracker)
   useEffect(() => {
@@ -74,7 +95,7 @@ const cartPrices = cart.map((item) => ({
   }));
 
   const basePrice = cartPrices.reduce((sum, i) => sum + i.price, 0);
-  const homeCollectionFee = includeHomeCollection ? HOME_COLLECTION_FEE : 0;
+  const homeCollectionFee = selectedLocation ? Number(selectedLocation.price) : 0;
 
   // Discount applies to package prices only — never to home collection fee
   const calculateDiscount = (): number => {
@@ -94,7 +115,7 @@ const cartPrices = cart.map((item) => ({
   const discount = calculateDiscount();
   const total = Math.max(basePrice - discount + homeCollectionFee, 0);
 
-  const fmt = (n: number) => `NGN ${n.toLocaleString()}`;
+  const fmt = fmtNgn;
 
   // --- Promo ---
   const handleApplyVoucher = async () => {
@@ -110,7 +131,10 @@ const cartPrices = cart.map((item) => ({
       });
       const data = await res.json();
       if (!data.valid) setPromoError(data.message || 'Invalid promo code.');
-      else setAppliedPromo(data.promo);
+      else {
+        setAppliedPromo(data.promo);
+        track('promo_code_applied', { code: voucherCode.trim(), discount: data.promo?.discountValue });
+      }
     } catch {
       setPromoError('Failed to validate. Please try again.');
     } finally {
@@ -162,8 +186,8 @@ const cartPrices = cart.map((item) => ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: total,
-          cartItems: cart.map((i) => ({ id: i.id, title: i.title, price: String(i.price), includes: i.includes, customItems: i.customItems })),
-          homeCollection: includeHomeCollection,
+          cartItems: cart.map((i) => ({ id: i.id, title: i.title, price: String(i.price), includes: i.includes, customItems: i.customItems, selectedAddons: i.selectedAddons })),
+          homeCollectionLocationId: selectedLocationId || null,
           bookingDate: new Date(selectedDate).toISOString(),
           promoCode: appliedPromo?.code ?? null,
           referralCode: appliedReferral ? referralCode.trim().toUpperCase() : null,
@@ -214,6 +238,11 @@ const cartPrices = cart.map((item) => ({
               .then((r) => r.json())
               .then((verifyData) => {
                 if (verifyData.success) {
+                  track('checkout_completed', {
+                    total,
+                    item_count: cart.length,
+                    booking_ids: verifyData.bookingIds ?? [],
+                  });
                   clearCart();
                   setShowSuccess(true);
                 } else {
@@ -337,7 +366,7 @@ const cartPrices = cart.map((item) => ({
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Your cart is empty</h2>
-        <Link href="/category/all" className="bg-primary text-white px-8 py-3 rounded-full font-bold hover:bg-primary-dark transition-colors">
+        <Link href="/packages" className="bg-primary text-white px-8 py-3 rounded-full font-bold hover:bg-primary-dark transition-colors">
           Browse Packages
         </Link>
       </div>
@@ -374,40 +403,106 @@ const cartPrices = cart.map((item) => ({
 
             <div className="space-y-3 mb-6">
               {cart.map((item, idx) => (
-                <div key={`${item.id}-${idx}`} className="flex items-center justify-between gap-4 p-3 bg-gray-50 rounded-xl">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-800 truncate">{item.title}</p>
-                    <p className="text-xs text-gray-400 truncate">{item.description.substring(0, 55)}…</p>
+                <div key={`${item.id}-${idx}`} className="p-3 bg-gray-50 rounded-xl space-y-2">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 truncate">{item.title}</p>
+                      <p className="text-xs text-gray-400 truncate">{item.description.substring(0, 55)}…</p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-sm font-bold text-gray-700 whitespace-nowrap">{item.price}</span>
+                      <button onClick={() => removeFromCart(item.id)} className="text-gray-300 hover:text-red-400 transition-colors" aria-label="Remove">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-sm font-bold text-gray-700 whitespace-nowrap">{item.price}</span>
-                    <button onClick={() => removeFromCart(item.id)} className="text-gray-300 hover:text-red-400 transition-colors" aria-label="Remove">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  {item.selectedAddons && item.selectedAddons.length > 0 && (
+                    <div className="pl-2 pt-1 border-t border-gray-200 space-y-1">
+                      <p className="text-xs text-gray-400 font-medium">Add-ons:</p>
+                      {item.selectedAddons.map((a) => (
+                        <div key={a.id} className="flex items-center justify-between text-xs text-gray-500">
+                          <span className="flex items-center gap-1.5">
+                            <span className="w-1 h-1 rounded-full bg-primary/60 inline-block" />
+                            {a.name}
+                          </span>
+                          <span>+{fmtNgn(a.price)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
 
             {/* Home Collection */}
-            <label className="flex items-center justify-between p-4 rounded-xl border border-dashed border-gray-200 cursor-pointer hover:border-primary/40 transition-colors group">
-              <div className="flex items-center gap-3">
-                <div className="relative flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={includeHomeCollection}
-                    onChange={(e) => setIncludeHomeCollection(e.target.checked)}
-                    className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 checked:border-primary checked:bg-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-                  />
-                  <Check className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-white opacity-0 peer-checked:opacity-100" />
+            <div className="rounded-xl border border-dashed border-gray-200 overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center gap-3 px-4 pt-4 pb-3">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <MapPin className="w-4 h-4 text-primary" />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-700">Home Sample Collection</p>
-                  <p className="text-xs text-gray-400">A phlebotomist visits you at home</p>
+                  <p className="text-xs text-gray-400">
+                    {locationsLoading
+                      ? 'Checking availability…'
+                      : !homeCollectionAvailable
+                      ? 'Not available in your area at this time'
+                      : selectedLocation
+                      ? `${selectedLocation.name} · ${fmt(selectedLocation.price)} added`
+                      : 'Select a service area below to add home collection'}
+                  </p>
                 </div>
+                {selectedLocation && (
+                  <span className="text-sm font-bold text-primary shrink-0">{fmt(selectedLocation.price)}</span>
+                )}
               </div>
-              <span className="text-sm font-bold text-gray-600">{fmt(HOME_COLLECTION_FEE)}</span>
-            </label>
+
+              {/* Location list */}
+              {homeCollectionAvailable && (
+                <div className="px-4 pb-4 border-t border-dashed border-gray-100 pt-3 space-y-2">
+                  {visibleLocations.map((loc) => {
+                    const checked = selectedLocationId === loc.id;
+                    return (
+                      <label
+                        key={loc.id}
+                        className={`flex items-center justify-between gap-4 p-3 rounded-xl border cursor-pointer transition-all ${
+                          checked ? 'border-primary bg-purple-50' : 'border-gray-100 hover:border-primary/30 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="relative flex items-center shrink-0">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => setSelectedLocationId(checked ? '' : loc.id)}
+                              className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 checked:border-primary checked:bg-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            />
+                            <Check className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 text-white opacity-0 peer-checked:opacity-100" />
+                          </div>
+                          <span className="text-sm font-medium text-gray-800 truncate">{loc.name}</span>
+                        </div>
+                        <span className="text-sm font-bold text-primary whitespace-nowrap shrink-0">{fmt(loc.price)}</span>
+                      </label>
+                    );
+                  })}
+
+                  {locations.length > LOCATIONS_COLLAPSE_THRESHOLD && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllLocations((v) => !v)}
+                      className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-semibold text-primary hover:text-primary-dark transition-colors"
+                    >
+                      {showAllLocations ? (
+                        <><ChevronUp className="w-3.5 h-3.5" /> Show fewer</>
+                      ) : (
+                        <><ChevronDown className="w-3.5 h-3.5" /> Show {locations.length - LOCATIONS_COLLAPSE_THRESHOLD} more</>
+                      )}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Preferred Appointment Date */}
@@ -493,7 +588,7 @@ const cartPrices = cart.map((item) => ({
                         NGN {Number(appliedPromo.discountValue).toLocaleString()} off applied to eligible packages · Home collection fee excluded
                       </p>
                     )}
-                    {appliedPromo.discountType === 'PERCENTAGE' && (
+                    {appliedPromo.discountType === 'PERCENTAGE' && !!selectedLocation && (
                       <p className="text-xs text-gray-400 pt-1 border-t border-green-100">
                         Home collection fee is excluded from discount
                       </p>
@@ -561,10 +656,13 @@ const cartPrices = cart.map((item) => ({
                   <span className="font-mono font-semibold tracking-widest">{referralCode}</span>
                 </div>
               )}
-              {includeHomeCollection && (
+              {selectedLocation && (
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>Home Collection <span className="text-gray-400 font-normal">(not discounted)</span></span>
-                  <span>{fmt(HOME_COLLECTION_FEE)}</span>
+                  <span>
+                    Home Collection — {selectedLocation.name}{' '}
+                    <span className="text-gray-400 font-normal">(not discounted)</span>
+                  </span>
+                  <span>{fmt(selectedLocation.price)}</span>
                 </div>
               )}
               <div className="border-t border-gray-100 pt-3 flex justify-between items-center">

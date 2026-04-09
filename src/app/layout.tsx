@@ -1,12 +1,12 @@
 
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Open_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const openSans = Open_Sans({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-inter",
+  variable: "--font-open-sans",
 });
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
@@ -16,6 +16,9 @@ import PWARegister from "@/components/PWARegister";
 import LayoutContent from "./LayoutContent";
 import { SessionProvider } from "next-auth/react";
 import ReferralTracker from "@/components/ui/ReferralTracker";
+import AnalyticsProvider from "@/components/providers/AnalyticsProvider";
+import CookieBanner from "@/components/ui/CookieBanner";
+import SWRProvider from "@/providers/SWRProvider";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://firmcare.com.ng";
 
@@ -141,7 +144,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={openSans.variable}>
       <head>
         {/* Preconnect for Cloudinary image CDN */}
         <link rel="preconnect" href="https://res.cloudinary.com" />
@@ -151,17 +154,22 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${inter.className} antialiased bg-gray-50 flex flex-col min-h-screen`}>
+      <body className={`${openSans.className} antialiased bg-gray-50 flex flex-col min-h-screen`}>
         <PWARegister />
         <SessionProvider>
-          <ToastProvider>
-            <CartProvider>
-              <ProgressBar />
-              <ReferralTracker />
-              <LayoutContent>{children}</LayoutContent>
-              <PWAInstallPrompt />
-            </CartProvider>
-          </ToastProvider>
+          <SWRProvider>
+          <AnalyticsProvider>
+            <ToastProvider>
+              <CartProvider>
+                <ProgressBar />
+                <ReferralTracker />
+                <LayoutContent>{children}</LayoutContent>
+                <PWAInstallPrompt />
+                <CookieBanner />
+              </CartProvider>
+            </ToastProvider>
+          </AnalyticsProvider>
+          </SWRProvider>
         </SessionProvider>
       </body>
     </html>

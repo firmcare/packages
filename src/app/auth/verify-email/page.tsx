@@ -11,6 +11,8 @@ function VerifyEmailInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
+  const callbackUrl = searchParams.get("callbackUrl") || '';
+  const loginHref = `/auth/login${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`;
 
   const [state, setState] = useState<State>(token ? "loading" : "no-token");
   const [message, setMessage] = useState("");
@@ -73,8 +75,8 @@ function VerifyEmailInner() {
             <h2 className="text-2xl font-bold text-gray-900">Email verified!</h2>
             <p className="text-gray-500">Your account is now active. A welcome email has been sent to you.</p>
             <button
-              onClick={() => router.push("/auth/login")}
-              className="mt-2 w-full py-3 px-4 bg-primary text-white font-bold rounded-xl hover:bg-[#8a3a7a] transition-colors"
+              onClick={() => router.push(loginHref)}
+              className="mt-2 w-full py-3 px-4 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-colors"
             >
               Sign In to Your Account
             </button>
@@ -110,7 +112,7 @@ function VerifyEmailInner() {
                 </form>
               )}
             </div>
-            <Link href="/auth/login" className="block text-sm text-gray-400 hover:text-gray-600">
+            <Link href={loginHref} className="block text-sm text-gray-400 hover:text-gray-600">
               Back to sign in
             </Link>
           </>
@@ -147,7 +149,7 @@ function VerifyEmailInner() {
                 </form>
               )}
             </div>
-            <Link href="/auth/login" className="block text-sm text-gray-400 hover:text-gray-600">
+            <Link href={loginHref} className="block text-sm text-gray-400 hover:text-gray-600">
               Back to sign in
             </Link>
           </>

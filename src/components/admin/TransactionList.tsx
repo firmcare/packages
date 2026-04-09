@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { User, Calendar, Tag, FileX2 } from "lucide-react";
-import Pagination from "@/components/ui/Pagination";
+import Pagination, { PageSizeSelector } from "@/components/ui/Pagination";
 import { usePagination } from "@/hooks/usePagination";
 import DateRangeFilter, { DateRange, inRange } from "@/components/ui/DateRangeFilter";
+import { fmtNgn } from "@/lib/format";
 
 interface Transaction {
   id: string;
@@ -51,7 +52,7 @@ export default function TransactionList({ transactions }: TransactionListProps) 
     return matchesSearch && matchesStatus && matchesMethod && matchesDate;
   });
 
-  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(filteredTransactions, 20);
+  const { page, setPage, totalPages, paged, totalItems, pageSize, setPageSize } = usePagination(filteredTransactions, 20);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -116,6 +117,7 @@ export default function TransactionList({ transactions }: TransactionListProps) 
             <option value="CASH">Cash</option>
             <option value="WALLET">Wallet</option>
           </select>
+          <PageSizeSelector pageSize={pageSize} onPageSizeChange={setPageSize} />
         </div>
         <DateRangeFilter value={dateRange} onChange={(r) => { setDateRange(r); setPage(1); }} />
       </div>
@@ -178,11 +180,11 @@ export default function TransactionList({ transactions }: TransactionListProps) 
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ₦{Number(txn.amount).toLocaleString()}
+                  {fmtNgn(txn.amount)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    ₦{Number(txn.discount).toLocaleString()}
+                    {fmtNgn(txn.discount)}
                   </div>
                   {txn.promo && (
                     <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -192,7 +194,7 @@ export default function TransactionList({ transactions }: TransactionListProps) 
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                  ₦{Number(txn.finalAmount).toLocaleString()}
+                  {fmtNgn(txn.finalAmount)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span

@@ -63,7 +63,7 @@ export default function DashboardSidebar({ onClose }: Props) {
 
       <div className="p-4 border-t border-gray-200">
         <Link
-          href="/category/all"
+          href="/packages"
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
         >
           <ShoppingBag className="w-5 h-5" />

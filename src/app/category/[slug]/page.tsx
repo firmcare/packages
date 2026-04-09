@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import CategoryView from "@/components/pages/CategoryView";
 import { Metadata } from "next";
+import { fmtNgn } from "@/lib/format";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -24,6 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "website",
       images: [{ url: `${siteUrl}/og-image.jpg`, width: 1200, height: 630, alt: `${categoryName} Packages` }],
     },
+    twitter: { card: 'summary_large_image', title: `${categoryName} Packages - FirmCare Diagnostics`, description: `Browse our comprehensive ${categoryName} diagnostic screening packages.`, images: [`${siteUrl}/og-image.jpg`] },
     alternates: { canonical: `${siteUrl}/category/${slug}` },
   };
 }
@@ -47,7 +49,7 @@ export default async function Page({ params }: Props) {
     slug: p.slug,
     title: p.title,
     description: p.description,
-    price: `₦${Number(p.price).toLocaleString("en-NG")}`,
+    price: fmtNgn(Number(p.price)),
     imageUrl: p.imageUrl ?? null,
     category: p.category.name,
   }));

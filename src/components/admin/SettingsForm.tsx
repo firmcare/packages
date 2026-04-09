@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   Settings, Globe, Mail, Calendar,
-  Gift, Clock, CreditCard, CheckCircle, AlertCircle, Save, Bell, Trash2, Loader2,
+  Gift, Clock, CreditCard, CheckCircle, AlertCircle, Save, Bell, Trash2, Loader2, MapPin, ArrowRight,
 } from "lucide-react";
 
 interface Props {
@@ -41,17 +42,9 @@ const SECTIONS: Section[] = [
   },
   {
     title: "Booking",
-    description: "Home collection fee and booking lead-time",
+    description: "Booking lead-time and home collection service areas",
     icon: Calendar,
     fields: [
-      {
-        key: "home_collection_fee",
-        label: "Home Collection Fee (NGN)",
-        type: "number",
-        prefix: "₦",
-        placeholder: "15000",
-        hint: "Fee added when a patient requests home sample collection.",
-      },
       {
         key: "booking_advance_days",
         label: "Minimum Booking Lead Time",
@@ -598,6 +591,29 @@ export default function SettingsForm({ initialSettings }: Props) {
 
             {/* Fields */}
             <div className="p-6 space-y-5">
+              {/* Home collection location callout — replaces the old single-fee field */}
+              {section.title === "Booking" && (
+                <div className="flex items-center justify-between gap-4 rounded-xl border border-primary/20 bg-primary/5 px-4 py-4">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <MapPin className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">Home Collection Pricing</p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Fees are set per service area — manage locations and their individual prices on the Locations page.
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/admin/locations"
+                    className="shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+                  >
+                    Manage Locations
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              )}
               {section.fields.map((field) => {
                 const isReadonly = field.key === "paystack_public_key_display";
                 return (

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Layers, BookOpen, TrendingUp, TestTube, ExternalLink, Ban, CheckCircle, Loader2, ArrowRight } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import { fmtNgn } from "@/lib/format";
 
 interface Props {
   pkg: {
@@ -41,8 +42,7 @@ export default function CustomPackageCard({ pkg, stats }: Props) {
   const [toggling, setToggling] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const fmt = (n: number) =>
-    "₦" + n.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmt = fmtNgn;
   const fmtDate = (iso: string) =>
     new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" });
 

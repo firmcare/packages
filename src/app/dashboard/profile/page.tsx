@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { User, Mail, Phone, MapPin, Copy, Check, Loader2, Save } from "lucide-react";
+import useSWR from "swr";
 
 interface Profile {
   id: string;
@@ -20,28 +21,28 @@ export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [form, setForm] = useState({ name: "", phone: "", address: "" });
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [formInitialized, setFormInitialized] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") router.replace("/auth/login?callbackUrl=/dashboard/profile");
   }, [status, router]);
 
+  const { data: profile, isLoading: loading, mutate: mutateProfile } = useSWR<Profile>(
+    session?.user ? "/api/users/me" : null
+  );
+
+  // Populate form once profile loads
   useEffect(() => {
-    if (!session?.user) return;
-    fetch("/api/users/me")
-      .then((r) => r.json())
-      .then((data: Profile) => {
-        setProfile(data);
-        setForm({ name: data.name ?? "", phone: data.phone ?? "", address: data.address ?? "" });
-      })
-      .finally(() => setLoading(false));
-  }, [session]);
+    if (profile && !formInitialized) {
+      setForm({ name: profile.name ?? "", phone: profile.phone ?? "", address: profile.address ?? "" });
+      setFormInitialized(true);
+    }
+  }, [profile, formInitialized]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +60,7 @@ export default function ProfilePage() {
       if (!res.ok) throw new Error(await res.text());
 
       const updated = await res.json();
-      setProfile((prev) => prev ? { ...prev, ...updated } : prev);
+      mutateProfile((prev) => prev ? { ...prev, ...updated } : prev, false);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: unknown) {
@@ -182,7 +183,7 @@ export default function ProfilePage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#8a3a7a] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {saving ? "Saving..." : "Save Changes"}

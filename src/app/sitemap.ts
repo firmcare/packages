@@ -10,7 +10,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '',
     '/checkout',
     '/custom-package',
-    '/category/all',
+    '/packages',
+    '/blog',
+    '/contact-us',
+    '/team',
     '/auth/login',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
@@ -51,5 +54,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Error fetching categories for sitemap:', error);
   }
 
-  return [...routes, ...packageRoutes, ...categoryRoutes];
+  // Fetch blog posts from database
+  let blogRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const posts = await prisma.blogPost.findMany({
+      where: { isPublished: true },
+      select: { slug: true, updatedAt: true },
+    });
+    blogRoutes = posts.map((post) => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: post.updatedAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    }));
+  } catch (error) {
+    console.error('Error fetching blog posts for sitemap:', error);
+  }
+
+  return [...routes, ...packageRoutes, ...categoryRoutes, ...blogRoutes];
 }

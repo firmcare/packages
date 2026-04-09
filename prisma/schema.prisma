@@ -91,6 +91,7 @@ model User {
   withdrawalRequests    WithdrawalRequest[]
   auditLogs             AuditLog[] @relation("AuditLogActor")
   emailJobs             EmailBroadcastJob[]
+  blogPosts             BlogPost[] @relation("BlogPostAuthor")
 }
 
 model CustomRole {
@@ -173,6 +174,17 @@ model Package {
   updatedAt   DateTime @updatedAt
 }
 
+model HomeCollectionLocation {
+  id        String   @id @default(cuid())
+  name      String
+  price     Decimal  @db.Decimal(10, 2)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings  Booking[]
+}
+
 model Booking {
   id              String        @id @default(cuid())
   userId          String
@@ -184,6 +196,8 @@ model Booking {
   date            DateTime
   status          BookingStatus @default(PENDING)
   homeCollection  Boolean       @default(false)
+  homeCollectionLocationId String?
+  homeCollectionLocation   HomeCollectionLocation? @relation(fields: [homeCollectionLocationId], references: [id])
   totalAmount     Decimal       @default(0.0) @db.Decimal(10, 2)
   paymentRef      String?       // Paystack reference — set on initialize, kept for audit
   referralCode    String?       // referral code used at checkout (if any)
@@ -422,4 +436,90 @@ model EmailBroadcastJob {
 
   @@index([status])
   @@index([actorId])
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String?
+  content     String   @db.Text
+  coverImage  String?
+  isPublished Boolean  @default(false)
+  authorId    String
+  author      User     @relation("BlogPostAuthor", fields: [authorId], references: [id])
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  comments    BlogComment[]
+
+  @@index([slug])
+  @@index([isPublished, publishedAt])
+}
+
+model BlogComment {
+  id        String   @id @default(cuid())
+  postId    String
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  name      String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  name      String
+  position  String
+  email     String?
+  image     String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AnalyticsEvent {
+  id             String   @id @default(cuid())
+  event          String                        // e.g. "$pageview", "add_to_cart"
+  sessionId      String                        // browser session (sessionStorage UUID)
+  visitorId      String?                       // persistent visitor (localStorage UUID)
+  userId         String?                       // authenticated user ID (nullable)
+  url            String                        // full URL at time of event
+  referrer       String?                       // raw referrer URL
+  referrerDomain String?                       // extracted referrer hostname
+  properties     Json     @default("{}")       // event-specific payload
+
+  // Geo (enriched server-side via geoip-lite — IP is never stored)
+  country        String?
+  city           String?
+  region         String?
+
+  // Device / UA (enriched server-side via ua-parser-js)
+  device         String?                       // mobile | tablet | desktop
+  browser        String?
+  browserVersion String?
+  os             String?
+
+  // UTM campaign tracking (sent from client URL params)
+  utmSource      String?
+  utmMedium      String?
+  utmCampaign    String?
+  utmTerm        String?
+  utmContent     String?
+
+  // Viewport (sent from client)
+  screenWidth    Int?
+  screenHeight   Int?
+
+  createdAt      DateTime @default(now())
+
+  @@index([event])
+  @@index([createdAt])
+  @@index([sessionId])
+  @@index([userId])
+  @@index([event, createdAt])
+  @@index([country])
+  @@index([device])
+  @@index([referrerDomain])
 }

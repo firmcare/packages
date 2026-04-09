@@ -11,6 +11,8 @@ interface Props {
   value: DateRange;
   onChange: (range: DateRange) => void;
   className?: string;
+  /** When true, hides the "All time" preset pill */
+  hideAllTime?: boolean;
 }
 
 function fmt(d: Date) {
@@ -42,8 +44,8 @@ export function inRange(dateStr: string | Date, from: string, to: string): boole
   return true;
 }
 
-export default function DateRangeFilter({ value, onChange, className }: Props) {
-  const presets = getPresets();
+export default function DateRangeFilter({ value, onChange, className, hideAllTime }: Props) {
+  const presets = getPresets().filter(p => !(hideAllTime && p.label === "All time"));
   const active = presets.find(p => p.from === value.from && p.to === value.to)?.label;
 
   return (

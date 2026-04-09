@@ -1,8 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import useSWR from "swr";
 import { Shield, Search, Filter, Download, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 import DateRangeFilter, { DateRange } from "@/components/ui/DateRangeFilter";
+
+// ── Date helpers ──────────────────────────────────────────────────────────────
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
 
 interface AuditEntry {
   id: string;
@@ -85,26 +92,27 @@ const ROLE_COLORS: Record<string, string> = {
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function AuditLogTable() {
-  const [data,       setData]       = useState<PageData | null>(null);
-  const [loading,    setLoading]    = useState(true);
   const [page,       setPage]       = useState(1);
   const [search,     setSearch]     = useState("");
   const [category,   setCategory]   = useState("All");
-  const [dateRange,  setDateRange]  = useState<DateRange>({ from: "", to: "" });
+  const [dateRange,  setDateRange]  = useState<DateRange>({ from: todayStr(), to: todayStr() });
   const [expanded,   setExpanded]   = useState<Set<string>>(new Set());
   const [exporting,  setExporting]  = useState(false);
 
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  // Debounce search
+  // Debounce search input
   useEffect(() => {
     if (searchTimer.current) clearTimeout(searchTimer.current);
     searchTimer.current = setTimeout(() => setDebouncedSearch(search), 350);
     return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
   }, [search]);
 
-  // Build query params — searchVal is explicit so export can use live value, fetch uses debounced
+  // Reset to page 1 when filters change
+  useEffect(() => { setPage(1); }, [debouncedSearch, category, dateRange]);
+
+  // Build query params helper (also used by export)
   const buildParams = useCallback((p: number, searchVal: string) => {
     const params = new URLSearchParams({ page: String(p) });
     if (searchVal)          params.set("search",   searchVal);
@@ -114,31 +122,25 @@ export default function AuditLogTable() {
     return params;
   }, [category, dateRange]);
 
-  const fetchLogs = useCallback(async (p: number) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/admin/audit?${buildParams(p, debouncedSearch)}`);
-      if (!res.ok) return;
-      setData(await res.json());
-    } finally {
-      setLoading(false);
+  const auditUrl = `/api/admin/audit?${buildParams(page, debouncedSearch)}`;
+  const { data, isLoading: loading } = useSWR<PageData>(auditUrl);
+
+  // Prevent clearing date range to "all time" in the UI view
+  const handleDateRangeChange = (r: DateRange) => {
+    if (!r.from && !r.to) {
+      setDateRange({ from: todayStr(), to: todayStr() });
+    } else {
+      setDateRange(r);
     }
-  }, [buildParams, debouncedSearch]);
-
-  // Reset page on filter change
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, category, dateRange]);
-
-  useEffect(() => {
-    fetchLogs(page);
-  }, [page, fetchLogs]);
+  };
 
   const handleExport = async () => {
     setExporting(true);
     try {
-      // Use live `search` (not debounced) so export always reflects what's on screen
-      const params = buildParams(1, search);
+      // Export is always all-time — only search + category filters apply, no date range
+      const params = new URLSearchParams({ page: "1" });
+      if (search)          params.set("search",   search);
+      if (category !== "All") params.set("category", category);
       params.set("format", "csv");
       const res = await fetch(`/api/admin/audit?${params}`);
       if (!res.ok) return;
@@ -177,7 +179,7 @@ export default function AuditLogTable() {
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       {/* ── Toolbar ── */}
       <div className="px-4 pt-4 pb-3 border-b border-gray-100 space-y-3">
-        {/* Row 1: search (full width on mobile) */}
+        {/* Row 1: search */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           <input
@@ -203,14 +205,15 @@ export default function AuditLogTable() {
           <button
             onClick={handleExport}
             disabled={exporting}
+            title="Exports all matching logs — all time, no date filter"
             className="flex items-center gap-1.5 h-9 px-3 border border-gray-200 rounded-xl text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors shrink-0"
           >
             {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             <span className="hidden sm:inline">Export CSV</span>
           </button>
         </div>
-        {/* Row 3: date range */}
-        <DateRangeFilter value={dateRange} onChange={(r) => setDateRange(r)} />
+        {/* Row 3: date range — "All time" hidden; view always requires a date window */}
+        <DateRangeFilter value={dateRange} onChange={handleDateRangeChange} hideAllTime />
       </div>
 
       {/* ── Summary bar ── */}

@@ -7,7 +7,8 @@ export interface Package {
   price: string;
   imageUrl: string;
   includes?: string[];
-  customItems?: { name: string; price: number }[]; // only set for custom-built packages
+  customItems?: { name: string; price: number }[];
+  selectedAddons?: { id: string; name: string; price: number }[];
 }
 
 export interface Testimonial {

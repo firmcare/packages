@@ -6,6 +6,7 @@ export interface CartItem {
   price: string;
   includes?: string[];
   customItems?: { name: string; price: number }[];
+  selectedAddons?: { id: string; name: string; price: number }[];
 }
 
 export interface ResolvedItem {
@@ -63,7 +64,10 @@ export async function resolveCartItems(
           });
         }
         if (pkg) {
-          return { item, packageId: pkg.id, notes: null, unitAmount: perItem };
+          const addonNote = item.selectedAddons?.length
+            ? `Add-ons: ${item.selectedAddons.map((a) => a.name).join(', ')}`
+            : null;
+          return { item, packageId: pkg.id, notes: addonNote, unitAmount: perItem };
         }
       }
 

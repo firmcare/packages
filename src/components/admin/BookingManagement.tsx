@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Edit, CalendarX2 } from "lucide-react";
 import BookingDetailsModal from "./BookingDetailsModal";
-import Pagination from "@/components/ui/Pagination";
+import Pagination, { PageSizeSelector } from "@/components/ui/Pagination";
 import { usePagination } from "@/hooks/usePagination";
 import DateRangeFilter, { DateRange, inRange } from "@/components/ui/DateRangeFilter";
 
@@ -75,7 +75,7 @@ export default function BookingManagement({ bookings }: BookingManagementProps) 
     return matchesSearch && matchesStatus && matchesDate;
   });
 
-  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(filteredBookings, 20);
+  const { page, setPage, totalPages, paged, totalItems, pageSize, setPageSize } = usePagination(filteredBookings, 20);
 
   return (
     <>
@@ -99,6 +99,7 @@ export default function BookingManagement({ bookings }: BookingManagementProps) 
                 <option key={value} value={value}>{label}</option>
               ))}
             </select>
+            <PageSizeSelector pageSize={pageSize} onPageSizeChange={setPageSize} />
           </div>
           <DateRangeFilter value={dateRange} onChange={(r) => { setDateRange(r); setPage(1); }} />
         </div>

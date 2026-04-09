@@ -16,6 +16,24 @@ interface AdminHeaderProps {
   onMenuOpen: () => void;
 }
 
+// Maps a route segment to its sidebar group name (mirrors AdminSidebar navItems)
+const segmentGroup: Record<string, string> = {
+  transactions: "Finance",
+  referrals:    "Finance",
+  withdrawals:  "Finance",
+  agents:       "Finance",
+  promos:       "Marketing",
+  email:        "Marketing",
+  blog:         "Marketing",
+  analytics:    "Insights",
+  reports:      "Insights",
+  users:        "Users",
+  admins:       "Users",
+  team:         "System",
+  audit:        "System",
+  settings:     "System",
+};
+
 const segmentLabels: Record<string, string> = {
   admin: "Dashboard",
   packages: "Packages",
@@ -25,9 +43,14 @@ const segmentLabels: Record<string, string> = {
   analytics: "Analytics",
   reports: "Reports",
   referrals: "Referrals",
+  agents: "Agents",
+  withdrawals: "Withdrawals",
+  email: "Email",
+  blog: "Blog",
   tests: "Tests",
   users: "Users",
   admins: "Admin Management",
+  team: "Management Team",
   audit: "Audit Log",
   settings: "Settings",
   new: "New",
@@ -35,20 +58,31 @@ const segmentLabels: Record<string, string> = {
   detail: "Details",
 };
 
-function useBreadcrumbs() {
+type Crumb =
+  | { kind: "link"; href: string; label: string; isLast: boolean }
+  | { kind: "group"; label: string };
+
+function useBreadcrumbs(): Crumb[] {
   const pathname = usePathname();
-  const segments = pathname.split("/").filter(Boolean);
-  return segments
-    .map((seg, i) => {
-      const label = segmentLabels[seg];
-      if (!label) return null;
-      return {
-        href: "/" + segments.slice(0, i + 1).join("/"),
-        label,
-        isLast: i === segments.length - 1,
-      };
-    })
-    .filter(Boolean) as { href: string; label: string; isLast: boolean }[];
+  const segments = pathname.split("/").filter(Boolean).slice(1); // drop "admin"
+
+  const crumbs: Crumb[] = [];
+  const firstSeg = segments[0];
+
+  // Prepend group label (non-clickable) when the top-level segment belongs to one
+  if (firstSeg && segmentGroup[firstSeg]) {
+    crumbs.push({ kind: "group", label: segmentGroup[firstSeg] });
+  }
+
+  segments.forEach((seg, i) => {
+    const label =
+      segmentLabels[seg] ??
+      seg.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    const href = "/admin/" + segments.slice(0, i + 1).join("/");
+    crumbs.push({ kind: "link", href, label, isLast: i === segments.length - 1 });
+  });
+
+  return crumbs;
 }
 
 export default function AdminHeader({ user, onMenuOpen }: AdminHeaderProps) {
@@ -106,10 +140,12 @@ export default function AdminHeader({ user, onMenuOpen }: AdminHeaderProps) {
             <Link href="/" className="text-gray-400 hover:text-primary transition-colors shrink-0">
               <Home className="w-4 h-4" />
             </Link>
-            {breadcrumbs.map((crumb) => (
-              <span key={crumb.href} className="flex items-center gap-1 min-w-0">
+            {breadcrumbs.map((crumb, i) => (
+              <span key={i} className="flex items-center gap-1 min-w-0">
                 <ChevronRight className="w-4 h-4 text-gray-300 shrink-0" />
-                {crumb.isLast ? (
+                {crumb.kind === "group" ? (
+                  <span className="text-gray-400 truncate">{crumb.label}</span>
+                ) : crumb.isLast ? (
                   <span className="font-semibold text-gray-900 truncate">{crumb.label}</span>
                 ) : (
                   <Link href={crumb.href} className="text-gray-500 hover:text-primary transition-colors truncate">
@@ -122,7 +158,7 @@ export default function AdminHeader({ user, onMenuOpen }: AdminHeaderProps) {
 
           {/* Current page title — mobile only */}
           <span className="sm:hidden font-semibold text-gray-900 truncate">
-            {breadcrumbs.at(-1)?.label ?? "Admin"}
+            {(() => { const last = breadcrumbs.at(-1); return last?.label ?? "Admin"; })()}
           </span>
         </div>
 

@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { FlaskConical, ArrowRight } from 'lucide-react';
 import ShareButton from '@/components/ui/ShareButton';
 
 interface PackageItem {
@@ -83,7 +84,7 @@ const CategoryView: React.FC<CategoryViewProps> = ({ category, packages }) => {
           {!isAllPackages && (
             <div className="mt-12 text-center">
               <Link
-                href="/category/all"
+                href="/packages"
                 className="inline-block border border-primary-light text-[#9d4496] px-10 py-3 rounded-full font-bold hover:bg-pink-50 transition-colors"
               >
                 View all packages
@@ -91,6 +92,30 @@ const CategoryView: React.FC<CategoryViewProps> = ({ category, packages }) => {
             </div>
           )}
         </div>
+
+        {/* Custom Package Banner */}
+        {isAllPackages && (
+          <div className="mb-16 rounded-3xl overflow-hidden bg-linear-to-r from-[#7b2d72] via-[#9d4496] to-[#c45fad] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-lg">
+            <div className="flex items-center gap-6 text-white">
+              <div className="shrink-0 w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center">
+                <FlaskConical className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold mb-2">Can&apos;t find what you need?</h3>
+                <p className="text-white/80 text-sm leading-relaxed max-w-md">
+                  Build your own custom diagnostic package — handpick individual tests and pay only for what you need.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/custom-package"
+              className="shrink-0 flex items-center gap-2 bg-white text-[#9d4496] px-8 py-3.5 rounded-full font-bold hover:bg-purple-50 transition-colors shadow-md whitespace-nowrap"
+            >
+              Build Your Package
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

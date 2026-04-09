@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { Edit, Trash2, Tag, ToggleLeft, ToggleRight, FlagOff } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/context/ToastContext";
-import Pagination from "@/components/ui/Pagination";
+import Pagination, { PageSizeSelector } from "@/components/ui/Pagination";
+import { fmtNgn } from "@/lib/format";
 import { usePagination } from "@/hooks/usePagination";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 
@@ -38,7 +39,7 @@ export default function PromoList({ promos }: PromoListProps) {
     promo.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
     promo.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(filteredPromos, 15);
+  const { page, setPage, totalPages, paged, totalItems, pageSize, setPageSize } = usePagination(filteredPromos, 20);
 
   const handleToggleActive = async (id: string, currentStatus: boolean) => {
     try {
@@ -81,14 +82,15 @@ export default function PromoList({ promos }: PromoListProps) {
 
   return (
     <div className="bg-white rounded-lg shadow">
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row gap-3">
         <input
           type="text"
           placeholder="Search promo codes..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
         />
+        <PageSizeSelector pageSize={pageSize} onPageSizeChange={setPageSize} />
       </div>
 
       {filteredPromos.length === 0 ? (
@@ -139,7 +141,7 @@ export default function PromoList({ promos }: PromoListProps) {
                   <div className="text-sm text-gray-900">
                     {promo.discountType === "PERCENTAGE"
                       ? `${Number(promo.discountValue)}%`
-                      : `₦${Number(promo.discountValue).toLocaleString()}`}
+                      : fmtNgn(Number(promo.discountValue))}
                   </div>
                   {promo.maxDiscount && (
                     <div className="text-xs text-gray-500">

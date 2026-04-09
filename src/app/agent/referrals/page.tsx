@@ -1,4 +1,5 @@
 import { requireAgent } from "@/lib/auth-utils";
+import { fmtNgn } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 import AgentReferralsTable from "@/components/agent/AgentReferralsTable";
 
@@ -41,9 +42,9 @@ export default async function AgentReferralsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Total Referrals", value: rewards.length,                                        sub: "All time" },
-          { label: "Pending",         value: pending?._count ?? 0,                                  sub: `₦${Number(pending?._sum?.amount ?? 0).toLocaleString()} outstanding` },
-          { label: "Paid Out",        value: paid?._count ?? 0,                                     sub: `₦${Number(paid?._sum?.amount ?? 0).toLocaleString()} received` },
-          { label: "Total Earned",    value: `₦${Number(paid?._sum?.amount ?? 0).toLocaleString()}`, sub: "Confirmed payments" },
+          { label: "Pending",         value: pending?._count ?? 0,                  sub: `${fmtNgn(Number(pending?._sum?.amount ?? 0))} outstanding` },
+          { label: "Paid Out",        value: paid?._count ?? 0,                     sub: `${fmtNgn(Number(paid?._sum?.amount ?? 0))} received` },
+          { label: "Total Earned",    value: fmtNgn(Number(paid?._sum?.amount ?? 0)), sub: "Confirmed payments" },
         ].map((card) => (
           <div key={card.label} className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
             <p className="text-2xl font-extrabold text-gray-900">{card.value}</p>

@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useScrollLock } from "@/hooks/useScrollLock";
 import { CheckCircle, XCircle, Clock, Users, UserSquare2, Shield, X, Loader2 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
-import Pagination from "@/components/ui/Pagination";
+import Pagination, { PageSizeSelector } from "@/components/ui/Pagination";
 import { usePagination } from "@/hooks/usePagination";
 import DateRangeFilter, { DateRange, inRange } from "@/components/ui/DateRangeFilter";
+import { fmtNgn as fmt } from "@/lib/format";
 
 type RewardStatus = "PENDING" | "CONFIRMED" | "PAID" | "CANCELLED";
 type ReferralType = "USER" | "ADMIN" | "AGENT";
@@ -47,8 +48,6 @@ const TYPE_CONFIG: Record<ReferralType, { label: string; icon: typeof Users; cla
 
 type FilterStatus = RewardStatus | "ALL";
 type FilterType   = ReferralType | "ALL_TYPES";
-
-const fmt = (n: number) => "₦" + n.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" });
 const fmtDateTime = (iso: string) => new Date(iso).toLocaleString("en-NG", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
@@ -229,7 +228,7 @@ export default function ReferralsTable({ rewards: initial }: { rewards: Reward[]
   const countByStatus = (s: RewardStatus) => rewards.filter((r) => r.status === s).length;
   const countByType   = (t: ReferralType)  => rewards.filter((r) => r.referralType === t).length;
 
-  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(filtered, 20);
+  const { page, setPage, totalPages, paged, totalItems, pageSize, setPageSize } = usePagination(filtered, 20);
 
   return (
     <>
@@ -273,7 +272,10 @@ export default function ReferralsTable({ rewards: initial }: { rewards: Reward[]
               </button>
             ))}
           </div>
-          <DateRangeFilter value={dateRange} onChange={(r) => { setDateRange(r); setPage(1); }} />
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <DateRangeFilter value={dateRange} onChange={(r) => { setDateRange(r); setPage(1); }} />
+            <PageSizeSelector pageSize={pageSize} onPageSizeChange={setPageSize} />
+          </div>
         </div>
 
         {filtered.length === 0 ? (
@@ -323,7 +325,7 @@ export default function ReferralsTable({ rewards: initial }: { rewards: Reward[]
                       <p className="text-gray-700 truncate text-sm">{reward.booking?.package.title ?? "—"}</p>
                     </td>
                     <td className="px-5 py-3.5">
-                      <p className="font-bold text-gray-900">₦{reward.amount.toLocaleString()}</p>
+                      <p className="font-bold text-gray-900">{fmt(reward.amount)}</p>
                       {reward.rewardPercent > 0 && (
                         <p className="text-xs text-blue-500">{reward.rewardPercent}% of net</p>
                       )}

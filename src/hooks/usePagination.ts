@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 
-export function usePagination<T>(items: T[], pageSize: number) {
+export function usePagination<T>(items: T[], initialPageSize: number) {
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSizeState] = useState(initialPageSize);
   const prevLengthRef = useRef(items.length);
 
   // Reset to page 1 whenever the filtered set changes size
@@ -11,6 +12,11 @@ export function usePagination<T>(items: T[], pageSize: number) {
       prevLengthRef.current = items.length;
     }
   }, [items.length]);
+
+  const setPageSize = (size: number) => {
+    setPageSizeState(size);
+    setPage(1);
+  };
 
   const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
   const safePage = Math.min(page, totalPages);
@@ -23,5 +29,6 @@ export function usePagination<T>(items: T[], pageSize: number) {
     paged,
     totalItems: items.length,
     pageSize,
+    setPageSize,
   };
 }

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useScrollLock, ScrollLock } from "@/hooks/useScrollLock";
 import { Plus, Copy, Check, RefreshCw, UserMinus, UserPlus, Loader2, X, Phone, Mail, Calendar, Tag, TrendingUp, Clock, Wallet, ChevronRight } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
-import Pagination from "@/components/ui/Pagination";
+import Pagination, { PageSizeSelector } from "@/components/ui/Pagination";
 import { usePagination } from "@/hooks/usePagination";
 
 interface Agent {
@@ -177,7 +177,7 @@ export default function AgentsManager({ initialAgents }: { initialAgents: Agent[
   const toast = useToast();
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   useEffect(() => { setAgents(initialAgents); }, [initialAgents]);
-  const { page, setPage, totalPages, paged: pagedAgents, totalItems, pageSize } = usePagination(agents, 20);
+  const { page, setPage, totalPages, paged: pagedAgents, totalItems, pageSize, setPageSize } = usePagination(agents, 20);
   const [selected, setSelected] = useState<Agent | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -357,6 +357,11 @@ export default function AgentsManager({ initialAgents }: { initialAgents: Agent[
 
       {/* Agents table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        {agents.length > 0 && (
+          <div className="p-4 border-b border-gray-100 flex justify-end">
+            <PageSizeSelector pageSize={pageSize} onPageSizeChange={setPageSize} />
+          </div>
+        )}
         {agents.length === 0 ? (
           <div className="text-center py-16 text-gray-400">
             <p className="text-sm">No agents yet.</p>

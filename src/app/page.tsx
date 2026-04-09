@@ -1,8 +1,10 @@
 
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import Hero from "@/components/home/Hero";
-import InfoSection from "@/components/home/InfoSection";
+import HeroV2 from "@/components/home/HeroV2";
+import ServicesSection from "@/components/home/ServicesSection";
+import WhyTrustUs from "@/components/home/WhyTrustUs";
+import ClientsSection from "@/components/home/ClientsSection";
 import PackageList from "@/components/home/PackageList";
 import SearchAndCategories from "@/components/home/SearchAndCategories";
 import Testimonials from "@/components/home/Testimonials";
@@ -52,22 +54,44 @@ export default async function Home() {
   if (role === "AGENT") redirect("/agent/dashboard");
 
   const agentPercent = await getAgentPercent();
+
   return (
     <>
-      <Hero />
+      {/* New hero: full-background carousel with numbered navigation */}
+      <HeroV2 />
+
+      {/* New: Our services (3 audience cards) */}
       <AnimatedSection animation="fadeIn">
+        <ServicesSection />
+      </AnimatedSection>
+
+      {/* New: Why Trust Us (split image + bullets) */}
+      <AnimatedSection animation="fadeIn" delay={100}>
+        <WhyTrustUs />
+      </AnimatedSection>
+
+      {/* Search & test finder */}
+      <AnimatedSection animation="fadeIn" delay={100}>
         <SearchAndCategories />
       </AnimatedSection>
+
+      {/* Package grid */}
       <AnimatedSection animation="slideInUp" delay={100}>
         <PackageList />
       </AnimatedSection>
-      <AnimatedSection animation="fadeIn" delay={150}>
+
+      {/* New: Client logos */}
+      <AnimatedSection animation="fadeIn" delay={100}>
+        <ClientsSection />
+      </AnimatedSection>
+
+      {/* Testimonials */}
+      <AnimatedSection animation="fadeIn" delay={100}>
         <Testimonials />
       </AnimatedSection>
-      <AnimatedSection animation="slideInUp" delay={200}>
-        <InfoSection />
-      </AnimatedSection>
-      <AnimatedSection animation="fadeIn" delay={250}>
+
+      {/* Become an agent */}
+      <AnimatedSection animation="fadeIn" delay={100}>
         <BecomeAgent agentPercent={agentPercent} />
       </AnimatedSection>
     </>

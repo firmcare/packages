@@ -6,7 +6,7 @@ import {
   User, Mail, Phone, Calendar, MapPin,
   CheckCircle, XCircle, Gift, X, BookOpen,
 } from "lucide-react";
-import Pagination from "@/components/ui/Pagination";
+import Pagination, { PageSizeSelector } from "@/components/ui/Pagination";
 import { usePagination } from "@/hooks/usePagination";
 
 interface UserData {
@@ -130,7 +130,7 @@ export default function UserManagement({ users }: UserManagementProps) {
     user.phone?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(filteredUsers, 25);
+  const { page, setPage, totalPages, paged, totalItems, pageSize, setPageSize } = usePagination(filteredUsers, 20);
 
   const fmt = (iso: string) =>
     new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" });
@@ -138,14 +138,15 @@ export default function UserManagement({ users }: UserManagementProps) {
   return (
     <>
       <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row gap-3">
           <input
             type="text"
             placeholder="Search by name, email or phone…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
           />
+          <PageSizeSelector pageSize={pageSize} onPageSizeChange={setPageSize} />
         </div>
 
         <div className="overflow-x-auto">

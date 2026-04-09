@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import { CheckCircle, XCircle, Clock, RefreshCw, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { useRouter } from "next/navigation";
-import Pagination from "@/components/ui/Pagination";
+import Pagination, { PageSizeSelector } from "@/components/ui/Pagination";
 import { usePagination } from "@/hooks/usePagination";
 
 interface Application {
@@ -39,24 +40,12 @@ export default function AgentApplicationsManager() {
   const toast = useToast();
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("PENDING");
-  const [apps, setApps] = useState<Application[]>([]);
-  const { page, setPage, totalPages, paged: pagedApps, totalItems, pageSize } = usePagination(apps, 15);
-  const [loading, setLoading] = useState(true);
+  const appsUrl = `/api/admin/agent-applications${tab ? `?status=${tab}` : ""}`;
+  const { data: apps = [], isLoading: loading, mutate: mutateApps } = useSWR<Application[]>(appsUrl);
+  const { page, setPage, totalPages, paged: pagedApps, totalItems, pageSize, setPageSize } = usePagination(apps, 20);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [processing, setProcessing] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
-
-  const fetchApps = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/admin/agent-applications${tab ? `?status=${tab}` : ""}`);
-      if (res.ok) setApps(await res.json());
-    } finally {
-      setLoading(false);
-    }
-  }, [tab]);
-
-  useEffect(() => { fetchApps(); }, [fetchApps]);
 
   const handleAction = async (id: string, action: "approve" | "reject") => {
     setProcessing(id);
@@ -73,7 +62,7 @@ export default function AgentApplicationsManager() {
       }
       toast.success(action === "approve" ? "Application approved — agent email sent." : "Application rejected.");
       setExpanded(null);
-      await fetchApps();
+      await mutateApps();
       router.refresh();
     } catch {
       toast.error("Network error. Please try again.");
@@ -100,8 +89,9 @@ export default function AgentApplicationsManager() {
           </button>
         ))}
         <div className="flex-1" />
+        <PageSizeSelector pageSize={pageSize} onPageSizeChange={setPageSize} />
         <button
-          onClick={fetchApps}
+          onClick={() => mutateApps()}
           className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
           title="Refresh"
         >

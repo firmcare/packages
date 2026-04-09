@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import Link from "next/link";
+import { fmtNgn } from "@/lib/format";
 
 interface TestItem {
   id: string;
@@ -76,8 +77,7 @@ export default function CustomPackageBuilder({ dbTests }: Props) {
   const discount = appliedPromo ? calcDiscount(appliedPromo, subtotal) : 0;
   const total = Math.max(0, subtotal - discount);
 
-  const fmt = (n: number) =>
-    new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(n);
+  const fmt = fmtNgn;
 
   const toggle = (id: string) => {
     setSelectedIds((prev) => {
@@ -180,7 +180,7 @@ export default function CustomPackageBuilder({ dbTests }: Props) {
       slug: "custom-tailored-package",
       title: "Custom Tailored Package",
       description: "A personalised selection of diagnostic tests.",
-      price: `NGN${total}`,
+      price: fmtNgn(total),
       imageUrl: "https://images.unsplash.com/photo-1584515933487-9bdb75f77f1e?auto=format&fit=crop&q=80&w=800",
       includes: selectedTests.map((t) => t.name),
       customItems: selectedTests.map((t) => ({ name: t.name, price: t.price })),
