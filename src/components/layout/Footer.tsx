@@ -49,7 +49,7 @@ const Footer: React.FC = () => {
             <h4 className="font-bold text-sm mb-5 uppercase tracking-wider text-white/70">Packages</h4>
             <ul className="space-y-3 text-sm text-gray-300">
               <li>
-                <Link href="/category/all" className="hover:text-pink-400 transition-colors">
+                <Link href="/packages" className="hover:text-pink-400 transition-colors">
                   Browse Packages
                 </Link>
               </li>
@@ -59,7 +59,7 @@ const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/category/all" className="hover:text-pink-400 transition-colors">
+                <Link href="/packages" className="hover:text-pink-400 transition-colors">
                   Full Test Menu
                 </Link>
               </li>

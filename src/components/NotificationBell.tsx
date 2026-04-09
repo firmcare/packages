@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import useSWR from "swr";
 import { Bell, CheckCheck, BookOpen, Activity, FileCheck, CircleCheck, CircleX } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 interface Notification {
   id: string;
@@ -12,6 +14,11 @@ interface Notification {
   bookingId: string | null;
   isRead: boolean;
   createdAt: string;
+}
+
+interface NotificationsResponse {
+  notifications: Notification[];
+  unreadCount: number;
 }
 
 const TYPE_ICON: Record<string, React.ReactNode> = {
@@ -34,34 +41,19 @@ function timeAgo(dateStr: string) {
 }
 
 interface Props {
-  /** Route to link the notification row to when bookingId is present */
   bookingsHref?: string;
 }
 
 export default function NotificationBell({ bookingsHref = "/dashboard/bookings" }: Props) {
   const [open, setOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const fetchNotifications = useCallback(async () => {
-    try {
-      const res = await fetch("/api/notifications", { cache: "no-store" });
-      if (!res.ok) return;
-      const data = await res.json();
-      setNotifications(data.notifications);
-      setUnreadCount(data.unreadCount);
-    } catch {
-      // silently ignore
-    }
-  }, []);
+  const { data, mutate } = useSWR<NotificationsResponse>("/api/notifications", {
+    refreshInterval: 30_000,
+  });
 
-  // Initial fetch + 30 s poll
-  useEffect(() => {
-    fetchNotifications();
-    const id = setInterval(fetchNotifications, 30_000);
-    return () => clearInterval(id);
-  }, [fetchNotifications]);
+  const notifications = data?.notifications ?? [];
+  const unreadCount = data?.unreadCount ?? 0;
 
   // Close on outside click
   useEffect(() => {
@@ -74,34 +66,40 @@ export default function NotificationBell({ bookingsHref = "/dashboard/bookings" 
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const handleOpen = () => {
-    setOpen((v) => !v);
-  };
-
   const markAllRead = async () => {
     await fetch("/api/notifications", { method: "PATCH" });
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-    setUnreadCount(0);
+    mutate(
+      (prev) => prev
+        ? { ...prev, notifications: prev.notifications.map((n) => ({ ...n, isRead: true })), unreadCount: 0 }
+        : prev,
+      false
+    );
   };
 
   const markOneRead = async (id: string) => {
     await fetch(`/api/notifications/${id}`, { method: "PATCH" });
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+    mutate(
+      (prev) => prev
+        ? {
+            ...prev,
+            notifications: prev.notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
+            unreadCount: Math.max(0, prev.unreadCount - 1),
+          }
+        : prev,
+      false
     );
-    setUnreadCount((c) => Math.max(0, c - 1));
   };
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        onClick={handleOpen}
+        onClick={() => setOpen((v) => !v)}
         className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors relative"
         aria-label="Notifications"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none">
+          <span className="absolute top-1 right-1 min-w-4.5 h-4.5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
@@ -115,7 +113,7 @@ export default function NotificationBell({ bookingsHref = "/dashboard/bookings" 
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
-                className="flex items-center gap-1 text-xs text-primary hover:text-[#8a3a7a] font-medium"
+                className="flex items-center gap-1 text-xs text-primary hover:text-primary-dark font-medium"
               >
                 <CheckCheck className="w-3.5 h-3.5" />
                 Mark all read
@@ -173,7 +171,7 @@ export default function NotificationBell({ bookingsHref = "/dashboard/bookings" 
               <Link
                 href={bookingsHref}
                 onClick={() => setOpen(false)}
-                className="text-xs text-primary hover:text-[#8a3a7a] font-medium"
+                className="text-xs text-primary hover:text-primary-dark font-medium"
               >
                 View all bookings
               </Link>

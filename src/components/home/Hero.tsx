@@ -46,7 +46,7 @@ const Hero: React.FC = () => {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start animate-slideInLeft">
             <Link
-              href="/category/all"
+              href="/packages"
               className="bg-white whitespace-nowrap text-primary font-bold py-3.5 px-8 rounded-full hover:bg-gray-50 transition-all duration-300 hover:scale-105 hover:shadow-2xl text-sm sm:text-base shadow-lg"
             >
               Explore Packages

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ScrollLock } from "@/hooks/useScrollLock";
 import Link from "next/link";
 import { Pencil, X } from "lucide-react";
-import Pagination from "@/components/ui/Pagination";
+import Pagination, { PageSizeSelector } from "@/components/ui/Pagination";
 import { usePagination } from "@/hooks/usePagination";
 
 interface Package {
@@ -24,12 +24,15 @@ interface Test {
 
 export default function TestList({ tests }: { tests: Test[] }) {
   const [selectedTest, setSelectedTest] = useState<Test | null>(null);
-  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(tests, 20);
+  const { page, setPage, totalPages, paged, totalItems, pageSize, setPageSize } = usePagination(tests, 20);
 
   return (
     <>
       {/* Scrollable wrapper — allows full table to be viewed on small screens */}
       <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <div className="p-4 border-b border-gray-100 flex justify-end">
+          <PageSizeSelector pageSize={pageSize} onPageSizeChange={setPageSize} />
+        </div>
         <table className="min-w-full divide-y divide-gray-200 text-sm">
           <thead className="bg-gray-50">
             <tr>

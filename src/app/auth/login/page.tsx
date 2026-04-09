@@ -96,7 +96,7 @@ function LoginForm() {
              <h2 className="text-3xl font-bold text-gray-900">Sign in</h2>
              <p className="mt-2 text-gray-500">
                New to FirmCare?{' '}
-               <Link href="/auth/signup" className="font-medium text-primary hover:text-[#8a3a7a]">
+               <Link href={`/auth/signup${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`} className="font-medium text-primary hover:text-[#8a3a7a]">
                  Create an account
                </Link>
              </p>

@@ -5,6 +5,7 @@ import { getPackages } from '@/app/actions';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import ShareButton from '@/components/ui/ShareButton';
 import { ArrowRight } from 'lucide-react';
+import { fmtNgn } from '@/lib/format';
 
 const PackageList: React.FC = async () => {
   const packages = await getPackages();
@@ -52,7 +53,7 @@ const PackageList: React.FC = async () => {
                   <div className="mt-auto space-y-3">
                     <div className="flex items-center justify-between">
                       <p className="text-xl font-extrabold text-gray-900">
-                        {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(Number(pkg.price))}
+                        {fmtNgn(Number(pkg.price))}
                       </p>
                       <ShareButton slug={pkg.slug} title={pkg.title} />
                     </div>
@@ -72,7 +73,7 @@ const PackageList: React.FC = async () => {
 
         <div className="mt-12 text-center">
           <Link
-            href="/category/all"
+            href="/packages"
             className="inline-flex items-center gap-2 border-2 border-primary text-primary px-8 py-3.5 rounded-full font-semibold hover:bg-primary hover:text-white transition-all duration-300 text-sm sm:text-base group"
           >
             View All Packages

@@ -1,11 +1,12 @@
 import { requireAdmin } from "@/lib/auth-utils";
+import { fmtNgn } from "@/lib/format";
 import { adminFetch } from "@/lib/server-fetch";
 import DashboardStats from "@/components/admin/DashboardStats";
 import RecentBookings from "@/components/admin/RecentBookings";
 import RevenueChart from "@/components/admin/RevenueChart";
 
 function formatRevenue(amount: number): { display: string; tooltip: string } {
-  const tooltip = `₦${amount.toLocaleString()}`;
+  const tooltip = fmtNgn(amount);
   if (amount >= 1_000_000_000) return { display: `₦${(amount / 1_000_000_000).toFixed(2).replace(/\.?0+$/, "")}B`, tooltip };
   if (amount >= 1_000_000)     return { display: `₦${(amount / 1_000_000).toFixed(2).replace(/\.?0+$/, "")}M`, tooltip };
   return { display: tooltip, tooltip };

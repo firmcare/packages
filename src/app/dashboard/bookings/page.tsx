@@ -17,6 +17,7 @@ import {
   FileCheck,
 } from "lucide-react";
 import ResultViewer from "@/components/ResultViewer";
+import { fmtNgn } from "@/lib/format";
 
 const statusIcon: Record<string, React.ReactNode> = {
   PENDING: <Clock className="w-4 h-4" />,
@@ -97,7 +98,7 @@ export default async function BookingsPage() {
             <div>
               <p className="text-xs text-gray-400 uppercase tracking-wide">Amount</p>
               <p className="text-gray-700 font-medium">
-                ₦{Number(booking.totalAmount).toLocaleString()}
+                {fmtNgn(Number(booking.totalAmount))}
               </p>
             </div>
             {booking.homeCollection && (
@@ -140,7 +141,7 @@ export default async function BookingsPage() {
           <p className="text-gray-500 mt-1">Track and manage your health screening appointments.</p>
         </div>
         <Link
-          href="/category/all"
+          href="/packages"
           className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#8a3a7a] transition-colors"
         >
           <ShoppingBag className="w-4 h-4" />
@@ -154,7 +155,7 @@ export default async function BookingsPage() {
           <h3 className="text-lg font-semibold text-gray-700 mb-2">No bookings yet</h3>
           <p className="text-gray-500 mb-6">Browse our packages and book your first health screening.</p>
           <Link
-            href="/category/all"
+            href="/packages"
             className="inline-block bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-[#8a3a7a] transition-colors"
           >
             Browse Packages

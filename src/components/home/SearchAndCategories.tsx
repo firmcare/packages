@@ -8,10 +8,12 @@ import { Package } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import AnimatedSection from '@/components/ui/AnimatedSection';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 const SearchAndCategories: React.FC = () => {
   const router = useRouter();
   const { addToCart } = useCart();
+  const { track } = useAnalytics();
   const [visibleCount, setVisibleCount] = useState(8);
   const [searchQuery, setSearchQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -66,9 +68,8 @@ const SearchAndCategories: React.FC = () => {
   };
 
   const handleAction = (action: 'book' | 'cart') => {
-    // Prefer inline match, or exact match, or just use current query
     const match = inlineMatch || SEARCH_SUGGESTIONS.find(s => s.name.toLowerCase() === searchQuery.toLowerCase());
-    
+
     let pkg: Package | null = null;
     if (match) {
         pkg = getPackageFromSuggestion(match.name, match.price);
@@ -76,13 +77,12 @@ const SearchAndCategories: React.FC = () => {
         pkg = getPackageFromSuggestion(searchQuery, "Price on Request");
     }
 
+    track('search_performed', { query: searchQuery.trim(), result_count: filteredSuggestions.length });
+
     if (pkg) {
         addToCart(pkg);
         if (action === 'book') {
             router.push('/checkout');
-        } else {
-            // Optional: Alert or toast
-            // alert(`${pkg.title} added to cart!`);
         }
     }
   };
@@ -91,7 +91,8 @@ const SearchAndCategories: React.FC = () => {
     if (category === 'Custom Package') {
         router.push('/custom-package');
     } else {
-        router.push(`/category/${encodeURIComponent(category.toLowerCase())}`);
+        const slug = category.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        router.push(`/category/${slug}`);
     }
   };
 
@@ -187,7 +188,7 @@ const SearchAndCategories: React.FC = () => {
               </div>
               <div className="bg-white border-t border-gray-100 p-3 sm:p-4 text-center">
                 <button
-                    onClick={() => router.push('/category/all')}
+                    onClick={() => router.push('/packages')}
                     className="text-footer-bg font-bold underline underline-offset-4 hover:text-primary transition-colors text-xs sm:text-sm"
                 >
                     View more results

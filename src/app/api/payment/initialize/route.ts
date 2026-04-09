@@ -12,8 +12,9 @@ const initSchema = z.object({
     price: z.string(),
     includes: z.array(z.string()).optional(),
     customItems: z.array(z.object({ name: z.string(), price: z.number() })).optional(),
+    selectedAddons: z.array(z.object({ id: z.string(), name: z.string(), price: z.number() })).optional(),
   })),
-  homeCollection: z.boolean(),
+  homeCollectionLocationId: z.string().nullable().default(null),
   bookingDate: z.iso.datetime(),
   promoCode: z.string().nullish(),
   referralCode: z.string().nullish(),
@@ -33,6 +34,17 @@ export async function POST(req: Request) {
     const amountKobo = Math.round(data.amount * 100);
     const reference = `FC-${Date.now()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
     const bookingDate = new Date(data.bookingDate);
+
+    // Validate home collection location if provided
+    const homeCollectionLocationId = data.homeCollectionLocationId ?? null;
+    if (homeCollectionLocationId) {
+      const loc = await prisma.homeCollectionLocation.findUnique({
+        where: { id: homeCollectionLocationId, isActive: true },
+      });
+      if (!loc) {
+        return new NextResponse("Invalid or unavailable home collection location", { status: 400 });
+      }
+    }
 
     // Resolve cart items using the ORIGINAL total (before discount) so totalAmount captures gross price
     const originalTotal = data.amount + data.discount;
@@ -56,7 +68,8 @@ export async function POST(req: Request) {
         userId: session.user.id,
         packageId,
         date: bookingDate,
-        homeCollection: data.homeCollection,
+        homeCollection: homeCollectionLocationId !== null,
+        homeCollectionLocationId: homeCollectionLocationId,
         totalAmount: unitAmount,       // gross (pre-discount) per-item amount
         status: "PENDING" as const,
         paymentRef: reference,
@@ -79,7 +92,7 @@ export async function POST(req: Request) {
         metadata: {
           userId: session.user.id,
           cartItems: data.cartItems,
-          homeCollection: data.homeCollection,
+          homeCollectionLocationId: homeCollectionLocationId,
           bookingDate: data.bookingDate,
           promoCode: data.promoCode ?? null,
           referralCode: data.referralCode ?? null,

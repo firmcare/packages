@@ -1,4 +1,5 @@
 import { requireAdmin } from "@/lib/auth-utils";
+import { fmtNgn } from "@/lib/format";
 import { adminFetch } from "@/lib/server-fetch";
 import ReferralsTable from "@/components/admin/ReferralsTable";
 
@@ -16,15 +17,15 @@ export default async function ReferralsPage() {
 
   const summaryCards = [
     { label: "Total Referrals",  value: rewards.length, sub: "All time" },
-    { label: "Pending Rewards",  value: pendingStats?._count ?? 0, sub: `₦${Number(pendingStats?._sum?.amount ?? 0).toLocaleString()} outstanding` },
-    { label: "Rewards Paid",     value: paidStats?._count ?? 0, sub: `₦${Number(paidStats?._sum?.amount ?? 0).toLocaleString()} paid out` },
+    { label: "Pending Rewards",  value: pendingStats?._count ?? 0, sub: `${fmtNgn(Number(pendingStats?._sum?.amount ?? 0))} outstanding` },
+    { label: "Rewards Paid",     value: paidStats?._count ?? 0, sub: `${fmtNgn(Number(paidStats?._sum?.amount ?? 0))} paid out` },
     { label: "Cancelled",        value: cancelledStats?._count ?? 0, sub: "Voided rewards" },
   ];
 
   const typeCards = [
-    { label: "User Referrals",  value: userStats?._count ?? 0,  sub: `₦${Number(userStats?._sum?.amount ?? 0).toLocaleString()}`,  color: "bg-blue-50 text-blue-700" },
-    { label: "Admin Referrals", value: adminStats?._count ?? 0, sub: `₦${Number(adminStats?._sum?.amount ?? 0).toLocaleString()}`, color: "bg-orange-50 text-orange-700" },
-    { label: "Agent Referrals", value: agentStats?._count ?? 0, sub: `₦${Number(agentStats?._sum?.amount ?? 0).toLocaleString()}`, color: "bg-purple-50 text-purple-700" },
+    { label: "User Referrals",  value: userStats?._count ?? 0,  sub: fmtNgn(Number(userStats?._sum?.amount ?? 0)),  color: "bg-blue-50 text-blue-700" },
+    { label: "Admin Referrals", value: adminStats?._count ?? 0, sub: fmtNgn(Number(adminStats?._sum?.amount ?? 0)), color: "bg-orange-50 text-orange-700" },
+    { label: "Agent Referrals", value: agentStats?._count ?? 0, sub: fmtNgn(Number(agentStats?._sum?.amount ?? 0)), color: "bg-purple-50 text-purple-700" },
   ];
 
   return (

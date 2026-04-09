@@ -68,7 +68,8 @@ export async function POST(req: Request) {
       includes?: string[];
       customItems?: { name: string; price: number }[];
     }[] = meta.cartItems ?? [];
-    const homeCollection: boolean = meta.homeCollection === true || meta.homeCollection === "true";
+    const homeCollectionLocationId: string | null = meta.homeCollectionLocationId ?? null;
+    const homeCollection: boolean = homeCollectionLocationId !== null;
     const referralCode: string | null = meta.referralCode ?? null;
     const discount: number = Number(meta.discount ?? 0);
     const totalPaid = tx.amount / 100; // kobo → NGN
@@ -108,6 +109,7 @@ export async function POST(req: Request) {
               packageId,
               date: bookingDate,
               homeCollection,
+              homeCollectionLocationId,
               totalAmount: originalPerItem,
               discountAmount: discountPerItem,
               status: "CONFIRMED",

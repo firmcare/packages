@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { prisma } from "./prisma";
+import { fmtNgn } from "./format";
 
 export type EmailType =
   | "verification"
@@ -123,14 +124,15 @@ export async function sendVerificationEmail(
   to: string,
   name: string | null | undefined,
   token: string,
-  baseUrl: string
+  baseUrl: string,
+  callbackUrl?: string
 ): Promise<SendResult> {
   const cfg = await getSmtpConfig();
   if (!cfg.host || !cfg.user || !cfg.pass) {
     return { success: false, error: "SMTP not configured" };
   }
 
-  const link = `${baseUrl}/auth/verify-email?token=${token}`;
+  const link = `${baseUrl}/auth/verify-email?token=${token}${callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`;
   const subject = "Verify your FirmCare account";
   const body = `
     <h2>Welcome to FirmCare${name ? `, ${name}` : ""}!</h2>
@@ -238,7 +240,7 @@ export async function sendBookingConfirmedEmail(
     .map(
       (b) =>
         `<tr><td style="padding:10px 0;border-bottom:1px solid #f0e8f0;color:#333;font-size:14px;">${b.title}</td>
-         <td style="padding:10px 0;border-bottom:1px solid #f0e8f0;text-align:right;color:#333;font-size:14px;">₦${b.amount.toLocaleString()}</td></tr>`
+         <td style="padding:10px 0;border-bottom:1px solid #f0e8f0;text-align:right;color:#333;font-size:14px;">${fmtNgn(b.amount)}</td></tr>`
     )
     .join("");
 
@@ -263,7 +265,7 @@ export async function sendBookingConfirmedEmail(
       <tfoot>
         <tr>
           <td style="padding:12px 0;font-weight:700;color:#1a1a2e;font-size:15px;">Total Paid</td>
-          <td style="padding:12px 0;font-weight:700;color:#A44692;font-size:15px;text-align:right;">₦${totalPaid.toLocaleString()}</td>
+          <td style="padding:12px 0;font-weight:700;color:#A44692;font-size:15px;text-align:right;">${fmtNgn(totalPaid)}</td>
         </tr>
       </tfoot>
     </table>

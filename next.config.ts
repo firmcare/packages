@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   compress: true,
 
+  serverExternalPackages: ['geoip-lite'],
+
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import {
   Send, RefreshCw, CheckCircle, AlertCircle, ChevronDown, ChevronUp, Mail,
   Clock, Loader2, Users, CheckCheck,
@@ -30,6 +31,11 @@ interface EmailLog {
   createdAt: string;
 }
 
+interface LogsResponse {
+  logs: EmailLog[];
+  total: number;
+}
+
 const TYPE_LABELS: Record<string, string> = {
   verification: "Verification",
   welcome: "Welcome",
@@ -45,57 +51,27 @@ export default function EmailComposer() {
   const [specificEmails, setSpecificEmails] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [jobs, setJobs] = useState<EmailJob[]>([]);
   const [showJobs, setShowJobs] = useState(false);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const [logs, setLogs] = useState<EmailLog[]>([]);
-  const [logsTotal, setLogsTotal] = useState(0);
-  const [logsLoading, setLogsLoading] = useState(false);
   const [showLogs, setShowLogs] = useState(false);
 
   // Reminder trigger
   const [reminderLoading, setReminderLoading] = useState(false);
   const [reminderResult, setReminderResult] = useState<string | null>(null);
 
-  useEffect(() => { fetchJobs(); }, []);
+  // Jobs — poll every 5s when any job is active
+  const { data: jobs = [], mutate: mutateJobs } = useSWR<EmailJob[]>("/api/admin/email/jobs", {
+    refreshInterval: (data) => {
+      const hasActive = (data ?? []).some((j) => j.status === "QUEUED" || j.status === "PROCESSING");
+      return hasActive ? 5000 : 0;
+    },
+  });
 
-  // Poll active jobs every 5s until all are settled
-  useEffect(() => {
-    const hasActive = jobs.some((j) => j.status === "QUEUED" || j.status === "PROCESSING");
-    if (hasActive && !pollRef.current) {
-      pollRef.current = setInterval(fetchJobs, 5_000);
-    } else if (!hasActive && pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
-    }
-    return () => {
-      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-    };
-  }, [jobs]);
-
-  useEffect(() => {
-    if (showLogs) fetchLogs();
-  }, [showLogs]);
-
-  async function fetchJobs() {
-    try {
-      const res = await fetch("/api/admin/email/jobs");
-      if (res.ok) setJobs(await res.json());
-    } catch {}
-  }
-
-  async function fetchLogs() {
-    setLogsLoading(true);
-    try {
-      const res = await fetch("/api/admin/email");
-      const data = await res.json();
-      setLogs(data.logs ?? []);
-      setLogsTotal(data.total ?? 0);
-    } finally {
-      setLogsLoading(false);
-    }
-  }
+  // Logs — only fetch when panel is open
+  const { data: logsData, isLoading: logsLoading } = useSWR<LogsResponse>(
+    showLogs ? "/api/admin/email" : null
+  );
+  const logs = logsData?.logs ?? [];
+  const logsTotal = logsData?.total ?? 0;
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
@@ -119,7 +95,7 @@ export default function EmailComposer() {
       setSubject("");
       setHtmlContent("");
       setSpecificEmails("");
-      await fetchJobs();
+      await mutateJobs();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to queue email job.");
     } finally {

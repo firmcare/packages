@@ -9,6 +9,7 @@ import {
   ChevronDown, ChevronUp, AlertCircle, Loader2, Building2, Info,
 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
+import { fmtNgn } from "@/lib/format";
 
 interface Reward {
   id: string;
@@ -85,8 +86,7 @@ export default function AgentWalletView({
   const [verifying, setVerifying] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const fmt = (n: number) =>
-    "₦" + n.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmt = fmtNgn;
 
   const fmtDate = (iso: string) =>
     new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" });

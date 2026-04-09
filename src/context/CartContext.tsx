@@ -24,6 +24,8 @@ interface Extras {
   appliedPromo?: PromoResult | null;
   referralCode?: string;
   appliedReferral?: ReferrerInfo | null;
+  selectedLocationId?: string;
+  selectedDate?: string;
 }
 
 interface CartContextType {
@@ -40,6 +42,10 @@ interface CartContextType {
   setReferralCode: (code: string) => void;
   appliedReferral: ReferrerInfo | null;
   setAppliedReferral: (referrer: ReferrerInfo | null) => void;
+  selectedLocationId: string;
+  setSelectedLocationId: (id: string) => void;
+  selectedDate: string;
+  setSelectedDate: (date: string) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -58,11 +64,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { data: session, status } = useSession();
   const isLoggedIn = status === 'authenticated' && !!session?.user?.id;
 
-  const [cart,           setCart]           = useState<Package[]>([]);
-  const [voucherCode,    setVoucherCode]    = useState('');
-  const [appliedPromo,   setAppliedPromo]   = useState<PromoResult | null>(null);
-  const [referralCode,   setReferralCode]   = useState('');
-  const [appliedReferral, setAppliedReferral] = useState<ReferrerInfo | null>(null);
+  const [cart,              setCart]              = useState<Package[]>([]);
+  const [voucherCode,       setVoucherCode]       = useState('');
+  const [appliedPromo,      setAppliedPromo]      = useState<PromoResult | null>(null);
+  const [referralCode,      setReferralCode]      = useState('');
+  const [appliedReferral,   setAppliedReferral]   = useState<ReferrerInfo | null>(null);
+  const [selectedLocationId, setSelectedLocationId] = useState('');
+  const [selectedDate,      setSelectedDate]      = useState('');
   const [ready, setReady] = useState(false);
 
   // Track whether the initial load has run so we don't over-sync
@@ -90,6 +98,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setAppliedPromo(extras.appliedPromo ?? null);
           setReferralCode(extras.referralCode ?? '');
           setAppliedReferral(extras.appliedReferral ?? null);
+          setSelectedLocationId(extras.selectedLocationId ?? '');
+          setSelectedDate(extras.selectedDate ?? '');
 
           // Clear localStorage now that server is authoritative
           localStorage.removeItem(CART_KEY);
@@ -105,6 +115,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setAppliedPromo(e.appliedPromo ?? null);
           setReferralCode(e.referralCode ?? '');
           setAppliedReferral(e.appliedReferral ?? null);
+          setSelectedLocationId(e.selectedLocationId ?? '');
+          setSelectedDate(e.selectedDate ?? '');
           setReady(true);
           initialLoadDone.current = true;
         });
@@ -116,6 +128,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAppliedPromo(e.appliedPromo ?? null);
       setReferralCode(e.referralCode ?? '');
       setAppliedReferral(e.appliedReferral ?? null);
+      setSelectedLocationId(e.selectedLocationId ?? '');
+      setSelectedDate(e.selectedDate ?? '');
       setReady(true);
       initialLoadDone.current = true;
     }
@@ -138,14 +152,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ── Persist on every change ──────────────────────────────────────────────
   useEffect(() => {
     if (!ready || !initialLoadDone.current) return;
-    const extras: Extras = { voucherCode, appliedPromo, referralCode, appliedReferral };
+    const extras: Extras = { voucherCode, appliedPromo, referralCode, appliedReferral, selectedLocationId, selectedDate };
     if (isLoggedIn) {
       syncToServer(cart, extras);
     } else {
       try { localStorage.setItem(CART_KEY,   JSON.stringify(cart));   } catch {}
       try { localStorage.setItem(EXTRAS_KEY, JSON.stringify(extras)); } catch {}
     }
-  }, [cart, voucherCode, appliedPromo, referralCode, appliedReferral, isLoggedIn, ready, syncToServer]);
+  }, [cart, voucherCode, appliedPromo, referralCode, appliedReferral, selectedLocationId, selectedDate, isLoggedIn, ready, syncToServer]);
 
   // ── Actions ──────────────────────────────────────────────────────────────
   const addToCart = (pkg: Package) => setCart((prev) => [...prev, pkg]);
@@ -161,6 +175,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCart([]);
     setVoucherCode(''); setAppliedPromo(null);
     setReferralCode(''); setAppliedReferral(null);
+    setSelectedLocationId(''); setSelectedDate('');
     if (isLoggedIn) {
       fetch('/api/cart', { method: 'DELETE' }).catch(() => {});
     } else {
@@ -174,6 +189,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       cart, addToCart, removeFromCart, clearCart, cartCount: cart.length,
       voucherCode, setVoucherCode, appliedPromo, setAppliedPromo,
       referralCode, setReferralCode, appliedReferral, setAppliedReferral,
+      selectedLocationId, setSelectedLocationId,
+      selectedDate, setSelectedDate,
     }}>
       {children}
     </CartContext.Provider>

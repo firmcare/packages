@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, XCircle, AlertCircle, Loader2, Building2, ChevronDown, ChevronUp } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
-import Pagination from "@/components/ui/Pagination";
+import Pagination, { PageSizeSelector } from "@/components/ui/Pagination";
 import { usePagination } from "@/hooks/usePagination";
+import { fmtNgn } from "@/lib/format";
 
 interface BankAccount {
   bankName: string;
@@ -55,10 +56,9 @@ export default function WithdrawalsManager({ initialWithdrawals }: { initialWith
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const filtered = filter === "ALL" ? withdrawals : withdrawals.filter((w) => w.status === filter);
-  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(filtered, 20);
+  const { page, setPage, totalPages, paged, totalItems, pageSize, setPageSize } = usePagination(filtered, 20);
 
-  const fmt = (n: number) =>
-    "₦" + n.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmt = fmtNgn;
   const fmtDate = (iso: string) =>
     new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" });
 
@@ -95,18 +95,21 @@ export default function WithdrawalsManager({ initialWithdrawals }: { initialWith
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       {/* Filter tabs */}
-      <div className="flex gap-1 p-3 border-b border-gray-100 overflow-x-auto">
-        {FILTERS.map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
-              filter === f ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            {f}
-          </button>
-        ))}
+      <div className="flex items-center gap-1 p-3 border-b border-gray-100 flex-wrap">
+        <div className="flex gap-1 flex-wrap flex-1">
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                filter === f ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+        <PageSizeSelector pageSize={pageSize} onPageSizeChange={setPageSize} />
       </div>
 
       {filtered.length === 0 ? (

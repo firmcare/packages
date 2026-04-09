@@ -104,7 +104,7 @@ export default async function DashboardPage() {
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { label: "Book a Test", href: "/category/all", icon: ShoppingBag, color: "bg-primary" },
+            { label: "Book a Test", href: "/packages", icon: ShoppingBag, color: "bg-primary" },
             { label: "My Bookings", href: "/dashboard/bookings", icon: Calendar, color: "bg-blue-500" },
             { label: "View Results", href: "/dashboard/bookings", icon: FileText, color: "bg-green-500" },
             { label: "Edit Profile", href: "/dashboard/profile", icon: User, color: "bg-orange-500" },
@@ -140,7 +140,7 @@ export default async function DashboardPage() {
             <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 mb-4">You haven&apos;t made any bookings yet.</p>
             <Link
-              href="/category/all"
+              href="/packages"
               className="inline-block bg-primary text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-[#8a3a7a] transition-colors"
             >
               Browse Packages

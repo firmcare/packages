@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Edit, Eye, Ban, CheckCircle, Loader2, PackageX } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/context/ToastContext";
-import Pagination from "@/components/ui/Pagination";
+import Pagination, { PageSizeSelector } from "@/components/ui/Pagination";
 import { usePagination } from "@/hooks/usePagination";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 
@@ -41,7 +41,7 @@ export default function PackageList({ packages: initialPackages }: PackageListPr
     pkg.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     pkg.category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  const { page, setPage, totalPages, paged, totalItems, pageSize } = usePagination(filteredPackages, 15);
+  const { page, setPage, totalPages, paged, totalItems, pageSize, setPageSize } = usePagination(filteredPackages, 20);
 
   const handleToggleActive = async (id: string, currentStatus: boolean) => {
     const action = currentStatus ? "disable" : "enable";
@@ -73,14 +73,15 @@ export default function PackageList({ packages: initialPackages }: PackageListPr
 
   return (
     <div className="bg-white rounded-lg shadow">
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row gap-3">
         <input
           type="text"
           placeholder="Search packages..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border border-primary rounded-lg focus:ring-2 focus:border-transparent"
+          className="flex-1 px-4 py-2 border border-primary rounded-lg focus:ring-2 focus:border-transparent"
         />
+        <PageSizeSelector pageSize={pageSize} onPageSizeChange={setPageSize} />
       </div>
 
       {filteredPackages.length === 0 ? (

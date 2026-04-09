@@ -1,6 +1,7 @@
 import { requireAgent } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { Gift, Users, TrendingUp, Wallet } from "lucide-react";
+import { fmtNgn } from "@/lib/format";
 
 async function getAgentStats(userId: string, referralCode: string) {
   const [statsByStatus, totalReferees, recentRewards] = await Promise.all([
@@ -45,12 +46,12 @@ export default async function AgentDashboard() {
   const cards = [
     { label: "People Referred",  value: stats.totalReferees,             icon: Users,      color: "text-blue-600",   bg: "bg-blue-50"   },
     { label: "Total Rewards",    value: stats.totalRewards,              icon: Gift,       color: "text-purple-600", bg: "bg-purple-50" },
-    { label: "Pending Earnings", value: `₦${stats.pendingAmount.toLocaleString()}`, icon: TrendingUp, color: "text-yellow-600", bg: "bg-yellow-50" },
-    { label: "Total Paid Out",   value: `₦${stats.paidAmount.toLocaleString()}`,   icon: Wallet,     color: "text-green-600",  bg: "bg-green-50"  },
+    { label: "Pending Earnings", value: fmtNgn(stats.pendingAmount), icon: TrendingUp, color: "text-yellow-600", bg: "bg-yellow-50" },
+    { label: "Total Paid Out",   value: fmtNgn(stats.paidAmount),   icon: Wallet,     color: "text-green-600",  bg: "bg-green-50"  },
   ];
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://firmcare.com.ng";
-  const shareUrl = `${siteUrl}/category/all?ref=${user!.referralCode}`;
+  const shareUrl = `${siteUrl}/packages?ref=${user!.referralCode}`;
 
   return (
     <div className="space-y-6">
@@ -107,7 +108,7 @@ export default async function AgentDashboard() {
                   <p className="text-xs text-gray-400">{r.booking.package.title}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold text-gray-900">₦{Number(r.amount).toLocaleString()}</p>
+                  <p className="text-sm font-bold text-gray-900">{fmtNgn(Number(r.amount))}</p>
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                     r.status === "PAID" ? "bg-green-100 text-green-700"
                     : r.status === "CANCELLED" ? "bg-red-100 text-red-600"

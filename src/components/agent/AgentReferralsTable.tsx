@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 import { usePagination } from "@/hooks/usePagination";
+import { fmtNgn } from "@/lib/format";
 
 type RewardStatus = "PENDING" | "CONFIRMED" | "PAID" | "CANCELLED";
 
@@ -79,7 +80,7 @@ export default function AgentReferralsTable({ rewards: initial }: { rewards: Rew
                       <p className="text-gray-700 truncate">{reward.booking?.package.title ?? "—"}</p>
                     </td>
                     <td className="px-5 py-4 font-medium text-gray-700">
-                      {reward.booking ? `₦${reward.booking.totalAmount.toLocaleString()}` : "—"}
+                      {reward.booking ? fmtNgn(reward.booking.totalAmount) : "—"}
                     </td>
                     <td className="px-5 py-4 font-bold text-gray-900">
                       ₦{Number(reward.amount).toLocaleString()}
