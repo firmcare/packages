@@ -7,7 +7,7 @@ import { STATS } from '@/lib/constants';
 
 const SLIDES = [
   {
-    src: '/landing/1.jpg',
+    src: '/landing/1.webp',
     label: "Men's Health",
     title: "Men's Health",
     subtitle:
@@ -15,7 +15,7 @@ const SLIDES = [
     href: '/packages',
   },
   {
-    src: '/landing/womens-health-slider-home.jpg',
+    src: '/landing/womens-health-slider-home.webp',
     label: "Women's Health",
     title: "Women's Health",
     subtitle:
@@ -23,7 +23,7 @@ const SLIDES = [
     href: '/packages',
   },
   {
-    src: '/landing/DNA-slider-home.jpg',
+    src: '/landing/DNA-slider-home.webp',
     label: 'DNA & Genomics',
     title: 'DNA & Genomics',
     subtitle:
@@ -31,7 +31,7 @@ const SLIDES = [
     href: '/packages',
   },
   {
-    src: '/landing/personal-health-assistance-slider-home.jpg',
+    src: '/landing/personal-health-assistance-slider-home.webp',
     label: 'Personal Health',
     title: 'Personal Health Assistance',
     subtitle:
@@ -39,7 +39,7 @@ const SLIDES = [
     href: '/packages',
   },
   {
-    src: '/landing/Ultasound-slider-home.jpg',
+    src: '/landing/Ultasound-slider-home.webp',
     label: 'Ultrasound',
     title: '4D Ultrasound Services',
     subtitle:
@@ -47,7 +47,7 @@ const SLIDES = [
     href: '/packages',
   },
   {
-    src: '/landing/Domestic-staff-screening-slider-home.jpg',
+    src: '/landing/Domestic-staff-screening-slider-home.webp',
     label: 'Staff Screening',
     title: 'Domestic Staff Screening',
     subtitle:
